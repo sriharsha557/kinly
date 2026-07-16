@@ -1,0 +1,85 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '../lib/supabase';
+import type { AskPost, AskReply } from '../types/models';
+
+export interface AskPostWithProfile extends AskPost {
+  profiles: { name: string } | null;
+}
+
+export interface AskReplyWithProfile extends AskReply {
+  profiles: { name: string } | null;
+}
+
+export function useAskPosts(circleId: string | undefined) {
+  return useQuery({
+    queryKey: ['askPosts', circleId],
+    enabled: !!circleId,
+    queryFn: async (): Promise<AskPostWithProfile[]> => {
+      const { data, error } = await supabase
+        .from('ask_posts')
+        .select('*, profiles(name)')
+        .eq('circle_id', circleId as string)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as unknown as AskPostWithProfile[];
+    },
+  });
+}
+
+export function useCreateAskPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      circleId,
+      userId,
+      question,
+    }: {
+      circleId: string;
+      userId: string;
+      question: string;
+    }) => {
+      const { error } = await supabase.from('ask_posts').insert({ circle_id: circleId, user_id: userId, question });
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['askPosts', variables.circleId] }),
+  });
+}
+
+export function useAskReplies(askPostId: string | undefined) {
+  return useQuery({
+    queryKey: ['askReplies', askPostId],
+    enabled: !!askPostId,
+    queryFn: async (): Promise<AskReplyWithProfile[]> => {
+      const { data, error } = await supabase
+        .from('ask_replies')
+        .select('*, profiles(name)')
+        .eq('ask_post_id', askPostId as string)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data as unknown as AskReplyWithProfile[];
+    },
+  });
+}
+
+export function useCreateReply(circleId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      askPostId,
+      userId,
+      body,
+    }: {
+      askPostId: string;
+      userId: string;
+      body: string;
+    }) => {
+      const { error } = await supabase.from('ask_replies').insert({ ask_post_id: askPostId, user_id: userId, body });
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['askReplies', variables.askPostId] });
+      queryClient.invalidateQueries({ queryKey: ['askPosts', circleId] });
+    },
+  });
+}

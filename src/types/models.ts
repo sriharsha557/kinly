@@ -49,6 +49,8 @@ export interface Nudge {
   event_id: string;
   from_user_id: string;
   kind: NudgeKind;
+  message: string | null;
+  created_at: string;
 }
 
 export interface AskPost {
@@ -57,6 +59,15 @@ export interface AskPost {
   user_id: string;
   question: string;
   reply_count: number;
+  created_at: string;
+}
+
+export interface AskReply {
+  id: string;
+  ask_post_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
 }
 
 export interface Achievement {

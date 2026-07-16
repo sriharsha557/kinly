@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signIn, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
@@ -8,7 +17,8 @@ import { GradientHeader } from '../components/GradientHeader';
 import { Mascot } from '../components/Mascot';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
-import { colors } from '../theme/colors';
+import { colors, radii, shadow } from '../theme/colors';
+import type { Circle } from '../types/models';
 
 function AuthStep() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
@@ -73,6 +83,25 @@ function AuthStep() {
   );
 }
 
+function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => void }) {
+  async function handleShare() {
+    await Share.share({
+      message: `Join my Growth Circle "${circle.name}" on Kinly. Invite code: ${circle.invite_code}`,
+    });
+  }
+
+  return (
+    <View style={styles.form}>
+      <View style={styles.inviteCard}>
+        <Text style={styles.inviteLabel}>Invite code</Text>
+        <Text style={styles.inviteCode}>{circle.invite_code}</Text>
+      </View>
+      <PillButton label="Invite friends" onPress={handleShare} />
+      <PillButton label="Continue to Kinly" variant="outline" onPress={onContinue} />
+    </View>
+  );
+}
+
 function CircleStep() {
   const userId = useAuthStore((state) => state.user?.id);
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
@@ -83,18 +112,19 @@ function CircleStep() {
   const [circleName, setCircleName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [createdCircle, setCreatedCircle] = useState<Circle | null>(null);
 
   useEffect(() => {
-    if (circles && circles.length > 0) {
+    if (!createdCircle && circles && circles.length > 0) {
       setActiveCircleId(circles[0].id);
     }
-  }, [circles, setActiveCircleId]);
+  }, [circles, createdCircle, setActiveCircleId]);
 
   async function handleCreate() {
     setError(null);
     try {
       const circle = await createCircle.mutateAsync(circleName.trim());
-      setActiveCircleId(circle.id);
+      setCreatedCircle(circle);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create circle');
     }
@@ -108,6 +138,10 @@ function CircleStep() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not join circle');
     }
+  }
+
+  if (createdCircle) {
+    return <InviteStep circle={createdCircle} onContinue={() => setActiveCircleId(createdCircle.id)} />;
   }
 
   return (
@@ -171,6 +205,15 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   body: { padding: 24, paddingTop: 28 },
   form: { gap: 14 },
+  inviteCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 20,
+    alignItems: 'center',
+    ...shadow,
+  },
+  inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+  inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
   title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
   link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },

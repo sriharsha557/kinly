@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
-import { useEvents, useSendCheer, type EventWithProfile } from '../hooks/useEvents';
+import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
+import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
-import type { EventType } from '../types/models';
+import type { EventType, NudgeKind } from '../types/models';
 
 const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }> = {
   goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: '✅' },
@@ -11,6 +13,15 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
 };
+
+const NUDGE_KINDS: { kind: NudgeKind; emoji: string }[] = [
+  { kind: 'cheer', emoji: '👏' },
+  { kind: 'water', emoji: '💧' },
+  { kind: 'walk', emoji: '🚶' },
+  { kind: 'workout', emoji: '💪' },
+  { kind: 'keep_going', emoji: '📚' },
+  { kind: 'streak', emoji: '🔥' },
+];
 
 function describeEvent(event: EventWithProfile): string {
   const name = event.profiles?.name ?? 'Someone';
@@ -29,6 +40,11 @@ function describeEvent(event: EventWithProfile): string {
   }
 }
 
+function goalTitleFromEvent(event: EventWithProfile): string | undefined {
+  const payload = event.payload as Record<string, unknown>;
+  return typeof payload.title === 'string' ? payload.title : undefined;
+}
+
 function dayLabel(iso: string): string {
   const date = new Date(iso);
   const today = new Date();
@@ -43,23 +59,54 @@ function dayLabel(iso: string): string {
 
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
   const style = EVENT_STYLE[event.type];
-  const sendCheer = useSendCheer(circleId);
+  const sendNudge = useSendNudge(circleId);
+  const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+  async function handleNudge(kind: NudgeKind) {
+    setSendingKind(kind);
+    try {
+      const recipientName = event.profiles?.name ?? 'your friend';
+      const message = await generateNudgeMessage(kind, recipientName, goalTitleFromEvent(event));
+      await sendNudge.mutateAsync({ eventId: event.id, userId, kind, message });
+    } finally {
+      setSendingKind(null);
+    }
+  }
 
   return (
     <View style={[styles.eventCard, { backgroundColor: style.bg }]}>
-      <Text style={styles.eventIcon}>{style.icon}</Text>
-      <View style={styles.eventBody}>
-        <Text style={[styles.eventText, { color: style.text }]}>{describeEvent(event)}</Text>
-        <Text style={styles.eventTime}>{time}</Text>
+      <View style={styles.eventHeader}>
+        <Text style={styles.eventIcon}>{style.icon}</Text>
+        <View style={styles.eventBody}>
+          <Text style={[styles.eventText, { color: style.text }]}>{describeEvent(event)}</Text>
+          <Text style={styles.eventTime}>{time}</Text>
+        </View>
       </View>
-      <TouchableOpacity
-        style={styles.cheerButton}
-        onPress={() => sendCheer.mutate({ eventId: event.id, userId })}
-        disabled={sendCheer.isPending}
-      >
-        <Text style={styles.cheerButtonText}>Cheer</Text>
-      </TouchableOpacity>
+
+      <View style={styles.nudgeRow}>
+        {NUDGE_KINDS.map(({ kind, emoji }) => (
+          <TouchableOpacity
+            key={kind}
+            style={styles.nudgeButton}
+            onPress={() => handleNudge(kind)}
+            disabled={sendingKind !== null}
+          >
+            <Text style={styles.nudgeButtonText}>{sendingKind === kind ? '…' : emoji}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {event.nudges.length > 0 && (
+        <View style={styles.nudgeList}>
+          {event.nudges.map((nudge) => (
+            <Text key={nudge.id} style={styles.nudgeMessage}>
+              <Text style={styles.nudgeSender}>{nudge.profiles?.name ?? 'Someone'}: </Text>
+              {nudge.message}
+            </Text>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -106,23 +153,28 @@ const styles = StyleSheet.create({
   list: { paddingBottom: 110, gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     borderRadius: radii.card,
     padding: 14,
     gap: 10,
     ...shadow,
   },
+  eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   eventIcon: { fontSize: 20 },
   eventBody: { flex: 1, gap: 2 },
   eventText: { fontSize: 14, fontWeight: '600' },
   eventTime: { fontSize: 11, color: colors.textSecondary },
-  cheerButton: {
+  nudgeRow: { flexDirection: 'row', gap: 6 },
+  nudgeButton: {
     backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: radii.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  cheerButtonText: { fontSize: 12, fontWeight: '700', color: colors.textPrimary },
+  nudgeButtonText: { fontSize: 16 },
+  nudgeList: { gap: 4 },
+  nudgeMessage: { fontSize: 13, color: colors.textPrimary },
+  nudgeSender: { fontWeight: '700' },
   empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 40 },
 });
