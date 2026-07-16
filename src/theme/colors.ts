@@ -1,19 +1,19 @@
-// Brand: Purple + Mint core identity, coral reserved for celebration/CTA moments.
+// Brand: deep navy-indigo primary + coral-orange accent, teal for success/completion states.
 export const colors = {
-  primary: '#6D5EF8',
-  primarySoft: '#8F7DFA',
-  secondary: '#2DD4BF',
-  celebration: '#FF6B6B',
+  primary: '#3D3A8C',
+  primarySoft: '#5750B0',
+  secondary: '#2FBF9B',
+  celebration: '#FF7A50',
   amber: '#F59E0B',
 
-  background: '#FAFAFF',
+  background: '#F1F1F6',
   surface: '#FFFFFF',
-  inputBg: '#F1EFFE',
+  inputBg: '#ECECF5',
 
-  textPrimary: '#1E1B4B',
-  textSecondary: '#6B7280',
+  textPrimary: '#1F2140',
+  textSecondary: '#8A8FA3',
 
-  success: '#22C55E',
+  success: '#2FBF9B',
   warning: '#F59E0B',
   danger: '#EF4444',
 
@@ -22,11 +22,11 @@ export const colors = {
 
 // Per-pillar accent colors (health/investments/ideas/learning/relationships).
 export const categoryColors = {
-  health: { bg: '#D1FAE5', text: '#047857', solid: '#34D399' },
+  health: { bg: '#D6F5EC', text: '#12805F', solid: '#2FBF9B' },
   wealth: { bg: '#FEF3C7', text: '#92400E', solid: '#FBBF24' },
-  ideas: { bg: '#EDE9FE', text: '#5B21B6', solid: '#8B5CF6' },
+  ideas: { bg: '#E4E2F9', text: '#3D3A8C', solid: '#5750B0' },
   learning: { bg: '#DBEAFE', text: '#1D4ED8', solid: '#60A5FA' },
-  relationships: { bg: '#FFE4E9', text: '#BE123C', solid: '#FB7185' },
+  relationships: { bg: '#FFE1D6', text: '#C2410C', solid: '#FF7A50' },
 } as const;
 
 export const gradients = {
@@ -45,7 +45,7 @@ export const radii = {
 } as const;
 
 export const shadow = {
-  shadowColor: '#1E1B4B',
+  shadowColor: '#1F2140',
   shadowOpacity: 0.08,
   shadowRadius: 16,
   shadowOffset: { width: 0, height: 6 },
