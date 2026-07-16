@@ -18,6 +18,7 @@ import { useGoals, useCreateGoal } from '../hooks/useGoals';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { PillButton } from '../components/PillButton';
+import { GardenCard } from '../components/GardenCard';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -233,6 +234,8 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.page}>
         <Text style={styles.title}>Feed</Text>
+
+        {circleId && <GardenCard circleId={circleId} />}
 
         {userId && circleId && <SuggestionsRow circleId={circleId} userId={userId} />}
 

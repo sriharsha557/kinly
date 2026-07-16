@@ -1,0 +1,64 @@
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useGardenState, type GardenStage } from '../hooks/useGarden';
+import { categoryColors, colors, radii, shadow } from '../theme/colors';
+
+const STAGE_EMOJI: Record<GardenStage, string> = {
+  wilted: '🥀',
+  seed: '🌱',
+  sprout: '🌿',
+  tree: '🌳',
+  bloom: '🌸',
+};
+
+function healthMessage(health: number): string {
+  if (health >= 80) return 'Everyone is thriving today';
+  if (health >= 50) return 'Your garden is growing';
+  if (health > 0) return 'A few plants need water';
+  return 'Your garden is waiting for its first bloom';
+}
+
+export function GardenCard({ circleId }: { circleId: string }) {
+  const { data, isLoading } = useGardenState(circleId);
+
+  if (isLoading || !data || data.members.length === 0) return null;
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Text style={styles.title}>🌱 Circle Garden</Text>
+        <Text style={styles.health}>{data.health}% thriving</Text>
+      </View>
+      <Text style={styles.message}>{healthMessage(data.health)}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+        {data.members.map((member) => (
+          <View key={member.userId} style={styles.plant}>
+            <Text style={styles.emoji}>{STAGE_EMOJI[member.stage]}</Text>
+            <Text style={styles.name} numberOfLines={1}>
+              {member.name}
+            </Text>
+            {member.streak > 0 && <Text style={styles.streak}>{member.streak}d</Text>}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: categoryColors.health.bg,
+    borderRadius: radii.card,
+    padding: 16,
+    marginBottom: 20,
+    ...shadow,
+  },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { fontSize: 16, fontWeight: '700', color: categoryColors.health.text },
+  health: { fontSize: 13, fontWeight: '700', color: categoryColors.health.text },
+  message: { fontSize: 12, color: categoryColors.health.text, opacity: 0.8, marginTop: 2, marginBottom: 12 },
+  row: { gap: 16 },
+  plant: { alignItems: 'center', width: 56 },
+  emoji: { fontSize: 32 },
+  name: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, marginTop: 2 },
+  streak: { fontSize: 10, color: colors.textSecondary },
+});
