@@ -82,7 +82,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 40 },
+  content: { padding: 20, paddingBottom: 120 },
   header: { alignItems: 'center', gap: 4, marginBottom: 24 },
   name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
   circleName: { fontSize: 14, color: colors.textSecondary },

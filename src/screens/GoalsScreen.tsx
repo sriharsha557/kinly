@@ -10,12 +10,31 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useGoals } from '../hooks/useGoals';
+import { useCreateGoal, useGoals, useUpdateGoalProgress } from '../hooks/useGoals';
+import { useLogEvent } from '../hooks/useEvents';
 import { ProgressBar } from '../components/ProgressBar';
 import { colors, radii, shadow } from '../theme/colors';
 import type { Goal } from '../types/models';
 
-function GoalCard({ goal }: { goal: Goal }) {
+function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
+  const updateProgress = useUpdateGoalProgress();
+  const logEvent = useLogEvent();
+  const isComplete = goal.progress >= goal.target;
+
+  async function handleLogProgress() {
+    const step = Math.max(1, Math.round(goal.target / 10));
+    const nextProgress = Math.min(goal.target, goal.progress + step);
+    await updateProgress.mutateAsync({ goalId: goal.id, circleId, progress: nextProgress });
+    if (nextProgress >= goal.target && goal.progress < goal.target) {
+      await logEvent.mutateAsync({
+        circleId,
+        userId,
+        type: 'goal_completed',
+        payload: { title: goal.title },
+      });
+    }
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -23,9 +42,22 @@ function GoalCard({ goal }: { goal: Goal }) {
         {goal.streak_count > 0 && <Text style={styles.streak}>🔥 {goal.streak_count}</Text>}
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
-      <Text style={styles.cardMeta}>
-        {goal.progress} / {goal.target}
-      </Text>
+      <View style={styles.cardFooter}>
+        <Text style={styles.cardMeta}>
+          {goal.progress} / {goal.target}
+        </Text>
+        {isComplete ? (
+          <Text style={styles.doneBadge}>✓ Completed</Text>
+        ) : (
+          <TouchableOpacity
+            style={styles.logButton}
+            onPress={handleLogProgress}
+            disabled={updateProgress.isPending}
+          >
+            <Text style={styles.logButtonText}>Log progress</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -88,7 +120,9 @@ export default function GoalsScreen() {
         <FlatList
           data={goals ?? []}
           keyExtractor={(goal) => goal.id}
-          renderItem={({ item }) => <GoalCard goal={item} />}
+          renderItem={({ item }) =>
+            userId && circleId ? <GoalCard goal={item} circleId={circleId} userId={userId} /> : null
+          }
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text style={styles.empty}>No goals yet — add your first one above.</Text>}
         />
@@ -117,17 +151,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addButtonText: { color: '#fff', fontWeight: '700' },
-  list: { gap: 12, paddingBottom: 24 },
+  list: { gap: 12, paddingBottom: 110 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radii.card,
     padding: 16,
-    gap: 8,
+    gap: 10,
     ...shadow,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
   streak: { fontSize: 14 },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardMeta: { fontSize: 12, color: colors.textSecondary },
+  doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
+  logButton: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  logButtonText: { fontSize: 12, fontWeight: '700', color: colors.primary },
   empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
 });
