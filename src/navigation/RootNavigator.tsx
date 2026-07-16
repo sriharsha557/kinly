@@ -6,6 +6,7 @@ import CircleSettingsScreen from '../screens/CircleSettingsScreen';
 import MainTabs from './MainTabs';
 import { useAuthStore } from '../state/useAuthStore';
 import { useBootstrapSession } from '../hooks/useBootstrapSession';
+import { usePushRegistration } from '../hooks/usePushRegistration';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -13,6 +14,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   useBootstrapSession();
   const user = useAuthStore((state) => state.user);
+  usePushRegistration(user?.id);
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
   const sessionLoading = useAuthStore((state) => state.sessionLoading);
 

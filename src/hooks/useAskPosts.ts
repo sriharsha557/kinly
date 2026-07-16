@@ -40,9 +40,15 @@ export function useCreateAskPost() {
     }) => {
       const { error } = await supabase.from('ask_posts').insert({ circle_id: circleId, user_id: userId, question });
       if (error) throw error;
+
+      await supabase
+        .from('events')
+        .insert({ circle_id: circleId, user_id: userId, type: 'ask', payload: { question } });
     },
-    onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ['askPosts', variables.circleId] }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['askPosts', variables.circleId] });
+      queryClient.invalidateQueries({ queryKey: ['events', variables.circleId] });
+    },
   });
 }
 
