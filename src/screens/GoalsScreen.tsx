@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { ProgressBar } from '../components/ProgressBar';
+import { colors, radii, shadow } from '../theme/colors';
 import type { Goal } from '../types/models';
 
 function GoalCard({ goal }: { goal: Goal }) {
@@ -47,12 +48,14 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
       <TextInput
         style={styles.input}
         placeholder="Goal (e.g. Drink 4L water)"
+        placeholderTextColor={colors.textSecondary}
         value={title}
         onChangeText={setTitle}
       />
       <TextInput
         style={[styles.input, styles.targetInput]}
         placeholder="Target"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         value={target}
         onChangeText={setTarget}
@@ -80,7 +83,7 @@ export default function GoalsScreen() {
       {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
 
       {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 24 }} />
+        <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
       ) : (
         <FlatList
           data={goals ?? []}
@@ -95,36 +98,36 @@ export default function GoalsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 12 },
+  container: { flex: 1, padding: 16, backgroundColor: colors.background },
+  title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
   form: { flexDirection: 'row', gap: 8, marginBottom: 16 },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.input,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    color: colors.textPrimary,
   },
   targetInput: { flex: 0.4 },
   addButton: {
-    backgroundColor: '#FF6B5A',
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    borderRadius: radii.input,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  addButtonText: { color: '#fff', fontWeight: '600' },
+  addButtonText: { color: '#fff', fontWeight: '700' },
   list: { gap: 12, paddingBottom: 24 },
   card: {
-    borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
     padding: 16,
     gap: 8,
+    ...shadow,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { fontSize: 16, fontWeight: '600' },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
   streak: { fontSize: 14 },
-  cardMeta: { fontSize: 12, opacity: 0.6 },
-  empty: { textAlign: 'center', opacity: 0.5, marginTop: 24 },
+  cardMeta: { fontSize: 12, color: colors.textSecondary },
+  empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
 });

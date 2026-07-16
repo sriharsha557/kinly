@@ -5,6 +5,7 @@ import { useAuthStore } from '../state/useAuthStore';
 
 export function useBootstrapSession() {
   const setUser = useAuthStore((state) => state.setUser);
+  const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const setSessionLoading = useAuthStore((state) => state.setSessionLoading);
 
   useEffect(() => {
@@ -12,7 +13,10 @@ export function useBootstrapSession() {
 
     async function loadFromSession(userId: string | undefined) {
       if (!userId) {
-        if (isMounted) setUser(null);
+        if (isMounted) {
+          setUser(null);
+          setActiveCircleId(null);
+        }
         return;
       }
       try {
@@ -37,5 +41,5 @@ export function useBootstrapSession() {
       isMounted = false;
       subscription.subscription.unsubscribe();
     };
-  }, [setUser, setSessionLoading]);
+  }, [setUser, setActiveCircleId, setSessionLoading]);
 }

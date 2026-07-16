@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signIn, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
+import { GradientHeader } from '../components/GradientHeader';
+import { Mascot } from '../components/Mascot';
+import { AppTextInput } from '../components/AppTextInput';
+import { PillButton } from '../components/PillButton';
+import { colors } from '../theme/colors';
 
 function AuthStep() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
@@ -30,48 +35,38 @@ function AuthStep() {
   }
 
   return (
-    <View style={styles.step}>
-      <Text style={styles.title}>Kinly</Text>
-      <Text style={styles.subtitle}>Grow Together. Every Day.</Text>
-
+    <View style={styles.form}>
       {mode === 'signUp' && (
-        <TextInput
-          style={styles.input}
-          placeholder="Your name"
-          autoCapitalize="words"
-          value={name}
-          onChangeText={setName}
-        />
+        <AppTextInput label="Name" autoCapitalize="words" value={name} onChangeText={setName} placeholder="Your name" />
       )}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
+      <AppTextInput
+        label="E-mail"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        placeholder="you@example.com"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
+      <AppTextInput
+        label="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+        placeholder="••••••••"
       />
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={submitting}>
-        {submitting ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>{mode === 'signUp' ? 'Sign up' : 'Sign in'}</Text>
-        )}
-      </TouchableOpacity>
+      <PillButton
+        label={mode === 'signUp' ? 'Sign up' : 'Sign in'}
+        onPress={handleSubmit}
+        loading={submitting}
+        style={{ marginTop: 8 }}
+      />
 
       <TouchableOpacity onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
         <Text style={styles.link}>
-          {mode === 'signUp' ? 'Already have an account? Sign in' : "New here? Create an account"}
+          {mode === 'signUp' ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </Text>
       </TouchableOpacity>
     </View>
@@ -81,7 +76,7 @@ function AuthStep() {
 function CircleStep() {
   const userId = useAuthStore((state) => state.user?.id);
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
-  const { data: circles, isLoading } = useMyCircles(userId);
+  const { data: circles } = useMyCircles(userId);
   const createCircle = useCreateCircle();
   const joinCircle = useJoinCircle();
 
@@ -115,49 +110,32 @@ function CircleStep() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.step}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.step}>
-      <Text style={styles.title}>Start a Growth Circle</Text>
-      <Text style={styles.subtitle}>2-10 trusted friends. Invite-only.</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Circle name"
-        value={circleName}
-        onChangeText={setCircleName}
-      />
-      <TouchableOpacity
-        style={styles.button}
+    <View style={styles.form}>
+      <AppTextInput label="Circle name" value={circleName} onChangeText={setCircleName} placeholder="The Grind Squad" />
+      <PillButton
+        label="Create Circle"
         onPress={handleCreate}
-        disabled={createCircle.isPending || !circleName.trim()}
-      >
-        <Text style={styles.buttonText}>Create Circle</Text>
-      </TouchableOpacity>
+        loading={createCircle.isPending}
+        disabled={!circleName.trim()}
+      />
 
       <Text style={styles.orDivider}>or</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Invite code"
+      <AppTextInput
+        label="Invite code"
         autoCapitalize="none"
         value={inviteCode}
         onChangeText={setInviteCode}
+        placeholder="8-character code"
       />
-      <TouchableOpacity
-        style={styles.buttonSecondary}
+      <PillButton
+        label="Join Circle"
+        variant="outline"
         onPress={handleJoin}
-        disabled={joinCircle.isPending || !inviteCode.trim()}
-      >
-        <Text style={styles.buttonSecondaryText}>Join Circle</Text>
-      </TouchableOpacity>
+        loading={joinCircle.isPending}
+        disabled={!inviteCode.trim()}
+      />
 
       {error && <Text style={styles.error}>{error}</Text>}
     </View>
@@ -166,38 +144,36 @@ function CircleStep() {
 
 export default function OnboardingScreen() {
   const user = useAuthStore((state) => state.user);
-  return <SafeAreaView style={styles.container}>{user ? <CircleStep /> : <AuthStep />}</SafeAreaView>;
+
+  return (
+    <SafeAreaView style={styles.container} edges={['bottom']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <GradientHeader>
+            <Mascot size={110} />
+            <Text style={styles.title}>{user ? 'Growth Circle' : 'Kinly'}</Text>
+            <Text style={styles.subtitle}>
+              {user ? '2-10 trusted friends. Invite-only.' : 'Grow Together. Every Day.'}
+            </Text>
+          </GradientHeader>
+
+          <View style={styles.body}>{user ? <CircleStep /> : <AuthStep />}</View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center' },
-  step: { paddingHorizontal: 24, gap: 12 },
-  title: { fontSize: 32, fontWeight: '700', textAlign: 'center' },
-  subtitle: { fontSize: 16, opacity: 0.7, textAlign: 'center', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#FF6B5A',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  buttonSecondary: {
-    borderWidth: 1,
-    borderColor: '#FF6B5A',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  buttonSecondaryText: { color: '#FF6B5A', fontSize: 16, fontWeight: '600' },
-  link: { textAlign: 'center', marginTop: 8, color: '#FF6B5A' },
-  orDivider: { textAlign: 'center', opacity: 0.5 },
-  error: { color: '#c0392b', textAlign: 'center' },
+  container: { flex: 1, backgroundColor: colors.background },
+  body: { padding: 24, paddingTop: 28 },
+  form: { gap: 14 },
+  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
+  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+  link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
+  orDivider: { textAlign: 'center', color: colors.textSecondary },
+  error: { color: colors.danger, textAlign: 'center' },
 });
