@@ -28,7 +28,8 @@
           "icon": "./assets/android-icon-monochrome.png",
           "color": "#FF7A50"
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }
