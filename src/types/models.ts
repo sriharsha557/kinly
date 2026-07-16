@@ -84,3 +84,20 @@ export interface Achievement {
   title: string;
   achieved_at: string;
 }
+
+export interface Challenge {
+  id: string;
+  circle_id: string;
+  title: string;
+  target: number;
+  created_by: string;
+  created_at: string;
+}
+
+export interface ChallengeLog {
+  id: string;
+  challenge_id: string;
+  user_id: string;
+  amount: number;
+  created_at: string;
+}
