@@ -13,6 +13,14 @@ export interface Circle {
   member_ids: string[];
 }
 
+export type CircleRole = 'owner' | 'admin' | 'member';
+
+export interface CircleMember {
+  circle_id: string;
+  user_id: string;
+  role: CircleRole;
+}
+
 export interface Goal {
   id: string;
   user_id: string;
@@ -34,7 +42,7 @@ export interface Event {
   created_at: string;
 }
 
-export type NudgeKind = 'cheer' | 'water' | 'walk' | 'workout' | 'streak';
+export type NudgeKind = 'cheer' | 'water' | 'walk' | 'workout' | 'keep_going' | 'streak';
 
 export interface Nudge {
   id: string;
@@ -49,4 +57,13 @@ export interface AskPost {
   user_id: string;
   question: string;
   reply_count: number;
+}
+
+export interface Achievement {
+  id: string;
+  user_id: string;
+  circle_id: string;
+  type: string;
+  title: string;
+  achieved_at: string;
 }
