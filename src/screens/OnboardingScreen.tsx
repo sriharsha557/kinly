@@ -188,9 +188,9 @@ export default function OnboardingScreen() {
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <GradientHeader>
             <Mascot size={110} />
-            <Text style={styles.title}>{user ? 'Growth Circle' : 'Kinly'}</Text>
+            <Text style={styles.title}>Kinly</Text>
             <Text style={styles.subtitle}>
-              {user ? '2-10 trusted friends. Invite-only.' : 'Grow Together. Every Day.'}
+              {user ? 'Create or join your Growth Circle — 2-10 trusted friends, invite-only.' : 'Together, We Thrive.'}
             </Text>
           </GradientHeader>
 
