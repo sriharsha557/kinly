@@ -21,6 +21,7 @@ import { PillButton } from '../components/PillButton';
 import { GardenCard } from '../components/GardenCard';
 import { ChallengesCard } from '../components/ChallengesCard';
 import { BuddyCard } from '../components/BuddyCard';
+import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -242,6 +243,8 @@ export default function FeedScreen() {
         {userId && circleId && <BuddyCard circleId={circleId} userId={userId} />}
 
         {userId && circleId && <ChallengesCard circleId={circleId} userId={userId} />}
+
+        {circleId && <WeeklyRecapCard circleId={circleId} />}
 
         {userId && circleId && <SuggestionsRow circleId={circleId} userId={userId} />}
 
