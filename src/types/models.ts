@@ -102,3 +102,40 @@ export interface ChallengeLog {
   amount: number;
   created_at: string;
 }
+
+export interface FutureLetter {
+  id: string;
+  user_id: string;
+  content: string;
+  unlock_date: string;
+  created_at: string;
+  opened_at: string | null;
+}
+
+export interface VisionItem {
+  id: string;
+  user_id: string;
+  circle_id: string;
+  title: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+export type RsvpStatus = 'yes' | 'no' | 'maybe';
+
+export interface Meetup {
+  id: string;
+  circle_id: string;
+  created_by: string;
+  title: string;
+  note: string | null;
+  proposed_date: string | null;
+  created_at: string;
+}
+
+export interface MeetupRsvp {
+  meetup_id: string;
+  user_id: string;
+  status: RsvpStatus;
+  responded_at: string;
+}

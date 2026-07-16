@@ -11,6 +11,7 @@ import { Logo } from '../components/Logo';
 import { StatTile } from '../components/StatTile';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
+import { FutureSelfCard } from '../components/FutureSelfCard';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
@@ -94,6 +95,8 @@ export default function ProfileScreen() {
         ) : (
           <Text style={styles.empty}>No achievements yet — complete a goal to earn your first badge.</Text>
         )}
+
+        {user && <FutureSelfCard userId={user.id} />}
 
         <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 32 }} />
       </ScrollView>
