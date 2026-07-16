@@ -26,6 +26,8 @@ export default function MainTabs() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarIconStyle: styles.tabBarIconStyle,
         tabBarIcon: ({ color, focused }) => (
           <View style={focused ? styles.activeIconWrap : styles.iconWrap}>
             <Ionicons name={ICONS[route.name]} size={22} color={focused ? '#fff' : color} />
@@ -51,7 +53,16 @@ const styles = {
     borderRadius: radii.pill,
     backgroundColor: colors.surface,
     borderTopWidth: 0,
+    paddingHorizontal: 8,
     ...shadow,
+  },
+  tabBarItem: {
+    height: 64,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  tabBarIconStyle: {
+    margin: 0,
   },
   iconWrap: {
     width: 40,
