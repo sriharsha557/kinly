@@ -3,7 +3,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import { signIn, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
 import { useSetInterests } from '../hooks/useInterests';
+import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { GradientHeader } from '../components/GradientHeader';
 import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
@@ -136,10 +136,8 @@ function InterestsStep() {
 }
 
 function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => void }) {
-  async function handleShare() {
-    await Share.share({
-      message: `Join my Growth Circle "${circle.name}" on Kinly. Invite code: ${circle.invite_code}`,
-    });
+  async function handleShareWhatsApp() {
+    await shareToWhatsApp(inviteMessage(circle.name, circle.invite_code));
   }
 
   return (
@@ -148,7 +146,7 @@ function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => 
         <Text style={styles.inviteLabel}>Invite code</Text>
         <Text style={styles.inviteCode}>{circle.invite_code}</Text>
       </View>
-      <PillButton label="Invite friends" onPress={handleShare} />
+      <PillButton label="Invite via WhatsApp" onPress={handleShareWhatsApp} />
       <PillButton label="Continue to Kinly" variant="outline" onPress={onContinue} />
     </View>
   );

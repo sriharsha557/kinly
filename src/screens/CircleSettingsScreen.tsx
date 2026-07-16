@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCircleDetail, useCircleMembers, useUpdateMemberRole } from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
+import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { colors, radii, shadow } from '../theme/colors';
 import type { CircleRole } from '../types/models';
 
@@ -38,11 +39,14 @@ export default function CircleSettingsScreen() {
   const myRole = members?.find((m) => m.user_id === userId)?.role;
   const canManageRoles = myRole === 'owner' || myRole === 'admin';
 
-  async function handleShareInvite() {
+  async function handleShareWhatsApp() {
     if (!circle) return;
-    await Share.share({
-      message: `Join my Growth Circle "${circle.name}" on Kinly. Invite code: ${circle.invite_code}`,
-    });
+    await shareToWhatsApp(inviteMessage(circle.name, circle.invite_code));
+  }
+
+  async function handleShareOther() {
+    if (!circle) return;
+    await Share.share({ message: inviteMessage(circle.name, circle.invite_code) });
   }
 
   if (circleLoading || membersLoading) {
@@ -61,7 +65,13 @@ export default function CircleSettingsScreen() {
         <View style={styles.inviteCard}>
           <Text style={styles.inviteLabel}>Invite code</Text>
           <Text style={styles.inviteCode}>{circle?.invite_code}</Text>
-          <PillButton label="Share invite" onPress={handleShareInvite} style={{ marginTop: 12 }} />
+          <PillButton label="Share via WhatsApp" onPress={handleShareWhatsApp} style={{ marginTop: 12 }} />
+          <PillButton
+            label="Other apps"
+            variant="outline"
+            onPress={handleShareOther}
+            style={{ marginTop: 8 }}
+          />
         </View>
 
         <Text style={styles.sectionTitle}>Members ({members?.length ?? 0}/10)</Text>
