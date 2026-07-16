@@ -57,6 +57,17 @@ export function useCreateAskPost() {
   });
 }
 
+export function useDeleteAskPost(circleId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (askPostId: string) => {
+      const { error } = await supabase.from('ask_posts').delete().eq('id', askPostId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['askPosts', circleId] }),
+  });
+}
+
 export function useAskReplies(askPostId: string | undefined) {
   return useQuery({
     queryKey: ['askReplies', askPostId],

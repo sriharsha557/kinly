@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,6 +18,7 @@ import {
   useAskReplies,
   useCreateAskPost,
   useCreateReply,
+  useDeleteAskPost,
   type AskPostWithProfile,
 } from '../hooks/useAskPosts';
 import { useGoals } from '../hooks/useGoals';
@@ -74,10 +76,27 @@ function AskCard({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const deletePost = useDeleteAskPost(circleId);
+  const isMine = post.user_id === userId;
+
+  function handleDelete() {
+    Alert.alert('Delete this post?', 'This will also delete its replies.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deletePost.mutate(post.id) },
+    ]);
+  }
+
   return (
     <View style={styles.card}>
       <TouchableOpacity onPress={onToggle}>
-        <Text style={styles.question}>{post.question}</Text>
+        <View style={styles.questionRow}>
+          <Text style={styles.question}>{post.question}</Text>
+          {isMine && (
+            <TouchableOpacity onPress={handleDelete} hitSlop={8}>
+              <Text style={styles.deleteButton}>🗑</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         {post.goals?.title && <Text style={styles.goalTag}>🎯 {post.goals.title}</Text>}
         <View style={styles.cardFooter}>
           <Text style={styles.meta}>{post.profiles?.name ?? 'Someone'}</Text>
@@ -212,7 +231,9 @@ const styles = StyleSheet.create({
     gap: 8,
     ...shadow,
   },
-  question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+  questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
+  question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+  deleteButton: { fontSize: 15, opacity: 0.6 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   meta: { fontSize: 12, color: colors.textSecondary },
   thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },

@@ -1,7 +1,27 @@
-import { ActivityIndicator, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCircleDetail, useCircleMembers, useUpdateMemberRole } from '../hooks/useCircles';
+import {
+  useCircleDetail,
+  useCircleMembers,
+  useCreateCircle,
+  useJoinCircle,
+  useLeaveCircle,
+  useMyCircles,
+  useUpdateMemberRole,
+} from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { colors, radii, shadow } from '../theme/colors';
@@ -29,12 +49,96 @@ function RoleChip({
   );
 }
 
+function JoinOrCreateModal({
+  userId,
+  onClose,
+  onSwitched,
+}: {
+  userId: string;
+  onClose: () => void;
+  onSwitched: (circleId: string) => void;
+}) {
+  const [circleName, setCircleName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const createCircle = useCreateCircle();
+  const joinCircle = useJoinCircle();
+
+  async function handleCreate() {
+    setError(null);
+    try {
+      const circle = await createCircle.mutateAsync(circleName.trim());
+      onSwitched(circle.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not create circle');
+    }
+  }
+
+  async function handleJoin() {
+    setError(null);
+    try {
+      const circle = await joinCircle.mutateAsync(inviteCode.trim());
+      onSwitched(circle.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not join circle');
+    }
+  }
+
+  return (
+    <Modal transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>New Growth Circle</Text>
+          <TextInput
+            style={styles.modalInput}
+            value={circleName}
+            onChangeText={setCircleName}
+            placeholder="Circle name"
+            placeholderTextColor={colors.textSecondary}
+          />
+          <PillButton
+            label="Create Circle"
+            onPress={handleCreate}
+            loading={createCircle.isPending}
+            disabled={!circleName.trim()}
+          />
+          <Text style={styles.orDivider}>or</Text>
+          <TextInput
+            style={styles.modalInput}
+            value={inviteCode}
+            onChangeText={setInviteCode}
+            placeholder="Invite code"
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize="none"
+          />
+          <PillButton
+            label="Join Circle"
+            variant="outline"
+            onPress={handleJoin}
+            loading={joinCircle.isPending}
+            disabled={!inviteCode.trim()}
+          />
+          {error && <Text style={styles.error}>{error}</Text>}
+          <TouchableOpacity onPress={onClose} style={{ marginTop: 4 }}>
+            <Text style={styles.cancelLink}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function CircleSettingsScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
+  const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const { data: circle, isLoading: circleLoading } = useCircleDetail(circleId ?? undefined);
   const { data: members, isLoading: membersLoading } = useCircleMembers(circleId ?? undefined);
+  const { data: myCircles } = useMyCircles(userId);
   const updateRole = useUpdateMemberRole(circleId ?? undefined);
+  const leaveCircle = useLeaveCircle();
+
+  const [showJoinCreate, setShowJoinCreate] = useState(false);
 
   const myRole = members?.find((m) => m.user_id === userId)?.role;
   const canManageRoles = myRole === 'owner' || myRole === 'admin';
@@ -47,6 +151,26 @@ export default function CircleSettingsScreen() {
   async function handleShareOther() {
     if (!circle) return;
     await Share.share({ message: inviteMessage(circle.name, circle.invite_code) });
+  }
+
+  function handleLeave() {
+    if (!circleId) return;
+    const willTransferOwnership = myRole === 'owner' && (members?.length ?? 0) > 1;
+    const message = willTransferOwnership
+      ? "Ownership will transfer to another member. You'll need a new invite to rejoin."
+      : "You'll need a new invite to rejoin.";
+
+    Alert.alert('Leave this circle?', message, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Leave',
+        style: 'destructive',
+        onPress: async () => {
+          await leaveCircle.mutateAsync(circleId);
+          setActiveCircleId(null);
+        },
+      },
+    ]);
   }
 
   if (circleLoading || membersLoading) {
@@ -98,7 +222,54 @@ export default function CircleSettingsScreen() {
             </View>
           ))}
         </View>
+
+        {myCircles && myCircles.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Your Circles</Text>
+            <View style={styles.memberList}>
+              {myCircles.map((c) => (
+                <TouchableOpacity
+                  key={c.id}
+                  style={[styles.circleRow, c.id === circleId && styles.circleRowActive]}
+                  onPress={() => setActiveCircleId(c.id)}
+                >
+                  <Text
+                    style={[styles.circleRowText, c.id === circleId && styles.circleRowTextActive]}
+                  >
+                    {c.name}
+                  </Text>
+                  {c.id === circleId && <Text style={styles.circleRowActiveTag}>Active</Text>}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
+
+        <PillButton
+          label="Join or start another circle"
+          variant="outline"
+          onPress={() => setShowJoinCreate(true)}
+          style={{ marginTop: 20 }}
+        />
+        <PillButton
+          label="Leave this circle"
+          variant="outline"
+          onPress={handleLeave}
+          loading={leaveCircle.isPending}
+          style={{ marginTop: 10, borderColor: colors.danger }}
+        />
       </ScrollView>
+
+      {showJoinCreate && userId && (
+        <JoinOrCreateModal
+          userId={userId}
+          onClose={() => setShowJoinCreate(false)}
+          onSwitched={(newCircleId) => {
+            setActiveCircleId(newCircleId);
+            setShowJoinCreate(false);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -136,4 +307,41 @@ const styles = StyleSheet.create({
   roleChipActive: { backgroundColor: colors.primary },
   roleChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textTransform: 'capitalize' },
   roleChipTextActive: { color: '#fff' },
+  circleRow: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    ...shadow,
+  },
+  circleRowActive: { borderWidth: 1.5, borderColor: colors.primary },
+  circleRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+  circleRowTextActive: { color: colors.primary },
+  circleRowActiveTag: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 20,
+    gap: 12,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+  modalInput: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.input,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: colors.textPrimary,
+    fontSize: 15,
+  },
+  orDivider: { textAlign: 'center', color: colors.textSecondary },
+  cancelLink: { textAlign: 'center', color: colors.textSecondary, fontWeight: '600' },
+  error: { color: colors.danger, textAlign: 'center' },
 });

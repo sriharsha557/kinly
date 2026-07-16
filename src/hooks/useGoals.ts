@@ -42,6 +42,46 @@ export function useCreateGoal() {
   });
 }
 
+export function useUpdateGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      goalId,
+      circleId,
+      title,
+      target,
+    }: {
+      goalId: string;
+      circleId: string;
+      title: string;
+      target: number;
+    }): Promise<Goal> => {
+      const { data, error } = await supabase
+        .from('goals')
+        .update({ title, target })
+        .eq('id', goalId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Goal;
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+  });
+}
+
+export function useDeleteGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ goalId }: { goalId: string; circleId: string }) => {
+      const { error } = await supabase.from('goals').delete().eq('id', goalId);
+      if (error) throw error;
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+  });
+}
+
 export function useLogGoalProgress() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -11,18 +13,82 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useGoals, useLogGoalProgress } from '../hooks/useGoals';
+import { useCreateGoal, useDeleteGoal, useGoals, useLogGoalProgress, useUpdateGoal } from '../hooks/useGoals';
 import { useLogEvent } from '../hooks/useEvents';
 import { ProgressBar } from '../components/ProgressBar';
+import { PillButton } from '../components/PillButton';
 import { colors, radii, shadow } from '../theme/colors';
 import type { Goal } from '../types/models';
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
+function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: string; onClose: () => void }) {
+  const [title, setTitle] = useState(goal.title);
+  const [target, setTarget] = useState(String(goal.target));
+  const updateGoal = useUpdateGoal();
+
+  async function handleSave() {
+    const targetValue = Number(target);
+    if (!title.trim() || !targetValue) return;
+    await updateGoal.mutateAsync({ goalId: goal.id, circleId, title: title.trim(), target: targetValue });
+    onClose();
+  }
+
+  return (
+    <Modal transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Edit goal</Text>
+          <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
+          <TextInput
+            style={styles.modalInput}
+            value={target}
+            onChangeText={setTarget}
+            placeholder="Target"
+            keyboardType="numeric"
+          />
+          <View style={styles.modalButtons}>
+            <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
+            <PillButton
+              label="Save"
+              onPress={handleSave}
+              loading={updateGoal.isPending}
+              disabled={!title.trim() || !target}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
   const logProgress = useLogGoalProgress();
   const logEvent = useLogEvent();
+  const deleteGoal = useDeleteGoal();
+  const [editing, setEditing] = useState(false);
   const isComplete = goal.progress >= goal.target;
+
+  function handleOptions() {
+    Alert.alert(goal.title, undefined, [
+      { text: 'Edit', onPress: () => setEditing(true) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          Alert.alert('Delete this goal?', 'This cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Delete',
+              style: 'destructive',
+              onPress: () => deleteGoal.mutate({ goalId: goal.id, circleId }),
+            },
+          ]),
+      },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+  }
 
   async function handleLogProgress() {
     const step = Math.max(1, Math.round(goal.target / 10));
@@ -62,7 +128,12 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{goal.title}</Text>
-        {goal.streak_count > 0 && <Text style={styles.streak}>🔥 {goal.streak_count}</Text>}
+        <View style={styles.cardHeaderRight}>
+          {goal.streak_count > 0 && <Text style={styles.streak}>🔥 {goal.streak_count}</Text>}
+          <TouchableOpacity onPress={handleOptions} hitSlop={8}>
+            <Text style={styles.optionsButton}>⋯</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
       <View style={styles.cardFooter}>
@@ -81,6 +152,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
           </TouchableOpacity>
         )}
       </View>
+      {editing && <EditGoalModal goal={goal} circleId={circleId} onClose={() => setEditing(false)} />}
     </View>
   );
 }
@@ -183,8 +255,10 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
+  cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
   streak: { fontSize: 14 },
+  optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardMeta: { fontSize: 12, color: colors.textSecondary },
   doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
@@ -196,4 +270,26 @@ const styles = StyleSheet.create({
   },
   logButtonText: { fontSize: 12, fontWeight: '700', color: colors.primary },
   empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 20,
+    gap: 12,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+  modalInput: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.input,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: colors.textPrimary,
+    fontSize: 15,
+  },
+  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
 });

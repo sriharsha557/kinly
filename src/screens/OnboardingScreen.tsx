@@ -29,13 +29,17 @@ function AuthStep() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   async function handleSubmit() {
     setError(null);
     setSubmitting(true);
     try {
       if (mode === 'signUp') {
-        await signUp(email.trim(), password, name.trim());
+        const { session, user } = await signUp(email.trim(), password, name.trim());
+        if (!session && user) {
+          setAwaitingConfirmation(true);
+        }
       } else {
         await signIn(email.trim(), password);
       }
@@ -44,6 +48,25 @@ function AuthStep() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (awaitingConfirmation) {
+    return (
+      <View style={styles.form}>
+        <Text style={styles.confirmTitle}>Check your email</Text>
+        <Text style={styles.confirmBody}>
+          We sent a confirmation link to {email.trim()}. Tap it, then come back and sign in.
+        </Text>
+        <PillButton
+          label="Back to sign in"
+          variant="outline"
+          onPress={() => {
+            setAwaitingConfirmation(false);
+            setMode('signIn');
+          }}
+        />
+      </View>
+    );
   }
 
   return (
@@ -235,6 +258,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   body: { padding: 24, paddingTop: 28 },
   form: { gap: 14 },
+  confirmTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
+  confirmBody: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
   inviteCard: {
     backgroundColor: colors.surface,
     borderRadius: radii.card,

@@ -76,6 +76,17 @@ export function useCircleMembers(circleId: string | undefined) {
   });
 }
 
+export function useLeaveCircle() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (circleId: string) => {
+      const { error } = await supabase.rpc('leave_circle', { p_circle_id: circleId });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circles'] }),
+  });
+}
+
 export function useUpdateMemberRole(circleId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
