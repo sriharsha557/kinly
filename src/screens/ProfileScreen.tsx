@@ -6,7 +6,7 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useCircleDetail } from '../hooks/useCircles';
 import { useProfileStats } from '../hooks/useProfileStats';
 import { signOut } from '../lib/auth';
-import { Mascot } from '../components/Mascot';
+import { Logo } from '../components/Logo';
 import { StatTile } from '../components/StatTile';
 import { PillButton } from '../components/PillButton';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
@@ -25,7 +25,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Mascot size={72} />
+          <Logo size={72} color="#FFFFFF" background={colors.celebration} />
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
           {circle && <Text style={styles.circleName}>{circle.name}</Text>}
         </View>

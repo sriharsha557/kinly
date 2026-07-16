@@ -14,7 +14,7 @@ import { signIn, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
 import { GradientHeader } from '../components/GradientHeader';
-import { Mascot } from '../components/Mascot';
+import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { colors, radii, shadow } from '../theme/colors';
@@ -187,7 +187,7 @@ export default function OnboardingScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <GradientHeader>
-            <Mascot size={110} />
+            <Logo size={100} color="#FFFFFF" />
             <Text style={styles.title}>Kinly</Text>
             <Text style={styles.subtitle}>
               {user ? 'Create or join your Growth Circle — 2-10 trusted friends, invite-only.' : 'Together, We Thrive.'}
