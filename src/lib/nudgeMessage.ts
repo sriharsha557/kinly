@@ -16,7 +16,10 @@ export async function generateNudgeMessage(
   context?: string,
 ): Promise<string> {
   try {
-    const { data, error } = await supabase.functions.invoke('generate-nudge-message', {
+    // Supabase Edge Function slug is fixed at creation as "smooth-responder";
+    // the dashboard display name was changed to "generate-nudge-message" but
+    // the invocable route did not follow, so this must match the real slug.
+    const { data, error } = await supabase.functions.invoke('smooth-responder', {
       body: { kind, recipientName, context },
     });
     if (error || !data?.message) throw error ?? new Error('empty response');
