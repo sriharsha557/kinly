@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import type { Goal } from '../types/models';
+import type { Goal, InterestCategory } from '../types/models';
 
 export function useGoals(circleId: string | undefined) {
   return useQuery({
@@ -23,15 +23,16 @@ interface NewGoal {
   userId: string;
   title: string;
   target: number;
+  category?: InterestCategory | null;
 }
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ circleId, userId, title, target }: NewGoal): Promise<Goal> => {
+    mutationFn: async ({ circleId, userId, title, target, category }: NewGoal): Promise<Goal> => {
       const { data, error } = await supabase
         .from('goals')
-        .insert({ circle_id: circleId, user_id: userId, title, target })
+        .insert({ circle_id: circleId, user_id: userId, title, target, category: category ?? null })
         .select()
         .single();
       if (error) throw error;

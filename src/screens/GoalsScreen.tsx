@@ -20,8 +20,9 @@ import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
-import { colors, radii, shadow } from '../theme/colors';
-import type { Goal } from '../types/models';
+import { INTEREST_OPTIONS } from '../components/InterestPicker';
+import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import type { Goal, InterestCategory } from '../types/models';
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
@@ -188,40 +189,59 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
 function AddGoalForm({ circleId, userId }: { circleId: string; userId: string }) {
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
+  const [category, setCategory] = useState<InterestCategory | null>(null);
   const createGoal = useCreateGoal();
 
   async function handleAdd() {
     const targetValue = Number(target);
     if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({ circleId, userId, title: title.trim(), target: targetValue });
+    await createGoal.mutateAsync({ circleId, userId, title: title.trim(), target: targetValue, category });
     setTitle('');
     setTarget('');
+    setCategory(null);
   }
 
   return (
-    <View style={styles.form}>
-      <TextInput
-        style={styles.input}
-        placeholder="Goal (e.g. Drink 4L water)"
-        placeholderTextColor={colors.textSecondary}
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={[styles.input, styles.targetInput]}
-        placeholder="Target"
-        placeholderTextColor={colors.textSecondary}
-        keyboardType="numeric"
-        value={target}
-        onChangeText={setTarget}
-      />
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={handleAdd}
-        disabled={createGoal.isPending || !title.trim() || !target}
-      >
-        <Text style={styles.addButtonText}>Add</Text>
-      </TouchableOpacity>
+    <View style={styles.addGoalWrap}>
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Goal (e.g. Drink 4L water)"
+          placeholderTextColor={colors.textSecondary}
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={[styles.input, styles.targetInput]}
+          placeholder="Target"
+          placeholderTextColor={colors.textSecondary}
+          keyboardType="numeric"
+          value={target}
+          onChangeText={setTarget}
+        />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={handleAdd}
+          disabled={createGoal.isPending || !title.trim() || !target}
+        >
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.categoryRow}>
+        {INTEREST_OPTIONS.map(({ key, emoji }) => {
+          const active = category === key;
+          const cat = categoryColors[key];
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[styles.categoryChip, { backgroundColor: active ? cat.solid : colors.inputBg }]}
+              onPress={() => setCategory(active ? null : key)}
+            >
+              <Text style={styles.categoryChipText}>{emoji}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -257,7 +277,17 @@ export default function GoalsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: colors.background },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  form: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  addGoalWrap: { marginBottom: 16, gap: 8 },
+  form: { flexDirection: 'row', gap: 8 },
+  categoryRow: { flexDirection: 'row', gap: 8 },
+  categoryChip: {
+    width: 34,
+    height: 34,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryChipText: { fontSize: 15 },
   input: {
     flex: 1,
     backgroundColor: colors.inputBg,

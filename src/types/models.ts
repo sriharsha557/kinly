@@ -34,6 +34,7 @@ export interface Goal {
   progress: number;
   streak_count: number;
   last_logged_date: string | null;
+  category: InterestCategory | null;
 }
 
 export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask';

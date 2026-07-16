@@ -22,6 +22,7 @@ import { GardenCard } from '../components/GardenCard';
 import { ChallengesCard } from '../components/ChallengesCard';
 import { BuddyCard } from '../components/BuddyCard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
+import { CircleAICard } from '../components/CircleAICard';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -93,7 +94,13 @@ function CustomizeGoalModal({
   async function handleSave() {
     const targetValue = Number(target);
     if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({ circleId, userId, title: title.trim(), target: targetValue });
+    await createGoal.mutateAsync({
+      circleId,
+      userId,
+      title: title.trim(),
+      target: targetValue,
+      category: suggestion.category,
+    });
     onClose();
   }
 
@@ -243,6 +250,8 @@ export default function FeedScreen() {
         {userId && circleId && <BuddyCard circleId={circleId} userId={userId} />}
 
         {userId && circleId && <ChallengesCard circleId={circleId} userId={userId} />}
+
+        {userId && circleId && <CircleAICard circleId={circleId} userId={userId} />}
 
         {circleId && <WeeklyRecapCard circleId={circleId} />}
 
