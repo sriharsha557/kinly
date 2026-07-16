@@ -1,4 +1,5 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, ViewStyle } from 'react-native';
+import { AnimatedPressable } from './AnimatedPressable';
 import { colors, radii } from '../theme/colors';
 
 interface PillButtonProps {
@@ -13,7 +14,7 @@ interface PillButtonProps {
 export function PillButton({ label, onPress, loading, disabled, variant = 'solid', style }: PillButtonProps) {
   const isOutline = variant === 'outline';
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       style={[styles.base, isOutline ? styles.outline : styles.solid, style]}
       onPress={onPress}
       disabled={disabled || loading}
@@ -23,7 +24,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
       ) : (
         <Text style={isOutline ? styles.outlineText : styles.solidText}>{label}</Text>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useGoals, useCreateGoal } from '../hooks/useGoals';
@@ -166,18 +168,25 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
   async function handleNudge(kind: NudgeKind) {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSendingKind(kind);
     try {
       const recipientName = event.profiles?.name ?? 'your friend';
       const message = await generateNudgeMessage(kind, recipientName, goalTitleFromEvent(event));
       await sendNudge.mutateAsync({ eventId: event.id, userId, kind, message });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } finally {
       setSendingKind(null);
     }
   }
 
+  const isCelebration = event.type === 'streak' || event.type === 'goal_completed';
+
   return (
-    <View style={[styles.eventCard, { backgroundColor: style.bg }]}>
+    <Animated.View
+      entering={isCelebration ? ZoomIn.springify().damping(14) : FadeInDown.duration(350)}
+      style={[styles.eventCard, { backgroundColor: style.bg }]}
+    >
       <View style={styles.eventHeader}>
         <Text style={styles.eventIcon}>{style.icon}</Text>
         <View style={styles.eventBody}>
@@ -209,7 +218,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           ))}
         </View>
       )}
-    </View>
+    </Animated.View>
   );
 }
 

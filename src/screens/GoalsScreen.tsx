@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useGoals, useLogGoalProgress } from '../hooks/useGoals';
 import { useLogEvent } from '../hooks/useEvents';
@@ -30,7 +31,16 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
 
     const updated = await logProgress.mutateAsync({ goalId: goal.id, circleId, increment: step });
 
-    if (!wasComplete && updated.progress >= updated.target) {
+    const justCompleted = !wasComplete && updated.progress >= updated.target;
+    const hitMilestone = updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count);
+
+    if (justCompleted || hitMilestone) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    if (justCompleted) {
       await logEvent.mutateAsync({
         circleId,
         userId,
@@ -38,7 +48,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         payload: { title: goal.title },
       });
     }
-    if (updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count)) {
+    if (hitMilestone) {
       await logEvent.mutateAsync({
         circleId,
         userId,

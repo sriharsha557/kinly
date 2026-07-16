@@ -1,11 +1,21 @@
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { colors } from '../theme/colors';
 
 export function ProgressBar({ progress, target }: { progress: number; target: number }) {
-  const pct = target > 0 ? Math.min(1, progress / target) : 0;
+  const pct = target > 0 ? Math.min(1, progress / target) * 100 : 0;
+  const width = useSharedValue(pct);
+
+  useEffect(() => {
+    width.value = withTiming(pct, { duration: 500 });
+  }, [pct, width]);
+
+  const animatedStyle = useAnimatedStyle(() => ({ width: `${width.value}%` }));
+
   return (
     <View style={styles.track}>
-      <View style={[styles.fill, { width: `${pct * 100}%` }]} />
+      <Animated.View style={[styles.fill, animatedStyle]} />
     </View>
   );
 }
