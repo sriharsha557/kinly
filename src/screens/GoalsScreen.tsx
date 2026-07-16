@@ -15,8 +15,11 @@ import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useDeleteGoal, useGoals, useLogGoalProgress, useUpdateGoal } from '../hooks/useGoals';
 import { useLogEvent } from '../hooks/useEvents';
+import { useCreateAchievement } from '../hooks/useAchievements';
+import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
+import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { colors, radii, shadow } from '../theme/colors';
 import type { Goal } from '../types/models';
 
@@ -66,8 +69,11 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
 function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
   const logProgress = useLogGoalProgress();
   const logEvent = useLogEvent();
+  const createAchievement = useCreateAchievement();
   const deleteGoal = useDeleteGoal();
+  const { data: circle } = useCircleDetail(circleId);
   const [editing, setEditing] = useState(false);
+  const [celebration, setCelebration] = useState<{ title: string; subtitle?: string } | null>(null);
   const isComplete = goal.progress >= goal.target;
 
   function handleOptions() {
@@ -113,6 +119,13 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         type: 'goal_completed',
         payload: { title: goal.title },
       });
+      await createAchievement.mutateAsync({
+        userId,
+        circleId,
+        type: 'goal_completed',
+        title: `Completed "${goal.title}"`,
+      });
+      setCelebration({ title: `Completed "${goal.title}"! 🎉` });
     }
     if (hitMilestone) {
       await logEvent.mutateAsync({
@@ -121,6 +134,13 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         type: 'streak',
         payload: { title: goal.title, streak_count: updated.streak_count },
       });
+      await createAchievement.mutateAsync({
+        userId,
+        circleId,
+        type: 'streak',
+        title: `${updated.streak_count}-day streak on "${goal.title}"`,
+      });
+      setCelebration({ title: `${updated.streak_count}-day streak!`, subtitle: goal.title });
     }
   }
 
@@ -153,6 +173,14 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         )}
       </View>
       {editing && <EditGoalModal goal={goal} circleId={circleId} onClose={() => setEditing(false)} />}
+      {celebration && (
+        <MilestoneCardModal
+          title={celebration.title}
+          subtitle={celebration.subtitle}
+          circleName={circle?.name}
+          onClose={() => setCelebration(null)}
+        />
+      )}
     </View>
   );
 }

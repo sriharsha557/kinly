@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -9,8 +10,10 @@ import { signOut } from '../lib/auth';
 import { Logo } from '../components/Logo';
 import { StatTile } from '../components/StatTile';
 import { PillButton } from '../components/PillButton';
+import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
+import type { Achievement } from '../types/models';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,6 +23,7 @@ export default function ProfileScreen() {
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: circle } = useCircleDetail(circleId ?? undefined);
   const { data: stats, isLoading } = useProfileStats(user?.id, circleId ?? undefined);
+  const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,9 +82,13 @@ export default function ProfileScreen() {
         {stats && stats.achievements.length > 0 ? (
           <View style={styles.badgeList}>
             {stats.achievements.map((achievement) => (
-              <View key={achievement.id} style={styles.badge}>
+              <TouchableOpacity
+                key={achievement.id}
+                style={styles.badge}
+                onPress={() => setViewingAchievement(achievement)}
+              >
                 <Text style={styles.badgeText}>{achievement.title}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         ) : (
@@ -89,6 +97,14 @@ export default function ProfileScreen() {
 
         <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 32 }} />
       </ScrollView>
+
+      {viewingAchievement && (
+        <MilestoneCardModal
+          title={viewingAchievement.title}
+          circleName={circle?.name}
+          onClose={() => setViewingAchievement(null)}
+        />
+      )}
     </SafeAreaView>
   );
 }
