@@ -32,6 +32,7 @@ export interface Goal {
   target: number;
   progress: number;
   streak_count: number;
+  last_logged_date: string | null;
 }
 
 export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask';

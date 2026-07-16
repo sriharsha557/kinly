@@ -42,24 +42,22 @@ export function useCreateGoal() {
   });
 }
 
-export function useUpdateGoalProgress() {
+export function useLogGoalProgress() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
       goalId,
       circleId,
-      progress,
+      increment,
     }: {
       goalId: string;
       circleId: string;
-      progress: number;
+      increment: number;
     }): Promise<Goal> => {
-      const { data, error } = await supabase
-        .from('goals')
-        .update({ progress })
-        .eq('id', goalId)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('log_goal_progress', {
+        p_goal_id: goalId,
+        p_increment: increment,
+      });
       if (error) throw error;
       return data as Goal;
     },

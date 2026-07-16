@@ -10,27 +10,40 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useGoals, useUpdateGoalProgress } from '../hooks/useGoals';
+import { useCreateGoal, useGoals, useLogGoalProgress } from '../hooks/useGoals';
 import { useLogEvent } from '../hooks/useEvents';
 import { ProgressBar } from '../components/ProgressBar';
 import { colors, radii, shadow } from '../theme/colors';
 import type { Goal } from '../types/models';
 
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
+
 function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
-  const updateProgress = useUpdateGoalProgress();
+  const logProgress = useLogGoalProgress();
   const logEvent = useLogEvent();
   const isComplete = goal.progress >= goal.target;
 
   async function handleLogProgress() {
     const step = Math.max(1, Math.round(goal.target / 10));
-    const nextProgress = Math.min(goal.target, goal.progress + step);
-    await updateProgress.mutateAsync({ goalId: goal.id, circleId, progress: nextProgress });
-    if (nextProgress >= goal.target && goal.progress < goal.target) {
+    const wasComplete = goal.progress >= goal.target;
+    const previousStreak = goal.streak_count;
+
+    const updated = await logProgress.mutateAsync({ goalId: goal.id, circleId, increment: step });
+
+    if (!wasComplete && updated.progress >= updated.target) {
       await logEvent.mutateAsync({
         circleId,
         userId,
         type: 'goal_completed',
         payload: { title: goal.title },
+      });
+    }
+    if (updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count)) {
+      await logEvent.mutateAsync({
+        circleId,
+        userId,
+        type: 'streak',
+        payload: { title: goal.title, streak_count: updated.streak_count },
       });
     }
   }
@@ -52,7 +65,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
           <TouchableOpacity
             style={styles.logButton}
             onPress={handleLogProgress}
-            disabled={updateProgress.isPending}
+            disabled={logProgress.isPending}
           >
             <Text style={styles.logButtonText}>Log progress</Text>
           </TouchableOpacity>
