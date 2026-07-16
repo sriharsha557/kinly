@@ -13,12 +13,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { signIn, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
+import { useSetInterests } from '../hooks/useInterests';
 import { GradientHeader } from '../components/GradientHeader';
 import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
-import { colors, radii, shadow } from '../theme/colors';
-import type { Circle } from '../types/models';
+import { colors, categoryColors, radii, shadow } from '../theme/colors';
+import type { Circle, InterestCategory } from '../types/models';
+
+const INTEREST_OPTIONS: { key: InterestCategory; label: string; emoji: string }[] = [
+  { key: 'health', label: 'Health', emoji: '💧' },
+  { key: 'wealth', label: 'Wealth', emoji: '💰' },
+  { key: 'ideas', label: 'Ideas', emoji: '🚀' },
+  { key: 'learning', label: 'Learning', emoji: '📚' },
+  { key: 'relationships', label: 'Relationships', emoji: '❤️' },
+];
 
 function AuthStep() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
@@ -78,6 +87,49 @@ function AuthStep() {
         <Text style={styles.link}>
           {mode === 'signUp' ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function InterestsStep() {
+  const [selected, setSelected] = useState<InterestCategory[]>([]);
+  const setInterests = useSetInterests();
+
+  function toggle(key: InterestCategory) {
+    setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  }
+
+  return (
+    <View style={styles.form}>
+      <View style={styles.chipGrid}>
+        {INTEREST_OPTIONS.map(({ key, label, emoji }) => {
+          const active = selected.includes(key);
+          const category = categoryColors[key];
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[
+                styles.chip,
+                { backgroundColor: active ? category.solid : colors.inputBg },
+              ]}
+              onPress={() => toggle(key)}
+            >
+              <Text style={styles.chipEmoji}>{emoji}</Text>
+              <Text style={[styles.chipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <PillButton
+        label="Continue"
+        onPress={() => setInterests.mutate(selected)}
+        loading={setInterests.isPending}
+        disabled={selected.length === 0}
+      />
+      <TouchableOpacity onPress={() => setInterests.mutate([])} disabled={setInterests.isPending}>
+        <Text style={styles.link}>Skip for now</Text>
       </TouchableOpacity>
     </View>
   );
@@ -178,6 +230,11 @@ function CircleStep() {
 
 export default function OnboardingScreen() {
   const user = useAuthStore((state) => state.user);
+  const needsInterests = !!user && user.interests === null;
+
+  let subtitle = 'Together, We Thrive.';
+  if (user && needsInterests) subtitle = "What do you want to grow? Pick what matters to you.";
+  else if (user) subtitle = 'Create or join your Growth Circle — 2-10 trusted friends, invite-only.';
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -189,12 +246,12 @@ export default function OnboardingScreen() {
           <GradientHeader>
             <Logo size={100} color="#FFFFFF" />
             <Text style={styles.title}>Kinly</Text>
-            <Text style={styles.subtitle}>
-              {user ? 'Create or join your Growth Circle — 2-10 trusted friends, invite-only.' : 'Together, We Thrive.'}
-            </Text>
+            <Text style={styles.subtitle}>{subtitle}</Text>
           </GradientHeader>
 
-          <View style={styles.body}>{user ? <CircleStep /> : <AuthStep />}</View>
+          <View style={styles.body}>
+            {!user ? <AuthStep /> : needsInterests ? <InterestsStep /> : <CircleStep />}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -219,4 +276,15 @@ const styles = StyleSheet.create({
   link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
   orDivider: { textAlign: 'center', color: colors.textSecondary },
   error: { color: colors.danger, textAlign: 'center' },
+  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: radii.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  chipEmoji: { fontSize: 16 },
+  chipLabel: { fontSize: 14, fontWeight: '600' },
 });

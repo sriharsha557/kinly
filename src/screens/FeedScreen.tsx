@@ -3,7 +3,9 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
+import { useGoals, useCreateGoal } from '../hooks/useGoals';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
+import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -55,6 +57,49 @@ function dayLabel(iso: string): string {
   if (sameDay(date, today)) return 'Today';
   if (sameDay(date, yesterday)) return 'Yesterday';
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function SuggestionCard({
+  suggestion,
+  circleId,
+  userId,
+}: {
+  suggestion: GoalSuggestion;
+  circleId: string;
+  userId: string;
+}) {
+  const createGoal = useCreateGoal();
+  const category = categoryColors[suggestion.category];
+
+  return (
+    <TouchableOpacity
+      style={[styles.suggestionCard, { backgroundColor: category.bg }]}
+      onPress={() => createGoal.mutate({ circleId, userId, title: suggestion.title, target: suggestion.target })}
+      disabled={createGoal.isPending}
+    >
+      <Text style={[styles.suggestionText, { color: category.text }]}>{suggestion.title}</Text>
+      <Text style={[styles.suggestionAdd, { color: category.text }]}>{createGoal.isPending ? '…' : '+ Add'}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function SuggestionsRow({ circleId, userId }: { circleId: string; userId: string }) {
+  const interests = useAuthStore((state) => state.user?.interests) ?? [];
+  const { data: goals } = useGoals(circleId);
+  const suggestions = pickSuggestions(interests, (goals ?? []).map((g) => g.title));
+
+  if (suggestions.length === 0) return null;
+
+  return (
+    <View style={styles.suggestionsSection}>
+      <Text style={styles.sectionTitle}>Suggested for you</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsRow}>
+        {suggestions.map((s) => (
+          <SuggestionCard key={s.title} suggestion={s} circleId={circleId} userId={userId} />
+        ))}
+      </ScrollView>
+    </View>
+  );
 }
 
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
@@ -120,37 +165,54 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Feed</Text>
+      <ScrollView contentContainerStyle={styles.page}>
+        <Text style={styles.title}>Feed</Text>
 
-      {isLoading ? (
-        <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
-      ) : events && events.length > 0 ? (
-        <ScrollView contentContainerStyle={styles.list}>
-          {events.map((event) => {
-            const label = dayLabel(event.created_at);
-            const showHeader = label !== lastLabel;
-            lastLabel = label;
-            return (
-              <View key={event.id}>
-                {showHeader && <Text style={styles.dayHeader}>{label}</Text>}
-                {userId && circleId && <EventRow event={event} circleId={circleId} userId={userId} />}
-              </View>
-            );
-          })}
-        </ScrollView>
-      ) : (
-        <Text style={styles.empty}>
-          Nothing yet — complete a goal to send your first update to the circle.
-        </Text>
-      )}
+        {userId && circleId && <SuggestionsRow circleId={circleId} userId={userId} />}
+
+        {isLoading ? (
+          <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+        ) : events && events.length > 0 ? (
+          <View style={styles.list}>
+            {events.map((event) => {
+              const label = dayLabel(event.created_at);
+              const showHeader = label !== lastLabel;
+              lastLabel = label;
+              return (
+                <View key={event.id}>
+                  {showHeader && <Text style={styles.dayHeader}>{label}</Text>}
+                  {userId && circleId && <EventRow event={event} circleId={circleId} userId={userId} />}
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <Text style={styles.empty}>
+            Nothing yet — complete a goal to send your first update to the circle.
+          </Text>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background },
+  page: { padding: 16, paddingBottom: 110 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  list: { paddingBottom: 110, gap: 10 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
+  suggestionsSection: { marginBottom: 20 },
+  suggestionsRow: { gap: 10, paddingRight: 16 },
+  suggestionCard: {
+    borderRadius: radii.card,
+    padding: 14,
+    width: 160,
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  suggestionText: { fontSize: 13, fontWeight: '600' },
+  suggestionAdd: { fontSize: 12, fontWeight: '800' },
+  list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
     borderRadius: radii.card,

@@ -1,7 +1,10 @@
+export type InterestCategory = 'health' | 'wealth' | 'ideas' | 'learning' | 'relationships';
+
 export interface User {
   id: string;
   name: string;
   avatar: string | null;
+  interests: InterestCategory[] | null;
   created_at: string;
 }
 
