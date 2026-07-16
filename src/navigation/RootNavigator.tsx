@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import CircleSettingsScreen from '../screens/CircleSettingsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
 import MainTabs from './MainTabs';
 import { useAuthStore } from '../state/useAuthStore';
 import { useBootstrapSession } from '../hooks/useBootstrapSession';
@@ -38,6 +39,11 @@ export default function RootNavigator() {
               name="CircleSettings"
               component={CircleSettingsScreen}
               options={{ headerShown: true, title: 'Circle Settings' }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ headerShown: true, title: 'Edit Profile' }}
             />
           </>
         ) : (

@@ -4,6 +4,7 @@ import type { AskPost, AskReply } from '../types/models';
 
 export interface AskPostWithProfile extends AskPost {
   profiles: { name: string } | null;
+  goals: { title: string } | null;
 }
 
 export interface AskReplyWithProfile extends AskReply {
@@ -17,7 +18,7 @@ export function useAskPosts(circleId: string | undefined) {
     queryFn: async (): Promise<AskPostWithProfile[]> => {
       const { data, error } = await supabase
         .from('ask_posts')
-        .select('*, profiles(name)')
+        .select('*, profiles(name), goals(title)')
         .eq('circle_id', circleId as string)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -33,12 +34,16 @@ export function useCreateAskPost() {
       circleId,
       userId,
       question,
+      goalId,
     }: {
       circleId: string;
       userId: string;
       question: string;
+      goalId?: string | null;
     }) => {
-      const { error } = await supabase.from('ask_posts').insert({ circle_id: circleId, user_id: userId, question });
+      const { error } = await supabase
+        .from('ask_posts')
+        .insert({ circle_id: circleId, user_id: userId, question, goal_id: goalId ?? null });
       if (error) throw error;
 
       await supabase

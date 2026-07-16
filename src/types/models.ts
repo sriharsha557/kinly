@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   avatar: string | null;
+  bio: string | null;
   interests: InterestCategory[] | null;
   created_at: string;
 }
@@ -63,6 +64,7 @@ export interface AskPost {
   user_id: string;
   question: string;
   reply_count: number;
+  goal_id: string | null;
   created_at: string;
 }
 

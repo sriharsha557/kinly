@@ -19,6 +19,7 @@ import {
   useCreateReply,
   type AskPostWithProfile,
 } from '../hooks/useAskPosts';
+import { useGoals } from '../hooks/useGoals';
 import { colors, radii, shadow } from '../theme/colors';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
@@ -77,6 +78,7 @@ function AskCard({
     <View style={styles.card}>
       <TouchableOpacity onPress={onToggle}>
         <Text style={styles.question}>{post.question}</Text>
+        {post.goals?.title && <Text style={styles.goalTag}>🎯 {post.goals.title}</Text>}
         <View style={styles.cardFooter}>
           <Text style={styles.meta}>{post.profiles?.name ?? 'Someone'}</Text>
           <Text style={styles.meta}>
@@ -93,15 +95,20 @@ export default function AskFriendsScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: posts, isLoading } = useAskPosts(circleId ?? undefined);
+  const { data: goals } = useGoals(circleId ?? undefined);
   const createPost = useCreateAskPost();
 
   const [question, setQuestion] = useState('');
+  const [goalId, setGoalId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
 
   async function handlePost() {
     if (!question.trim() || !circleId || !userId) return;
-    await createPost.mutateAsync({ circleId, userId, question: question.trim() });
+    await createPost.mutateAsync({ circleId, userId, question: question.trim(), goalId });
     setQuestion('');
+    setGoalId(null);
   }
 
   return (
@@ -118,6 +125,22 @@ export default function AskFriendsScreen() {
             onChangeText={setQuestion}
             multiline
           />
+          {myGoals.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalChips}>
+              {myGoals.map((goal) => {
+                const active = goalId === goal.id;
+                return (
+                  <TouchableOpacity
+                    key={goal.id}
+                    style={[styles.goalChip, active && styles.goalChipActive]}
+                    onPress={() => setGoalId(active ? null : goal.id)}
+                  >
+                    <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>🎯 {goal.title}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          )}
           <TouchableOpacity style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
             <Text style={styles.postButtonText}>Post</Text>
           </TouchableOpacity>
@@ -162,6 +185,17 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   composerInput: { minHeight: 44, color: colors.textPrimary, fontSize: 14 },
+  goalChips: { gap: 6 },
+  goalChip: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  goalChipActive: { backgroundColor: colors.primary },
+  goalChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  goalChipTextActive: { color: '#fff' },
+  goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
   postButton: {
     alignSelf: 'flex-end',
     backgroundColor: colors.primary,

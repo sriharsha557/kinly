@@ -18,16 +18,9 @@ import { GradientHeader } from '../components/GradientHeader';
 import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
-import { colors, categoryColors, radii, shadow } from '../theme/colors';
+import { InterestPicker } from '../components/InterestPicker';
+import { colors, radii, shadow } from '../theme/colors';
 import type { Circle, InterestCategory } from '../types/models';
-
-const INTEREST_OPTIONS: { key: InterestCategory; label: string; emoji: string }[] = [
-  { key: 'health', label: 'Health', emoji: '💧' },
-  { key: 'wealth', label: 'Wealth', emoji: '💰' },
-  { key: 'ideas', label: 'Ideas', emoji: '🚀' },
-  { key: 'learning', label: 'Learning', emoji: '📚' },
-  { key: 'relationships', label: 'Relationships', emoji: '❤️' },
-];
 
 function AuthStep() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
@@ -102,25 +95,7 @@ function InterestsStep() {
 
   return (
     <View style={styles.form}>
-      <View style={styles.chipGrid}>
-        {INTEREST_OPTIONS.map(({ key, label, emoji }) => {
-          const active = selected.includes(key);
-          const category = categoryColors[key];
-          return (
-            <TouchableOpacity
-              key={key}
-              style={[
-                styles.chip,
-                { backgroundColor: active ? category.solid : colors.inputBg },
-              ]}
-              onPress={() => toggle(key)}
-            >
-              <Text style={styles.chipEmoji}>{emoji}</Text>
-              <Text style={[styles.chipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <InterestPicker selected={selected} onToggle={toggle} />
 
       <PillButton
         label="Continue"
@@ -274,15 +249,4 @@ const styles = StyleSheet.create({
   link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
   orDivider: { textAlign: 'center', color: colors.textSecondary },
   error: { color: colors.danger, textAlign: 'center' },
-  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: radii.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  chipEmoji: { fontSize: 16 },
-  chipLabel: { fontSize: 14, fontWeight: '600' },
 });

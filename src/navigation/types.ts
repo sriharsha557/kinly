@@ -11,4 +11,5 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   CircleSettings: undefined;
+  EditProfile: undefined;
 };

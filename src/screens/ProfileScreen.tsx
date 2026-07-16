@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,9 +25,22 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Logo size={72} color="#FFFFFF" background={colors.celebration} />
+          <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <Logo size={72} color="#FFFFFF" background={colors.celebration} />
+            )}
+          </TouchableOpacity>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
           {circle && <Text style={styles.circleName}>{circle.name}</Text>}
+          {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+          <PillButton
+            label="Edit Profile"
+            variant="outline"
+            onPress={() => navigation.navigate('EditProfile')}
+            style={{ marginTop: 12, paddingHorizontal: 24, paddingVertical: 8 }}
+          />
         </View>
 
         {isLoading ? (
@@ -84,6 +97,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20, paddingBottom: 120 },
   header: { alignItems: 'center', gap: 4, marginBottom: 24 },
+  avatarImage: { width: 72, height: 72, borderRadius: 36 },
+  bio: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
   name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
   circleName: { fontSize: 14, color: colors.textSecondary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },

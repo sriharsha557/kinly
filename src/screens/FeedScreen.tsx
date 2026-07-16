@@ -1,11 +1,21 @@
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useGoals, useCreateGoal } from '../hooks/useGoals';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
+import { PillButton } from '../components/PillButton';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -59,26 +69,64 @@ function dayLabel(iso: string): string {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-function SuggestionCard({
+function CustomizeGoalModal({
   suggestion,
   circleId,
   userId,
+  onClose,
 }: {
   suggestion: GoalSuggestion;
   circleId: string;
   userId: string;
+  onClose: () => void;
 }) {
+  const [title, setTitle] = useState(suggestion.title);
+  const [target, setTarget] = useState(String(suggestion.target));
   const createGoal = useCreateGoal();
+
+  async function handleSave() {
+    const targetValue = Number(target);
+    if (!title.trim() || !targetValue) return;
+    await createGoal.mutateAsync({ circleId, userId, title: title.trim(), target: targetValue });
+    onClose();
+  }
+
+  return (
+    <Modal transparent animationType="fade" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Customize goal</Text>
+          <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
+          <TextInput
+            style={styles.modalInput}
+            value={target}
+            onChangeText={setTarget}
+            placeholder="Target"
+            keyboardType="numeric"
+          />
+          <View style={styles.modalButtons}>
+            <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
+            <PillButton
+              label="Save"
+              onPress={handleSave}
+              loading={createGoal.isPending}
+              disabled={!title.trim() || !target}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function SuggestionCard({ suggestion, onPress }: { suggestion: GoalSuggestion; onPress: () => void }) {
   const category = categoryColors[suggestion.category];
 
   return (
-    <TouchableOpacity
-      style={[styles.suggestionCard, { backgroundColor: category.bg }]}
-      onPress={() => createGoal.mutate({ circleId, userId, title: suggestion.title, target: suggestion.target })}
-      disabled={createGoal.isPending}
-    >
+    <TouchableOpacity style={[styles.suggestionCard, { backgroundColor: category.bg }]} onPress={onPress}>
       <Text style={[styles.suggestionText, { color: category.text }]}>{suggestion.title}</Text>
-      <Text style={[styles.suggestionAdd, { color: category.text }]}>{createGoal.isPending ? '…' : '+ Add'}</Text>
+      <Text style={[styles.suggestionAdd, { color: category.text }]}>+ Add</Text>
     </TouchableOpacity>
   );
 }
@@ -87,6 +135,7 @@ function SuggestionsRow({ circleId, userId }: { circleId: string; userId: string
   const interests = useAuthStore((state) => state.user?.interests) ?? [];
   const { data: goals } = useGoals(circleId);
   const suggestions = pickSuggestions(interests, (goals ?? []).map((g) => g.title));
+  const [editing, setEditing] = useState<GoalSuggestion | null>(null);
 
   if (suggestions.length === 0) return null;
 
@@ -95,9 +144,17 @@ function SuggestionsRow({ circleId, userId }: { circleId: string; userId: string
       <Text style={styles.sectionTitle}>Suggested for you</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsRow}>
         {suggestions.map((s) => (
-          <SuggestionCard key={s.title} suggestion={s} circleId={circleId} userId={userId} />
+          <SuggestionCard key={s.title} suggestion={s} onPress={() => setEditing(s)} />
         ))}
       </ScrollView>
+      {editing && (
+        <CustomizeGoalModal
+          suggestion={editing}
+          circleId={circleId}
+          userId={userId}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </View>
   );
 }
@@ -212,6 +269,28 @@ const styles = StyleSheet.create({
   },
   suggestionText: { fontSize: 13, fontWeight: '600' },
   suggestionAdd: { fontSize: 12, fontWeight: '800' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 20,
+    gap: 12,
+  },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+  modalInput: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.input,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: colors.textPrimary,
+    fontSize: 15,
+  },
+  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
