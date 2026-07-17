@@ -12,7 +12,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kinly.app"
+      "bundleIdentifier": "com.kinly.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Kinly needs access to your photos so you can set a profile picture and add images to your circle's Vision Board."
+      }
     },
     "android": {
       "package": "com.kinly.app",
