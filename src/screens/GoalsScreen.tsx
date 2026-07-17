@@ -11,12 +11,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
@@ -121,13 +123,9 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         {isComplete ? (
           <Text style={styles.doneBadge}>✓ Completed</Text>
         ) : (
-          <TouchableOpacity
-            style={styles.logButton}
-            onPress={handleLogProgress}
-            disabled={isPending}
-          >
+          <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
             <Text style={styles.logButtonText}>Log progress</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         )}
       </View>
       {editing && <EditGoalModal goal={goal} circleId={circleId} onClose={() => setEditing(false)} />}
@@ -222,8 +220,12 @@ export default function GoalsScreen() {
         <FlatList
           data={goals ?? []}
           keyExtractor={(goal) => goal.id}
-          renderItem={({ item }) =>
-            userId && circleId ? <GoalCard goal={item} circleId={circleId} userId={userId} /> : null
+          renderItem={({ item, index }) =>
+            userId && circleId ? (
+              <Animated.View entering={FadeInDown.duration(350).delay(Math.min(index, 6) * 60)}>
+                <GoalCard goal={item} circleId={circleId} userId={userId} />
+              </Animated.View>
+            ) : null
           }
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text style={styles.empty}>No goals yet — add your first one above.</Text>}

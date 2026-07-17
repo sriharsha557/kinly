@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, FadeOutRight, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useGoals } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { MilestoneCardModal } from './MilestoneCardModal';
@@ -16,10 +18,13 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const { data: circle } = useCircleDetail(circleId);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [loggingId, setLoggingId] = useState<string | null>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
 
   const today = todayIso();
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
-  const pending = myGoals.filter((g) => g.progress < g.target && g.last_logged_date !== today);
+  const pending = myGoals.filter(
+    (g) => g.progress < g.target && g.last_logged_date !== today && !checkedIds.has(g.id),
+  );
 
   async function handleLog(goalId: string) {
     const goal = myGoals.find((g) => g.id === goalId);
@@ -27,6 +32,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
     setLoggingId(goalId);
     try {
       const result = await logGoal(goal);
+      setCheckedIds((prev) => new Set(prev).add(goalId));
       if (result) setCelebration(result);
     } finally {
       setLoggingId(null);
@@ -42,21 +48,29 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
       ) : pending.length === 0 ? (
-        <Text style={styles.done}>✓ Everything logged for today. Nice work.</Text>
+        <Animated.Text entering={ZoomIn.springify().damping(14)} style={styles.done}>
+          ✓ Everything logged for today. Nice work.
+        </Animated.Text>
       ) : (
         <View style={styles.list}>
-          {pending.map((goal) => (
-            <TouchableOpacity
+          {pending.map((goal, index) => (
+            <Animated.View
               key={goal.id}
-              style={styles.row}
-              onPress={() => handleLog(goal.id)}
-              disabled={isPending && loggingId === goal.id}
+              entering={FadeInDown.duration(300).delay(index * 50)}
+              exiting={FadeOutRight.duration(250)}
+              layout={LinearTransition.springify()}
             >
-              <View style={styles.checkbox}>
-                {isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>}
-              </View>
-              <Text style={styles.rowText}>{goal.title}</Text>
-            </TouchableOpacity>
+              <AnimatedPressable
+                style={styles.row}
+                onPress={() => handleLog(goal.id)}
+                disabled={isPending && loggingId === goal.id}
+              >
+                <View style={styles.checkbox}>
+                  {isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>}
+                </View>
+                <Text style={styles.rowText}>{goal.title}</Text>
+              </AnimatedPressable>
+            </Animated.View>
           ))}
         </View>
       )}

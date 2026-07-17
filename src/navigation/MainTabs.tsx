@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import TodayScreen from '../screens/TodayScreen';
 import CircleScreen from '../screens/CircleScreen';
 import GoalsScreen from '../screens/GoalsScreen';
@@ -19,6 +21,41 @@ const ICONS: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
   Profile: 'person',
 };
 
+function TabIcon({
+  name,
+  color,
+  focused,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  color: string;
+  focused: boolean;
+}) {
+  const scale = useSharedValue(focused ? 1 : 0);
+
+  useEffect(() => {
+    scale.value = withSpring(focused ? 1 : 0, { damping: 14, stiffness: 220 });
+  }, [focused, scale]);
+
+  const wrapStyle = useAnimatedStyle(() => ({
+    backgroundColor: colors.primary,
+    opacity: scale.value,
+    transform: [{ scale: 0.6 + scale.value * 0.4 }],
+  }));
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + scale.value * 0.08 }],
+  }));
+
+  return (
+    <View style={styles.iconWrap}>
+      <Animated.View style={[styles.activeIconWrap, wrapStyle]} />
+      <Animated.View style={[styles.iconOverlay, iconStyle]}>
+        <Ionicons name={name} size={22} color={focused ? '#fff' : color} />
+      </Animated.View>
+    </View>
+  );
+}
+
 export default function MainTabs() {
   return (
     <Tab.Navigator
@@ -31,9 +68,7 @@ export default function MainTabs() {
         tabBarItemStyle: styles.tabBarItem,
         tabBarIconStyle: styles.tabBarIconStyle,
         tabBarIcon: ({ color, focused }) => (
-          <View style={focused ? styles.activeIconWrap : styles.iconWrap}>
-            <Ionicons name={ICONS[route.name]} size={22} color={focused ? '#fff' : color} />
-          </View>
+          <TabIcon name={ICONS[route.name]} color={color} focused={focused} />
         ),
       })}
     >
@@ -74,10 +109,12 @@ const styles = {
     justifyContent: 'center' as const,
   },
   activeIconWrap: {
+    position: 'absolute' as const,
     width: 40,
     height: 40,
     borderRadius: radii.pill,
-    backgroundColor: colors.primary,
+  },
+  iconOverlay: {
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },

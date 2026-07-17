@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
 import {
   useAskPosts,
@@ -145,10 +146,26 @@ export default function ConnectionScreen() {
         <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Connection Moments</Text>
 
-          {userId && circleId && <DailyCircleCard circleId={circleId} userId={userId} />}
-          {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
-          {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
-          {userId && circleId && <CircleStoriesCard circleId={circleId} userId={userId} />}
+          {userId && circleId && (
+            <Animated.View entering={FadeInDown.duration(350).delay(0)}>
+              <DailyCircleCard circleId={circleId} userId={userId} />
+            </Animated.View>
+          )}
+          {userId && circleId && (
+            <Animated.View entering={FadeInDown.duration(350).delay(70)}>
+              <WouldYouRatherCard circleId={circleId} userId={userId} />
+            </Animated.View>
+          )}
+          {userId && circleId && (
+            <Animated.View entering={FadeInDown.duration(350).delay(140)}>
+              <GuessWhoCard circleId={circleId} userId={userId} />
+            </Animated.View>
+          )}
+          {userId && circleId && (
+            <Animated.View entering={FadeInDown.duration(350).delay(210)}>
+              <CircleStoriesCard circleId={circleId} userId={userId} />
+            </Animated.View>
+          )}
 
           <Text style={styles.sectionTitle}>Ask Friends</Text>
           <View style={styles.composer}>
@@ -187,16 +204,17 @@ export default function ConnectionScreen() {
             <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
           ) : posts && posts.length > 0 ? (
             <View style={styles.list}>
-              {posts.map((post) =>
+              {posts.map((post, index) =>
                 userId && circleId ? (
-                  <AskCard
-                    key={post.id}
-                    post={post}
-                    circleId={circleId}
-                    userId={userId}
-                    expanded={expandedId === post.id}
-                    onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)}
-                  />
+                  <Animated.View key={post.id} entering={FadeInDown.duration(300).delay(Math.min(index, 6) * 50)}>
+                    <AskCard
+                      post={post}
+                      circleId={circleId}
+                      userId={userId}
+                      expanded={expandedId === post.id}
+                      onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)}
+                    />
+                  </Animated.View>
                 ) : null,
               )}
             </View>

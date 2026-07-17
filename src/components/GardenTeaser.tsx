@@ -1,7 +1,10 @@
+import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useGardenState } from '../hooks/useGarden';
 import { gradients, radii } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
@@ -22,19 +25,28 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
 
   const health = data?.health ?? 0;
   const hasMembers = (data?.members.length ?? 0) > 0;
+  const barWidth = useSharedValue(0);
+
+  useEffect(() => {
+    barWidth.value = withTiming(health, { duration: 600 });
+  }, [health, barWidth]);
+
+  const barStyle = useAnimatedStyle(() => ({ width: `${barWidth.value}%` }));
 
   return (
-    <LinearGradient colors={gradients.growth} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-      <Text style={styles.title}>🌱 Your Circle</Text>
-      <Text style={styles.percent}>{health}%</Text>
-      <View style={styles.barTrack}>
-        <View style={[styles.barFill, { width: `${health}%` }]} />
-      </View>
-      <Text style={styles.copy}>{emotionalCopy(health, hasMembers)}</Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Circle')}>
-        <Text style={styles.link}>View Garden →</Text>
-      </TouchableOpacity>
-    </LinearGradient>
+    <Animated.View entering={FadeInDown.duration(400)}>
+      <LinearGradient colors={gradients.growth} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+        <Text style={styles.title}>🌱 Your Circle</Text>
+        <Text style={styles.percent}>{health}%</Text>
+        <View style={styles.barTrack}>
+          <Animated.View style={[styles.barFill, barStyle]} />
+        </View>
+        <Text style={styles.copy}>{emotionalCopy(health, hasMembers)}</Text>
+        <AnimatedPressable onPress={() => navigation.navigate('Circle')} style={styles.linkWrap}>
+          <Text style={styles.link}>View Garden →</Text>
+        </AnimatedPressable>
+      </LinearGradient>
+    </Animated.View>
   );
 }
 
@@ -51,5 +63,6 @@ const styles = StyleSheet.create({
   },
   barFill: { height: '100%', backgroundColor: '#fff', borderRadius: 4 },
   copy: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 10, lineHeight: 18 },
-  link: { fontSize: 13, fontWeight: '700', color: '#fff', marginTop: 10 },
+  linkWrap: { alignSelf: 'flex-start', marginTop: 10 },
+  link: { fontSize: 13, fontWeight: '700', color: '#fff' },
 });
