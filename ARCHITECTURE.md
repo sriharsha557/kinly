@@ -42,7 +42,7 @@ Everything about "how is my circle doing," moved off Today to keep it uncluttere
 ### Connection (was "Ask Friends") — [src/screens/ConnectionScreen.tsx](src/screens/ConnectionScreen.tsx)
 Split into **Support** (visible by default) and **Play** (behind a `DisclosureSection`), since only the former actually deepens accountability:
 - **Support**: `DailyCircleCard` (one deterministic daily prompt per circle, hashed from `circleId+date`, no server call, answers hidden until you submit your own), then **Ask Friends** — post a question (optionally tagged to one of your goals), circle members reply in an expandable thread, author can delete their own post.
-- **Play, behind "🎲 Circle Games" (collapsed by default)**: `WouldYouRatherCard` (A/B poll, live vote %), `GuessWhoCard` (anonymous-style fact guessing, answer hidden client-side only, not RLS-enforced — accepted tradeoff), `CircleStoriesCard` (collaborative one-line-at-a-time story, auto-completes at 8 lines).
+- **Play, behind "✨ Light Moments" (collapsed by default)**: `WouldYouRatherCard` (A/B poll, live vote %), `GuessWhoCard` (anonymous-style fact guessing, answer hidden client-side only, not RLS-enforced — accepted tradeoff). Trimmed to these two deliberately — kept the mechanics that are one-tap, under 3 minutes, and async-only; dropped Circle Stories to avoid the section turning into a toybox that competes with the app's accountability identity. Live-drawing games (e.g. Pictionary) were considered and explicitly deferred — they need a realtime canvas/sync layer that doesn't exist yet, unlike everything else here.
 
 ### Profile — [src/screens/ProfileScreen.tsx](src/screens/ProfileScreen.tsx)
 - Avatar (tap → `EditProfileScreen`), name, active circle name, bio.

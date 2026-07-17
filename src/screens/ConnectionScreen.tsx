@@ -26,7 +26,6 @@ import { useGoals } from '../hooks/useGoals';
 import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
-import { CircleStoriesCard } from '../components/CircleStoriesCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { colors, radii, shadow } from '../theme/colors';
 
@@ -209,12 +208,11 @@ export default function ConnectionScreen() {
             <Text style={styles.empty}>No open questions yet — ask your circle something above.</Text>
           )}
 
-          {/* Play: lighter, lower-stakes games — tucked away so they don't outweigh accountability */}
+          {/* Play: lighter, lower-stakes moments — tucked away so they don't outweigh accountability */}
           <View style={styles.gamesSection}>
-            <DisclosureSection label="🎲 Circle Games">
+            <DisclosureSection label="✨ Light Moments">
               {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
               {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
-              {userId && circleId && <CircleStoriesCard circleId={circleId} userId={userId} />}
             </DisclosureSection>
           </View>
         </ScrollView>
