@@ -6,7 +6,10 @@ import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
-import { CirclePulseStrip } from '../components/CirclePulseStrip';
+import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
+import { GardenTeaser } from '../components/GardenTeaser';
+import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
+import { QuickActionsRow } from '../components/QuickActionsRow';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -127,8 +130,9 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   );
 }
 
-export default function FeedScreen() {
-  const userId = useAuthStore((state) => state.user?.id);
+export default function TodayScreen() {
+  const user = useAuthStore((state) => state.user);
+  const userId = user?.id;
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: events, isLoading } = useEvents(circleId ?? undefined);
 
@@ -137,10 +141,16 @@ export default function FeedScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.page}>
-        <Text style={styles.title}>Feed</Text>
+        <Text style={styles.greeting}>
+          {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'} 👋
+        </Text>
+        <Text style={styles.date}>{todayDateLabel()}</Text>
 
-        {circleId && <CirclePulseStrip circleId={circleId} />}
+        {circleId && <GardenTeaser circleId={circleId} />}
+        {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
+        <QuickActionsRow />
 
+        <Text style={styles.sectionTitle}>Circle Activity</Text>
         {isLoading ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
         ) : events && events.length > 0 ? (
@@ -158,9 +168,12 @@ export default function FeedScreen() {
             })}
           </View>
         ) : (
-          <Text style={styles.empty}>
-            Nothing yet — complete a goal to send your first update to the circle.
-          </Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>Your journey starts today.</Text>
+            <Text style={styles.emptyBody}>
+              Complete your first goal to grow your garden and inspire your circle.
+            </Text>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -170,7 +183,9 @@ export default function FeedScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   page: { padding: 16, paddingBottom: 110 },
-  title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
+  greeting: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
+  date: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
@@ -197,5 +212,14 @@ const styles = StyleSheet.create({
   nudgeList: { gap: 4 },
   nudgeMessage: { fontSize: 13, color: colors.textPrimary },
   nudgeSender: { fontWeight: '700' },
-  empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 40 },
+  emptyCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.card,
+    padding: 24,
+    alignItems: 'center',
+    gap: 6,
+    ...shadow,
+  },
+  emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
+  emptyBody: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
 });

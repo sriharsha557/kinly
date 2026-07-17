@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
-import FeedScreen from '../screens/FeedScreen';
+import TodayScreen from '../screens/TodayScreen';
 import CircleScreen from '../screens/CircleScreen';
 import GoalsScreen from '../screens/GoalsScreen';
 import ConnectionScreen from '../screens/ConnectionScreen';
@@ -12,7 +12,7 @@ import type { MainTabParamList } from './types';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const ICONS: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
-  Feed: 'home',
+  Today: 'home',
   Circle: 'people',
   Goals: 'flag',
   Connection: 'happy',
@@ -37,7 +37,7 @@ export default function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Feed" component={FeedScreen} />
+      <Tab.Screen name="Today" component={TodayScreen} />
       <Tab.Screen name="Circle" component={CircleScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
       <Tab.Screen name="Connection" component={ConnectionScreen} options={{ title: 'Connection Moments' }} />

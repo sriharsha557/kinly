@@ -11,11 +11,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useDeleteGoal, useGoals, useLogGoalProgress, useUpdateGoal } from '../hooks/useGoals';
-import { useLogEvent } from '../hooks/useEvents';
-import { useCreateAchievement } from '../hooks/useAchievements';
+import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
+import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
@@ -24,8 +22,6 @@ import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
-
-const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
 function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: string; onClose: () => void }) {
   const [title, setTitle] = useState(goal.title);
@@ -69,13 +65,11 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
 }
 
 function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
-  const logProgress = useLogGoalProgress();
-  const logEvent = useLogEvent();
-  const createAchievement = useCreateAchievement();
+  const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId);
   const deleteGoal = useDeleteGoal();
   const { data: circle } = useCircleDetail(circleId);
   const [editing, setEditing] = useState(false);
-  const [celebration, setCelebration] = useState<{ title: string; subtitle?: string } | null>(null);
+  const [celebration, setCelebration] = useState<Celebration | null>(null);
   const isComplete = goal.progress >= goal.target;
 
   function handleOptions() {
@@ -99,51 +93,8 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
   }
 
   async function handleLogProgress() {
-    const step = Math.max(1, Math.round(goal.target / 10));
-    const wasComplete = goal.progress >= goal.target;
-    const previousStreak = goal.streak_count;
-
-    const updated = await logProgress.mutateAsync({ goalId: goal.id, circleId, increment: step });
-
-    const justCompleted = !wasComplete && updated.progress >= updated.target;
-    const hitMilestone = updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count);
-
-    if (justCompleted || hitMilestone) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } else {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    if (justCompleted) {
-      await logEvent.mutateAsync({
-        circleId,
-        userId,
-        type: 'goal_completed',
-        payload: { title: goal.title },
-      });
-      await createAchievement.mutateAsync({
-        userId,
-        circleId,
-        type: 'goal_completed',
-        title: `Completed "${goal.title}"`,
-      });
-      setCelebration({ title: `Completed "${goal.title}"! 🎉` });
-    }
-    if (hitMilestone) {
-      await logEvent.mutateAsync({
-        circleId,
-        userId,
-        type: 'streak',
-        payload: { title: goal.title, streak_count: updated.streak_count },
-      });
-      await createAchievement.mutateAsync({
-        userId,
-        circleId,
-        type: 'streak',
-        title: `${updated.streak_count}-day streak on "${goal.title}"`,
-      });
-      setCelebration({ title: `${updated.streak_count}-day streak!`, subtitle: goal.title });
-    }
+    const celebration = await logGoal(goal);
+    if (celebration) setCelebration(celebration);
   }
 
   return (
@@ -173,7 +124,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
           <TouchableOpacity
             style={styles.logButton}
             onPress={handleLogProgress}
-            disabled={logProgress.isPending}
+            disabled={isPending}
           >
             <Text style={styles.logButtonText}>Log progress</Text>
           </TouchableOpacity>
