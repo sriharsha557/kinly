@@ -27,14 +27,9 @@ The app's landing screen — redesigned to have a clear "what should I do right 
 - **Circle Activity** — day-grouped timeline of circle events (goal completions, streaks, reminders, asks, challenge completions) from `useEvents`. Each row supports one-tap emoji "nudges" (cheer/water/walk/workout/keep going/streak) which call `generateNudgeMessage` (Claude via Edge Function `smooth-responder`) then insert a nudge row and fan out a push notification via the `notify-circle` Edge Function.
 
 ### Circle (dashboard tab) — [src/screens/CircleScreen.tsx](src/screens/CircleScreen.tsx)
-Everything about "how is my circle doing," moved off Today to keep it uncluttered. All cards take `circleId`/`userId` and manage their own data:
-- `GardenCard` — full detail view of per-member plant growth (derived, not stored — see `useGarden`), stages `wilted → seed → sprout → tree → bloom` from `streak_count`/`last_logged_date`.
-- `BuddyCard` — accountability buddy pairing/check-ins (`useBuddy`).
-- `ChallengesCard` — circle challenges with completion celebrations (`useChallenges`).
-- `VisionBoardCard` — shared image board, uploads via `useVisionBoard` + `visionImageUpload.ts`.
-- `MeetUpCard` — manual RSVP meet-up scheduling (`useMeetups`; no calendar integration).
-- `CircleAICard` — AI-generated circle insight (`useCircleAI`, Edge Function `circle-ai-insight`).
-- `WeeklyRecapCard` — AI weekly summary (`useWeeklyRecap`, Edge Function `weekly-recap`).
+Everything about "how is my circle doing," moved off Today to keep it uncluttered. Cards are split into two tiers so the accountability loop stays the visual priority instead of competing equally with lower-frequency extras:
+- **Primary (always visible)**: `GardenCard` (full per-member plant growth, derived from `useGarden`, stages `wilted → seed → sprout → tree → bloom`), `BuddyCard` (accountability buddy pairing/check-ins), `ChallengesCard` (circle challenges + completion celebrations).
+- **Secondary, behind a `DisclosureSection` ("More for your circle")**: `VisionBoardCard`, `MeetUpCard` (manual RSVP, no calendar integration), `CircleAICard` (AI insight, Edge Function `circle-ai-insight`), `WeeklyRecapCard` (AI weekly summary, Edge Function `weekly-recap`). Collapsed by default — tap to expand.
 - Header "⚙️ Settings" link → `CircleSettingsScreen`.
 
 ### Goals — [src/screens/GoalsScreen.tsx](src/screens/GoalsScreen.tsx)
@@ -45,12 +40,9 @@ Everything about "how is my circle doing," moved off Today to keep it uncluttere
 - Edit uses `EditGoalModal`; delete/edit both route through `useUpdateGoal` / `useDeleteGoal`.
 
 ### Connection (was "Ask Friends") — [src/screens/ConnectionScreen.tsx](src/screens/ConnectionScreen.tsx)
-Async, lightweight social/play features plus the original Q&A, in one scroll:
-- `DailyCircleCard` — one deterministic daily prompt per circle (hashed from `circleId+date`, no server call), answers hidden until you submit your own.
-- `WouldYouRatherCard` — simple A/B poll, live vote % shown after voting.
-- `GuessWhoCard` — anonymous-style fact guessing game (answer hidden client-side only, not RLS-enforced — accepted tradeoff).
-- `CircleStoriesCard` — collaborative one-line-at-a-time story, auto-completes at 8 lines.
-- **Ask Friends** — original question/reply feature: post a question (optionally tagged to one of your goals), circle members reply in an expandable thread; author can delete their own post.
+Split into **Support** (visible by default) and **Play** (behind a `DisclosureSection`), since only the former actually deepens accountability:
+- **Support**: `DailyCircleCard` (one deterministic daily prompt per circle, hashed from `circleId+date`, no server call, answers hidden until you submit your own), then **Ask Friends** — post a question (optionally tagged to one of your goals), circle members reply in an expandable thread, author can delete their own post.
+- **Play, behind "🎲 Circle Games" (collapsed by default)**: `WouldYouRatherCard` (A/B poll, live vote %), `GuessWhoCard` (anonymous-style fact guessing, answer hidden client-side only, not RLS-enforced — accepted tradeoff), `CircleStoriesCard` (collaborative one-line-at-a-time story, auto-completes at 8 lines).
 
 ### Profile — [src/screens/ProfileScreen.tsx](src/screens/ProfileScreen.tsx)
 - Avatar (tap → `EditProfileScreen`), name, active circle name, bio.
@@ -76,3 +68,4 @@ Name, bio, avatar upload (`avatarUpload.ts` → Supabase Storage), interest pill
 - **Push notifications**: Supabase Database Webhooks → `notify-circle` Edge Function fan-out to Expo push tokens, filtered by each recipient's per-category mutes.
 - **AI features**: all go through Supabase Edge Functions (never called directly from the client with a raw API key) — nudge messages, weekly recap, circle insight, future self.
 - **Derived vs. stored state**: Garden health/plant stages are computed client-side from goals data (`useGarden`), not a separate table — keeps it always in sync with real goal activity.
+- **Progressive disclosure**: `DisclosureSection` ([src/components/DisclosureSection.tsx](src/components/DisclosureSection.tsx)) is the shared collapse/expand wrapper used to keep lower-frequency features (Vision Board, Meet Up, Circle AI, Weekly Recap on Circle; the three Connection games) out of the primary view without deleting them — used so the core accountability loop (goals, garden, buddy, challenges, ask friends) stays visually dominant.

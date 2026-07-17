@@ -12,6 +12,7 @@ import { VisionBoardCard } from '../components/VisionBoardCard';
 import { MeetUpCard } from '../components/MeetUpCard';
 import { CircleAICard } from '../components/CircleAICard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
+import { DisclosureSection } from '../components/DisclosureSection';
 import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -36,6 +37,7 @@ export default function CircleScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Primary: the accountability loop — how your circle's goals are actually going */}
         {circleId && (
           <Reveal index={0}>
             <GardenCard circleId={circleId} />
@@ -51,26 +53,14 @@ export default function CircleScreen() {
             <ChallengesCard circleId={circleId} userId={userId} />
           </Reveal>
         )}
-        {userId && circleId && (
-          <Reveal index={3}>
-            <VisionBoardCard circleId={circleId} userId={userId} />
-          </Reveal>
-        )}
-        {userId && circleId && (
-          <Reveal index={4}>
-            <MeetUpCard circleId={circleId} userId={userId} />
-          </Reveal>
-        )}
-        {userId && circleId && (
-          <Reveal index={5}>
-            <CircleAICard circleId={circleId} userId={userId} />
-          </Reveal>
-        )}
-        {circleId && (
-          <Reveal index={6}>
-            <WeeklyRecapCard circleId={circleId} />
-          </Reveal>
-        )}
+
+        {/* Secondary: lower-frequency extras, tucked behind a tap so they don't compete for attention */}
+        <DisclosureSection label="More for your circle">
+          {userId && circleId && <VisionBoardCard circleId={circleId} userId={userId} />}
+          {userId && circleId && <MeetUpCard circleId={circleId} userId={userId} />}
+          {userId && circleId && <CircleAICard circleId={circleId} userId={userId} />}
+          {circleId && <WeeklyRecapCard circleId={circleId} />}
+        </DisclosureSection>
       </ScrollView>
     </SafeAreaView>
   );

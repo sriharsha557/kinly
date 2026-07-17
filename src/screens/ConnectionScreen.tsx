@@ -27,6 +27,7 @@ import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
 import { CircleStoriesCard } from '../components/CircleStoriesCard';
+import { DisclosureSection } from '../components/DisclosureSection';
 import { colors, radii, shadow } from '../theme/colors';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
@@ -146,24 +147,10 @@ export default function ConnectionScreen() {
         <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Connection Moments</Text>
 
+          {/* Support: daily check-in + advice from your circle */}
           {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350).delay(0)}>
+            <Animated.View entering={FadeInDown.duration(350)}>
               <DailyCircleCard circleId={circleId} userId={userId} />
-            </Animated.View>
-          )}
-          {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350).delay(70)}>
-              <WouldYouRatherCard circleId={circleId} userId={userId} />
-            </Animated.View>
-          )}
-          {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350).delay(140)}>
-              <GuessWhoCard circleId={circleId} userId={userId} />
-            </Animated.View>
-          )}
-          {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350).delay(210)}>
-              <CircleStoriesCard circleId={circleId} userId={userId} />
             </Animated.View>
           )}
 
@@ -221,6 +208,15 @@ export default function ConnectionScreen() {
           ) : (
             <Text style={styles.empty}>No open questions yet — ask your circle something above.</Text>
           )}
+
+          {/* Play: lighter, lower-stakes games — tucked away so they don't outweigh accountability */}
+          <View style={styles.gamesSection}>
+            <DisclosureSection label="🎲 Circle Games">
+              {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
+              {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
+              {userId && circleId && <CircleStoriesCard circleId={circleId} userId={userId} />}
+            </DisclosureSection>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -295,4 +291,5 @@ const styles = StyleSheet.create({
   },
   replySendText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+  gamesSection: { marginTop: 24 },
 });
