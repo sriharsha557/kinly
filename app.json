@@ -6,10 +6,16 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "kinly",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kinly.app"
     },
     "android": {
+      "package": "com.kinly.app",
       "adaptiveIcon": {
         "backgroundColor": "#FF7A50",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -29,7 +35,8 @@
           "color": "#FF7A50"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }

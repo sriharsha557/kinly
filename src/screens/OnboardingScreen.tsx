@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signIn, signUp } from '../lib/auth';
+import { signIn, signInWithGoogle, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
 import { useSetInterests } from '../hooks/useInterests';
@@ -28,6 +28,7 @@ function AuthStep() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
@@ -47,6 +48,18 @@ function AuthStep() {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setGoogleSubmitting(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign-in failed');
+    } finally {
+      setGoogleSubmitting(false);
     }
   }
 
@@ -97,6 +110,15 @@ function AuthStep() {
         onPress={handleSubmit}
         loading={submitting}
         style={{ marginTop: 8 }}
+      />
+
+      <Text style={styles.orDivider}>or</Text>
+
+      <PillButton
+        label="Continue with Google"
+        variant="outline"
+        onPress={handleGoogleSignIn}
+        loading={googleSubmitting}
       />
 
       <TouchableOpacity onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
