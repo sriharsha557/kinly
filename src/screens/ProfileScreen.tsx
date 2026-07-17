@@ -30,7 +30,11 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('EditProfile')}
+            accessibilityRole="button"
+            accessibilityLabel="Edit profile picture"
+          >
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
             ) : (

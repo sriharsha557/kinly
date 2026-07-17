@@ -92,7 +92,12 @@ function AskCard({
         <View style={styles.questionRow}>
           <Text style={styles.question}>{post.question}</Text>
           {isMine && (
-            <TouchableOpacity onPress={handleDelete} hitSlop={8}>
+            <TouchableOpacity
+              onPress={handleDelete}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Delete this post"
+            >
               <Text style={styles.deleteButton}>🗑</Text>
             </TouchableOpacity>
           )}

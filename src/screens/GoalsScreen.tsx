@@ -151,7 +151,12 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         <Text style={styles.cardTitle}>{goal.title}</Text>
         <View style={styles.cardHeaderRight}>
           {goal.streak_count > 0 && <Text style={styles.streak}>🔥 {goal.streak_count}</Text>}
-          <TouchableOpacity onPress={handleOptions} hitSlop={8}>
+          <TouchableOpacity
+            onPress={handleOptions}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={`Options for ${goal.title}`}
+          >
             <Text style={styles.optionsButton}>⋯</Text>
           </TouchableOpacity>
         </View>

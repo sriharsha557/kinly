@@ -36,13 +36,13 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
 };
 
-const NUDGE_KINDS: { kind: NudgeKind; emoji: string }[] = [
-  { kind: 'cheer', emoji: '👏' },
-  { kind: 'water', emoji: '💧' },
-  { kind: 'walk', emoji: '🚶' },
-  { kind: 'workout', emoji: '💪' },
-  { kind: 'keep_going', emoji: '📚' },
-  { kind: 'streak', emoji: '🔥' },
+const NUDGE_KINDS: { kind: NudgeKind; emoji: string; label: string }[] = [
+  { kind: 'cheer', emoji: '👏', label: 'Cheer' },
+  { kind: 'water', emoji: '💧', label: 'Remind to drink water' },
+  { kind: 'walk', emoji: '🚶', label: 'Remind to walk' },
+  { kind: 'workout', emoji: '💪', label: 'Remind to work out' },
+  { kind: 'keep_going', emoji: '📚', label: 'Encourage to keep going' },
+  { kind: 'streak', emoji: '🔥', label: 'Cheer their streak' },
 ];
 
 function describeEvent(event: EventWithProfile): string {
@@ -212,12 +212,15 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       </View>
 
       <View style={styles.nudgeRow}>
-        {NUDGE_KINDS.map(({ kind, emoji }) => (
+        {NUDGE_KINDS.map(({ kind, emoji, label }) => (
           <TouchableOpacity
             key={kind}
             style={styles.nudgeButton}
             onPress={() => handleNudge(kind)}
             disabled={sendingKind !== null}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            hitSlop={4}
           >
             <Text style={styles.nudgeButtonText}>{sendingKind === kind ? '…' : emoji}</Text>
           </TouchableOpacity>
@@ -347,8 +350,8 @@ const styles = StyleSheet.create({
   nudgeButton: {
     backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: radii.pill,
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
