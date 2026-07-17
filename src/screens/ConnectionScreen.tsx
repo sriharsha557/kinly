@@ -22,6 +22,10 @@ import {
   type AskPostWithProfile,
 } from '../hooks/useAskPosts';
 import { useGoals } from '../hooks/useGoals';
+import { DailyCircleCard } from '../components/DailyCircleCard';
+import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
+import { GuessWhoCard } from '../components/GuessWhoCard';
+import { CircleStoriesCard } from '../components/CircleStoriesCard';
 import { colors, radii, shadow } from '../theme/colors';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
@@ -115,7 +119,7 @@ function AskCard({
   );
 }
 
-export default function AskFriendsScreen() {
+export default function ConnectionScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: posts, isLoading } = useAskPosts(circleId ?? undefined);
@@ -138,44 +142,52 @@ export default function AskFriendsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Text style={styles.title}>Ask Friends</Text>
+        <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
+          <Text style={styles.title}>Connection Moments</Text>
 
-        <View style={styles.composer}>
-          <TextInput
-            style={styles.composerInput}
-            placeholder="Should I invest in this? Review my resume?"
-            placeholderTextColor={colors.textSecondary}
-            value={question}
-            onChangeText={setQuestion}
-            multiline
-          />
-          {myGoals.length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalChips}>
-              {myGoals.map((goal) => {
-                const active = goalId === goal.id;
-                return (
-                  <TouchableOpacity
-                    key={goal.id}
-                    style={[styles.goalChip, active && styles.goalChipActive]}
-                    onPress={() => setGoalId(active ? null : goal.id)}
-                  >
-                    <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>🎯 {goal.title}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          )}
-          <TouchableOpacity style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
-            <Text style={styles.postButtonText}>Post</Text>
-          </TouchableOpacity>
-        </View>
+          {userId && circleId && <DailyCircleCard circleId={circleId} userId={userId} />}
+          {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
+          {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
+          {userId && circleId && <CircleStoriesCard circleId={circleId} userId={userId} />}
 
-        {isLoading ? (
-          <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
-        ) : (
-          <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
-            {posts && posts.length > 0 ? (
-              posts.map((post) =>
+          <Text style={styles.sectionTitle}>Ask Friends</Text>
+          <View style={styles.composer}>
+            <TextInput
+              style={styles.composerInput}
+              placeholder="Should I invest in this? Review my resume?"
+              placeholderTextColor={colors.textSecondary}
+              value={question}
+              onChangeText={setQuestion}
+              multiline
+            />
+            {myGoals.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.goalChips}>
+                {myGoals.map((goal) => {
+                  const active = goalId === goal.id;
+                  return (
+                    <TouchableOpacity
+                      key={goal.id}
+                      style={[styles.goalChip, active && styles.goalChipActive]}
+                      onPress={() => setGoalId(active ? null : goal.id)}
+                    >
+                      <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>
+                        🎯 {goal.title}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            )}
+            <TouchableOpacity style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
+              <Text style={styles.postButtonText}>Post</Text>
+            </TouchableOpacity>
+          </View>
+
+          {isLoading ? (
+            <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+          ) : posts && posts.length > 0 ? (
+            <View style={styles.list}>
+              {posts.map((post) =>
                 userId && circleId ? (
                   <AskCard
                     key={post.id}
@@ -186,20 +198,22 @@ export default function AskFriendsScreen() {
                     onToggle={() => setExpandedId(expandedId === post.id ? null : post.id)}
                   />
                 ) : null,
-              )
-            ) : (
-              <Text style={styles.empty}>No open questions yet — ask your circle something above.</Text>
-            )}
-          </ScrollView>
-        )}
+              )}
+            </View>
+          ) : (
+            <Text style={styles.empty}>No open questions yet — ask your circle something above.</Text>
+          )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: colors.background },
+  container: { flex: 1, backgroundColor: colors.background },
+  page: { padding: 16, paddingBottom: 110 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
   composer: {
     backgroundColor: colors.surface,
     borderRadius: radii.card,
@@ -228,7 +242,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   postButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  list: { gap: 12, paddingBottom: 110 },
+  list: { gap: 12 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radii.card,

@@ -21,6 +21,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
+import { GoalSuggestions } from '../components/GoalSuggestions';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 
@@ -259,6 +260,8 @@ export default function GoalsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
+
+      {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
 
       {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
 

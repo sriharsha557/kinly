@@ -139,3 +139,64 @@ export interface MeetupRsvp {
   status: RsvpStatus;
   responded_at: string;
 }
+
+export interface CircleCardAnswer {
+  id: string;
+  circle_id: string;
+  user_id: string;
+  prompt_date: string;
+  prompt_text: string;
+  answer: string;
+  created_at: string;
+}
+
+export interface Story {
+  id: string;
+  circle_id: string;
+  prompt: string;
+  created_by: string;
+  completed: boolean;
+  created_at: string;
+}
+
+export interface StoryLine {
+  id: string;
+  story_id: string;
+  user_id: string;
+  text: string;
+  created_at: string;
+}
+
+export interface WouldYouRatherPoll {
+  id: string;
+  circle_id: string;
+  option_a: string;
+  option_b: string;
+  created_by: string;
+  created_at: string;
+}
+
+export type WouldYouRatherChoice = 'a' | 'b';
+
+export interface WouldYouRatherVote {
+  poll_id: string;
+  user_id: string;
+  choice: WouldYouRatherChoice;
+  created_at: string;
+}
+
+export interface GuessWhoPost {
+  id: string;
+  circle_id: string;
+  fact: string;
+  answer_user_id: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface GuessWhoGuess {
+  post_id: string;
+  user_id: string;
+  guessed_user_id: string;
+  created_at: string;
+}

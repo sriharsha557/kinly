@@ -1,30 +1,12 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
-import { useGoals, useCreateGoal } from '../hooks/useGoals';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
-import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
-import { PillButton } from '../components/PillButton';
-import { GardenCard } from '../components/GardenCard';
-import { ChallengesCard } from '../components/ChallengesCard';
-import { BuddyCard } from '../components/BuddyCard';
-import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
-import { CircleAICard } from '../components/CircleAICard';
-import { VisionBoardCard } from '../components/VisionBoardCard';
-import { MeetUpCard } from '../components/MeetUpCard';
+import { CirclePulseStrip } from '../components/CirclePulseStrip';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -79,102 +61,6 @@ function dayLabel(iso: string): string {
   if (sameDay(date, today)) return 'Today';
   if (sameDay(date, yesterday)) return 'Yesterday';
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
-
-function CustomizeGoalModal({
-  suggestion,
-  circleId,
-  userId,
-  onClose,
-}: {
-  suggestion: GoalSuggestion;
-  circleId: string;
-  userId: string;
-  onClose: () => void;
-}) {
-  const [title, setTitle] = useState(suggestion.title);
-  const [target, setTarget] = useState(String(suggestion.target));
-  const createGoal = useCreateGoal();
-
-  async function handleSave() {
-    const targetValue = Number(target);
-    if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({
-      circleId,
-      userId,
-      title: title.trim(),
-      target: targetValue,
-      category: suggestion.category,
-    });
-    onClose();
-  }
-
-  return (
-    <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Customize goal</Text>
-          <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
-          <TextInput
-            style={styles.modalInput}
-            value={target}
-            onChangeText={setTarget}
-            placeholder="Target"
-            keyboardType="numeric"
-          />
-          <View style={styles.modalButtons}>
-            <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
-            <PillButton
-              label="Save"
-              onPress={handleSave}
-              loading={createGoal.isPending}
-              disabled={!title.trim() || !target}
-              style={{ flex: 1 }}
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-function SuggestionCard({ suggestion, onPress }: { suggestion: GoalSuggestion; onPress: () => void }) {
-  const category = categoryColors[suggestion.category];
-
-  return (
-    <TouchableOpacity style={[styles.suggestionCard, { backgroundColor: category.bg }]} onPress={onPress}>
-      <Text style={[styles.suggestionText, { color: category.text }]}>{suggestion.title}</Text>
-      <Text style={[styles.suggestionAdd, { color: category.text }]}>+ Add</Text>
-    </TouchableOpacity>
-  );
-}
-
-function SuggestionsRow({ circleId, userId }: { circleId: string; userId: string }) {
-  const interests = useAuthStore((state) => state.user?.interests) ?? [];
-  const { data: goals } = useGoals(circleId);
-  const suggestions = pickSuggestions(interests, (goals ?? []).map((g) => g.title));
-  const [editing, setEditing] = useState<GoalSuggestion | null>(null);
-
-  if (suggestions.length === 0) return null;
-
-  return (
-    <View style={styles.suggestionsSection}>
-      <Text style={styles.sectionTitle}>Suggested for you</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsRow}>
-        {suggestions.map((s) => (
-          <SuggestionCard key={s.title} suggestion={s} onPress={() => setEditing(s)} />
-        ))}
-      </ScrollView>
-      {editing && (
-        <CustomizeGoalModal
-          suggestion={editing}
-          circleId={circleId}
-          userId={userId}
-          onClose={() => setEditing(null)}
-        />
-      )}
-    </View>
-  );
 }
 
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
@@ -253,21 +139,7 @@ export default function FeedScreen() {
       <ScrollView contentContainerStyle={styles.page}>
         <Text style={styles.title}>Feed</Text>
 
-        {circleId && <GardenCard circleId={circleId} />}
-
-        {userId && circleId && <BuddyCard circleId={circleId} userId={userId} />}
-
-        {userId && circleId && <ChallengesCard circleId={circleId} userId={userId} />}
-
-        {userId && circleId && <VisionBoardCard circleId={circleId} userId={userId} />}
-
-        {userId && circleId && <MeetUpCard circleId={circleId} userId={userId} />}
-
-        {userId && circleId && <CircleAICard circleId={circleId} userId={userId} />}
-
-        {circleId && <WeeklyRecapCard circleId={circleId} />}
-
-        {userId && circleId && <SuggestionsRow circleId={circleId} userId={userId} />}
+        {circleId && <CirclePulseStrip circleId={circleId} />}
 
         {isLoading ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
@@ -299,40 +171,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   page: { padding: 16, paddingBottom: 110 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
-  suggestionsSection: { marginBottom: 20 },
-  suggestionsRow: { gap: 10, paddingRight: 16 },
-  suggestionCard: {
-    borderRadius: radii.card,
-    padding: 14,
-    width: 160,
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  suggestionText: { fontSize: 13, fontWeight: '600' },
-  suggestionAdd: { fontSize: 12, fontWeight: '800' },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
