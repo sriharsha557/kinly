@@ -13,7 +13,9 @@ export const colors = {
   textPrimary: '#1F2140',
   textSecondary: '#8A8FA3',
 
-  success: '#2FBF9B',
+  // Deliberately distinct from secondary/health.solid (#2FBF9B) - "success" is a
+  // generic status color, not the health category, even though both read as teal.
+  success: '#149C74',
   warning: '#F59E0B',
   danger: '#EF4444',
 
@@ -26,13 +28,17 @@ export const categoryColors = {
   wealth: { bg: '#FEF3C7', text: '#92400E', solid: '#FBBF24' },
   ideas: { bg: '#E4E2F9', text: '#3D3A8C', solid: '#5750B0' },
   learning: { bg: '#DBEAFE', text: '#1D4ED8', solid: '#60A5FA' },
-  relationships: { bg: '#FFE1D6', text: '#C2410C', solid: '#FF7A50' },
+  // solid deliberately distinct from colors.celebration (#FF7A50) - relationships
+  // is a category identity, not the same token as a celebration moment.
+  relationships: { bg: '#FFE1D6', text: '#C2410C', solid: '#E8623D' },
 } as const;
 
 export const gradients = {
   hero: [colors.celebration, colors.secondary] as const,
   achievement: [colors.amber, colors.celebration] as const,
-  growth: [categoryColors.health.solid, colors.secondary] as const,
+  // Was [health.solid, secondary] - identical values, so this rendered as a flat
+  // fill, not a gradient. Now runs bright mint -> deep teal for real depth.
+  growth: [categoryColors.health.solid, colors.success] as const,
   inspiration: [categoryColors.ideas.solid, categoryColors.learning.solid] as const,
   brand: [colors.primary, colors.primarySoft] as const,
 };

@@ -8,7 +8,8 @@ Kinly is a React Native / Expo app for small private accountability circles ("Gr
 - **State**: Zustand `useAuthStore` holds the signed-in `user` and `activeCircleId` (a user can belong to multiple circles but only one is "active" at a time).
 - **Server state**: TanStack React Query, one hook file per domain in `src/hooks/`, persisted to `AsyncStorage` for offline-first caching ([src/lib/persister.ts](src/lib/persister.ts)).
 - **Backend**: Supabase — Postgres + RLS, Auth (email/password + Google OAuth), Storage (avatars, vision-board images), Edge Functions (nudge messages, notifications, weekly recap, circle AI, streak-at-risk cron).
-- **Theme**: static tokens in [src/theme/colors.ts](src/theme/colors.ts) — `colors`, `categoryColors` (per interest pillar), `gradients`, `radii`, `shadow`. No dark mode yet (deliberately deferred).
+- **Theme**: static tokens in [src/theme/colors.ts](src/theme/colors.ts) — `colors`, `categoryColors` (per interest pillar), `gradients`, `radii`, `shadow`. No dark mode yet (deliberately deferred). Each semantic color (`success`, `celebration`) is deliberately a distinct hex from the category color it shares a hue family with (`health.solid`, `relationships.solid`) — same visual family, but not literally the same value, so they stay distinguishable if ever shown together.
+- **Platform status**: [app.json](app.json) is configured for both platforms and every EAS Update publish targets iOS + Android JS bundles, but no real iOS native build (`eas build --platform ios`) has been produced or tested yet — that requires an Apple Developer Program enrollment, which hasn't happened. `ios.infoPlist.NSPhotoLibraryUsageDescription` is set (needed for the avatar/vision-board image picker); revisit this section once a real iOS build is run, since native-config issues only surface there, not in `expo export` or `eas update`.
 
 ## Screen map
 
