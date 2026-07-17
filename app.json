@@ -37,6 +37,15 @@
       ],
       "expo-font",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "789c17ea-caf7-482d-93c6-9fbb4824806c"
+      }
+    },
+    "owner": "sriharsha87",
+    "updates": {
+      "url": "https://u.expo.dev/789c17ea-caf7-482d-93c6-9fbb4824806c"
+    }
   }
 }

@@ -33,6 +33,7 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   streak: { bg: '#FFE4D6', text: '#C2410C', icon: '🔥' },
   reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
+  challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
 };
 
 const NUDGE_KINDS: { kind: NudgeKind; emoji: string }[] = [
@@ -56,6 +57,8 @@ function describeEvent(event: EventWithProfile): string {
       return `${name} could use a nudge: ${payload.message ?? ''}`.trim();
     case 'ask':
       return `${name} asked: "${payload.question ?? ''}"`;
+    case 'challenge_completed':
+      return `Your circle completed "${payload.title ?? 'a challenge'}"! 🎉 (${name} sealed it)`;
     default:
       return `${name} had an update`;
   }

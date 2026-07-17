@@ -6,8 +6,12 @@ import {
   useLogChallengeContribution,
   type ChallengeWithProgress,
 } from '../hooks/useChallenges';
+import { useLogEvent } from '../hooks/useEvents';
+import { useCreateAchievement } from '../hooks/useAchievements';
+import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from './ProgressBar';
 import { PillButton } from './PillButton';
+import { MilestoneCardModal } from './MilestoneCardModal';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 
 function NewChallengeModal({
@@ -71,20 +75,42 @@ function LogContributionModal({
   circleId,
   userId,
   onClose,
+  onCompleted,
 }: {
   challenge: ChallengeWithProgress;
   circleId: string;
   userId: string;
   onClose: () => void;
+  onCompleted: () => void;
 }) {
   const [amount, setAmount] = useState('');
   const logContribution = useLogChallengeContribution(circleId);
+  const logEvent = useLogEvent();
+  const createAchievement = useCreateAchievement();
 
   async function handleLog() {
     const value = Number(amount);
     if (!value) return;
     await logContribution.mutateAsync({ challengeId: challenge.id, userId, amount: value });
-    onClose();
+
+    const justCompleted = challenge.progress < challenge.target && challenge.progress + value >= challenge.target;
+    if (justCompleted) {
+      await logEvent.mutateAsync({
+        circleId,
+        userId,
+        type: 'challenge_completed',
+        payload: { title: challenge.title },
+      });
+      await createAchievement.mutateAsync({
+        userId,
+        circleId,
+        type: 'challenge_completed',
+        title: `Circle completed "${challenge.title}"`,
+      });
+      onCompleted();
+    } else {
+      onClose();
+    }
   }
 
   return (
@@ -119,8 +145,10 @@ function LogContributionModal({
 
 export function ChallengesCard({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: challenges } = useChallenges(circleId);
+  const { data: circle } = useCircleDetail(circleId);
   const [creating, setCreating] = useState(false);
   const [logging, setLogging] = useState<ChallengeWithProgress | null>(null);
+  const [celebrating, setCelebrating] = useState<ChallengeWithProgress | null>(null);
 
   return (
     <View style={styles.card}>
@@ -160,6 +188,17 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
           circleId={circleId}
           userId={userId}
           onClose={() => setLogging(null)}
+          onCompleted={() => {
+            setCelebrating(logging);
+            setLogging(null);
+          }}
+        />
+      )}
+      {celebrating && (
+        <MilestoneCardModal
+          title={`Circle completed "${celebrating.title}"! 🎉`}
+          circleName={circle?.name}
+          onClose={() => setCelebrating(null)}
         />
       )}
     </View>

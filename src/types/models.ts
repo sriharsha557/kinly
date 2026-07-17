@@ -37,7 +37,7 @@ export interface Goal {
   category: InterestCategory | null;
 }
 
-export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask';
+export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask' | 'challenge_completed';
 
 export interface Event {
   id: string;

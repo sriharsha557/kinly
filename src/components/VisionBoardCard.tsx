@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
+import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 
@@ -14,11 +15,23 @@ function AddVisionModal({
   onClose: () => void;
 }) {
   const [title, setTitle] = useState('');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const addItem = useAddVisionItem(circleId);
+
+  async function handlePickImage() {
+    setUploading(true);
+    try {
+      const url = await pickAndUploadVisionImage(userId);
+      if (url) setImageUrl(url);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleAdd() {
     if (!title.trim()) return;
-    await addItem.mutateAsync({ userId, title: title.trim() });
+    await addItem.mutateAsync({ userId, title: title.trim(), imageUrl });
     onClose();
   }
 
@@ -34,6 +47,13 @@ function AddVisionModal({
             placeholder="e.g. Launch my first startup"
             placeholderTextColor={colors.textSecondary}
           />
+          <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage} disabled={uploading}>
+            {imageUrl ? (
+              <Image source={{ uri: imageUrl }} style={styles.imagePreview} />
+            ) : (
+              <Text style={styles.imagePickerText}>{uploading ? 'Uploading…' : '📷 Add a photo (optional)'}</Text>
+            )}
+          </TouchableOpacity>
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
             <PillButton label="Add" onPress={handleAdd} loading={addItem.isPending} disabled={!title.trim()} style={{ flex: 1 }} />
@@ -74,6 +94,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
               style={styles.itemCard}
               onLongPress={() => handleLongPress(item.id, item.user_id === userId)}
             >
+              {item.image_url && <Image source={{ uri: item.image_url }} style={styles.itemImage} />}
               <Text style={styles.itemTitle}>{item.title}</Text>
               <Text style={styles.itemOwner}>{item.profiles?.name ?? 'Someone'}</Text>
             </TouchableOpacity>
@@ -107,6 +128,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     maxWidth: '48%',
   },
+  itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
   itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
   itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
   empty: { fontSize: 12, color: categoryColors.wealth.text, opacity: 0.8 },
@@ -131,5 +153,15 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: 15,
   },
+  imagePicker: {
+    backgroundColor: colors.inputBg,
+    borderRadius: radii.input,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  imagePickerText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+  imagePreview: { width: '100%', height: '100%' },
   modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
 });

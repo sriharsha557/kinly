@@ -25,8 +25,18 @@ export function useVisionItems(circleId: string | undefined) {
 export function useAddVisionItem(circleId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ userId, title }: { userId: string; title: string }) => {
-      const { error } = await supabase.from('vision_items').insert({ circle_id: circleId, user_id: userId, title });
+    mutationFn: async ({
+      userId,
+      title,
+      imageUrl,
+    }: {
+      userId: string;
+      title: string;
+      imageUrl?: string | null;
+    }) => {
+      const { error } = await supabase
+        .from('vision_items')
+        .insert({ circle_id: circleId, user_id: userId, title, image_url: imageUrl ?? null });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visionItems', circleId] }),
