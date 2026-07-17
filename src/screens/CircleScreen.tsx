@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -26,10 +27,11 @@ export default function CircleScreen() {
   const navigation = useNavigation<Nav>();
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
+  const scrollRef = useRef<ScrollView>(null);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.page}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>Circle</Text>
           <TouchableOpacity onPress={() => navigation.navigate('CircleSettings')}>
@@ -58,7 +60,13 @@ export default function CircleScreen() {
         <DisclosureSection label="More for your circle">
           {userId && circleId && <VisionBoardCard circleId={circleId} userId={userId} />}
           {userId && circleId && <MeetUpCard circleId={circleId} userId={userId} />}
-          {userId && circleId && <CircleAICard circleId={circleId} userId={userId} />}
+          {userId && circleId && (
+            <CircleAICard
+              circleId={circleId}
+              userId={userId}
+              onChallengeStarted={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+            />
+          )}
           {circleId && <WeeklyRecapCard circleId={circleId} />}
         </DisclosureSection>
       </ScrollView>

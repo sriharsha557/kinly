@@ -29,7 +29,7 @@ The app's landing screen — redesigned to have a clear "what should I do right 
 ### Circle (dashboard tab) — [src/screens/CircleScreen.tsx](src/screens/CircleScreen.tsx)
 Everything about "how is my circle doing," moved off Today to keep it uncluttered. Cards are split into two tiers so the accountability loop stays the visual priority instead of competing equally with lower-frequency extras:
 - **Primary (always visible)**: `GardenCard` (full per-member plant growth, derived from `useGarden`, stages `wilted → seed → sprout → tree → bloom`), `BuddyCard` (accountability buddy pairing/check-ins), `ChallengesCard` (circle challenges + completion celebrations).
-- **Secondary, behind a `DisclosureSection` ("More for your circle")**: `VisionBoardCard`, `MeetUpCard` (manual RSVP, no calendar integration), `CircleAICard` (AI insight, Edge Function `circle-ai-insight`), `WeeklyRecapCard` (AI weekly summary, Edge Function `weekly-recap`). Collapsed by default — tap to expand.
+- **Secondary, behind a `DisclosureSection` ("More for your circle")**: `VisionBoardCard`, `MeetUpCard` (manual RSVP, no calendar integration), `CircleAICard` (AI insight, Edge Function `circle-ai-insight`), `WeeklyRecapCard` (AI weekly summary, Edge Function `weekly-recap`). Collapsed by default — tap to expand. `CircleAICard`'s "Try: {suggestedChallenge}" button creates a real challenge via `useCreateChallenge`, then confirms with haptics + inline "✓ Started" state and scrolls the screen back up to `ChallengesCard` so the result is actually visible — closes the loop between the AI suggestion and the primary card it feeds.
 - Header "⚙️ Settings" link → `CircleSettingsScreen`.
 
 ### Goals — [src/screens/GoalsScreen.tsx](src/screens/GoalsScreen.tsx)

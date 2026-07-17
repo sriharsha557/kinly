@@ -1,12 +1,23 @@
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
 import { INTEREST_OPTIONS } from './InterestPicker';
 import { colors, radii, shadow } from '../theme/colors';
 
-export function CircleAICard({ circleId, userId }: { circleId: string; userId: string }) {
+export function CircleAICard({
+  circleId,
+  userId,
+  onChallengeStarted,
+}: {
+  circleId: string;
+  userId: string;
+  onChallengeStarted?: () => void;
+}) {
   const { data } = useCircleAI(circleId);
   const createChallenge = useCreateChallenge(circleId);
+  const [started, setStarted] = useState(false);
 
   if (!data || !data.message) return null;
 
@@ -16,6 +27,9 @@ export function CircleAICard({ circleId, userId }: { circleId: string; userId: s
   async function handleStartChallenge() {
     if (!data?.suggestedChallenge) return;
     await createChallenge.mutateAsync({ circleId, userId, title: data.suggestedChallenge, target: 7 });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setStarted(true);
+    onChallengeStarted?.();
   }
 
   return (
@@ -38,17 +52,22 @@ export function CircleAICard({ circleId, userId }: { circleId: string; userId: s
           </View>
         )}
       </View>
-      {data.suggestedChallenge && (
-        <TouchableOpacity
-          style={styles.suggestion}
-          onPress={handleStartChallenge}
-          disabled={createChallenge.isPending}
-        >
-          <Text style={styles.suggestionText}>
-            💡 {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
-          </Text>
-        </TouchableOpacity>
-      )}
+      {data.suggestedChallenge &&
+        (started ? (
+          <View style={[styles.suggestion, styles.suggestionDone]}>
+            <Text style={styles.suggestionText}>✓ Started — see Circle Challenges above</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.suggestion}
+            onPress={handleStartChallenge}
+            disabled={createChallenge.isPending}
+          >
+            <Text style={styles.suggestionText}>
+              💡 {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
+            </Text>
+          </TouchableOpacity>
+        ))}
     </View>
   );
 }
@@ -78,5 +97,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
+  suggestionDone: { backgroundColor: colors.success },
   suggestionText: { fontSize: 13, fontWeight: '700', color: '#fff', textAlign: 'center' },
 });
