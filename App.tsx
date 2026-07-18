@@ -13,7 +13,10 @@ function App() {
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: asyncStoragePersister }}>
           <RootNavigator />
-          <StatusBar style="auto" />
+          {/* App has no dark mode yet - background is always light, so the
+              status bar text must always be dark regardless of the phone's
+              system theme ("auto" follows system theme, not our UI). */}
+          <StatusBar style="dark" />
         </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
