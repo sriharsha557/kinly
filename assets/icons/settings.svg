@@ -1,0 +1,10 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100,30 L108,30 C111,30 114,32 115,35 L119,50 C126,52 132,55 138,59 L152,52 C155,50 159,51 161,54 L170,68 C172,71 171,75 168,77 L156,87 C157,91 158,95 158,100 C158,105 157,109 156,113 L168,123 C171,125 172,129 170,132 L161,146 C159,149 155,150 152,148 L138,141 C132,145 126,148 119,150 L115,165 C114,168 111,170 108,170 L100,170"
+        fill="none" stroke="#F97316" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100,30 L92,30 C89,30 86,32 85,35 L81,50 C74,52 68,55 62,59 L48,52 C45,50 41,51 39,54 L30,68 C28,71 29,75 32,77 L44,87 C43,91 42,95 42,100 C42,105 43,109 44,113 L32,123 C29,125 28,129 30,132 L39,146 C41,149 45,150 48,148 L62,141 C68,145 74,148 81,150 L85,165 C86,168 89,170 92,170 L100,170"
+        fill="none" stroke="#F97316" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="84" cy="92" r="7" fill="#F97316"/>
+  <circle cx="116" cy="92" r="7" fill="#F97316"/>
+  <path d="M76,112 C76,124 88,132 100,126" fill="none" stroke="#F97316" stroke-width="8" stroke-linecap="round"/>
+  <path d="M124,112 C124,124 112,132 100,126" fill="none" stroke="#F97316" stroke-width="8" stroke-linecap="round"/>
+</svg>

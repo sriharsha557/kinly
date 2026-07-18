@@ -16,6 +16,7 @@ import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
+import SettingsIcon from '../../assets/brand/settings.svg';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -34,8 +35,9 @@ export default function CircleScreen() {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>Circle</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('CircleSettings')}>
-            <Text style={styles.settingsLink}>⚙️ Settings</Text>
+          <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
+            <SettingsIcon width={15} height={15} />
+            <Text style={styles.settingsLink}>Settings</Text>
           </TouchableOpacity>
         </View>
 
@@ -79,5 +81,6 @@ const styles = StyleSheet.create({
   page: { padding: 16, paddingBottom: 110 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
+  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   settingsLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
 });

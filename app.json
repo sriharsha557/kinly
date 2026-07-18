@@ -20,7 +20,7 @@
     "android": {
       "package": "com.kinly.app",
       "adaptiveIcon": {
-        "backgroundColor": "#FF7A50",
+        "backgroundColor": "#F97316",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -35,7 +35,7 @@
         "expo-notifications",
         {
           "icon": "./assets/android-icon-monochrome.png",
-          "color": "#FF7A50"
+          "color": "#F97316"
         }
       ],
       "expo-font",
