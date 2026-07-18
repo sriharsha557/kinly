@@ -12,6 +12,11 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+// A row is checked off in two beats: justChecked flips the checkbox to a
+// filled checkmark immediately, then checkedIds (which actually removes it
+// from the list) is delayed so the checkmark is visible before the row exits.
+const CHECKED_VISIBLE_MS = 550;
+
 export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: goals, isLoading } = useGoals(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId);
@@ -19,6 +24,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [loggingId, setLoggingId] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
 
   const today = todayIso();
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
@@ -32,7 +38,10 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
     setLoggingId(goalId);
     try {
       const result = await logGoal(goal);
-      setCheckedIds((prev) => new Set(prev).add(goalId));
+      setJustChecked((prev) => new Set(prev).add(goalId));
+      setTimeout(() => {
+        setCheckedIds((prev) => new Set(prev).add(goalId));
+      }, CHECKED_VISIBLE_MS);
       if (result) setCelebration(result);
     } finally {
       setLoggingId(null);
@@ -53,25 +62,34 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
         </Animated.Text>
       ) : (
         <View style={styles.list}>
-          {pending.map((goal, index) => (
-            <Animated.View
-              key={goal.id}
-              entering={FadeInDown.duration(300).delay(index * 50)}
-              exiting={FadeOutRight.duration(250)}
-              layout={LinearTransition.springify()}
-            >
-              <AnimatedPressable
-                style={styles.row}
-                onPress={() => handleLog(goal.id)}
-                disabled={isPending && loggingId === goal.id}
+          {pending.map((goal, index) => {
+            const checked = justChecked.has(goal.id);
+            return (
+              <Animated.View
+                key={goal.id}
+                entering={FadeInDown.duration(300).delay(index * 50)}
+                exiting={FadeOutRight.duration(250)}
+                layout={LinearTransition.springify()}
               >
-                <View style={styles.checkbox}>
-                  {isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>}
-                </View>
-                <Text style={styles.rowText}>{goal.title}</Text>
-              </AnimatedPressable>
-            </Animated.View>
-          ))}
+                <AnimatedPressable
+                  style={styles.row}
+                  onPress={() => handleLog(goal.id)}
+                  disabled={checked || (isPending && loggingId === goal.id)}
+                >
+                  <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
+                    {checked ? (
+                      <Animated.Text entering={ZoomIn.springify().damping(9)} style={styles.checkmark}>
+                        ✓
+                      </Animated.Text>
+                    ) : (
+                      isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>
+                    )}
+                  </View>
+                  <Text style={[styles.rowText, checked && styles.rowTextChecked]}>{goal.title}</Text>
+                </AnimatedPressable>
+              </Animated.View>
+            );
+          })}
         </View>
       )}
 
@@ -110,6 +128,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
+  checkmark: { color: '#fff', fontSize: 13, fontWeight: '800' },
   checkboxLoading: { fontSize: 12, color: colors.primary },
   rowText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
+  rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
 });

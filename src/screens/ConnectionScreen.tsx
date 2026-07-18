@@ -4,6 +4,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +28,7 @@ import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
 import { DisclosureSection } from '../components/DisclosureSection';
+import { AskCardSkeleton } from '../components/Skeleton';
 import { colors, radii, shadow } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
@@ -130,7 +132,7 @@ function AskCard({
 export default function ConnectionScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
-  const { data: posts, isLoading } = useAskPosts(circleId ?? undefined);
+  const { data: posts, isLoading, isFetching, refetch } = useAskPosts(circleId ?? undefined);
   const { data: goals } = useGoals(circleId ?? undefined);
   const createPost = useCreateAskPost();
 
@@ -150,7 +152,13 @@ export default function ConnectionScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.page}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+          }
+        >
           <Text style={styles.title}>Connection Moments</Text>
 
           {/* Support: daily check-in + advice from your circle */}
@@ -197,7 +205,10 @@ export default function ConnectionScreen() {
           </View>
 
           {isLoading ? (
-            <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+            <View>
+              <AskCardSkeleton />
+              <AskCardSkeleton />
+            </View>
           ) : posts && posts.length > 0 ? (
             <View style={styles.list}>
               {posts.map((post, index) =>

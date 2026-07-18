@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   Modal,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -22,6 +22,7 @@ import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
+import { GoalCardSkeleton } from '../components/Skeleton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 
@@ -204,7 +205,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
 export default function GoalsScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
-  const { data: goals, isLoading } = useGoals(circleId ?? undefined);
+  const { data: goals, isLoading, isFetching, refetch } = useGoals(circleId ?? undefined);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -215,7 +216,11 @@ export default function GoalsScreen() {
       {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
 
       {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 24 }} color={colors.primary} />
+        <View style={{ marginTop: 4 }}>
+          <GoalCardSkeleton />
+          <GoalCardSkeleton />
+          <GoalCardSkeleton />
+        </View>
       ) : (
         <FlatList
           data={goals ?? []}
@@ -229,6 +234,9 @@ export default function GoalsScreen() {
           }
           contentContainerStyle={styles.list}
           ListEmptyComponent={<Text style={styles.empty}>No goals yet — add your first one above.</Text>}
+          refreshControl={
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+          }
         />
       )}
     </SafeAreaView>

@@ -23,6 +23,7 @@ import {
   useUpdateMemberRole,
 } from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
+import { ToggleSwitch } from '../components/ToggleSwitch';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { MUTE_CATEGORIES, useNotificationMutes, useToggleMute } from '../hooks/useNotificationMutes';
 import { colors, radii, shadow } from '../theme/colors';
@@ -255,14 +256,10 @@ export default function CircleSettingsScreen() {
             return (
               <View key={key} style={styles.notifyRow}>
                 <Text style={styles.notifyLabel}>{label}</Text>
-                <TouchableOpacity
-                  style={[styles.notifyToggle, !muted && styles.notifyToggleActive]}
-                  onPress={() => toggleMute.mutate({ category: key, muted: !muted })}
-                >
-                  <Text style={[styles.notifyToggleText, !muted && styles.notifyToggleTextActive]}>
-                    {muted ? 'Muted' : 'On'}
-                  </Text>
-                </TouchableOpacity>
+                <ToggleSwitch
+                  value={!muted}
+                  onValueChange={(next) => toggleMute.mutate({ category: key, muted: !next })}
+                />
               </View>
             );
           })}
@@ -353,15 +350,6 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  notifyToggle: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  notifyToggleActive: { backgroundColor: colors.primary },
-  notifyToggleText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
-  notifyToggleTextActive: { color: '#fff' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

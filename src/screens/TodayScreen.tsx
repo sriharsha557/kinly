@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -10,6 +10,7 @@ import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { GardenTeaser } from '../components/GardenTeaser';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
+import { EventRowSkeleton } from '../components/Skeleton';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -134,13 +135,18 @@ export default function TodayScreen() {
   const user = useAuthStore((state) => state.user);
   const userId = user?.id;
   const circleId = useAuthStore((state) => state.activeCircleId);
-  const { data: events, isLoading } = useEvents(circleId ?? undefined);
+  const { data: events, isLoading, isFetching, refetch } = useEvents(circleId ?? undefined);
 
   let lastLabel = '';
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.page}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        refreshControl={
+          <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+        }
+      >
         <Text style={styles.greeting}>
           {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'} 👋
         </Text>
@@ -152,7 +158,11 @@ export default function TodayScreen() {
 
         <Text style={styles.sectionTitle}>Circle Activity</Text>
         {isLoading ? (
-          <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+          <View>
+            <EventRowSkeleton />
+            <EventRowSkeleton />
+            <EventRowSkeleton />
+          </View>
         ) : events && events.length > 0 ? (
           <View style={styles.list}>
             {events.map((event) => {

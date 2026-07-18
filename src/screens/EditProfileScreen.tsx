@@ -9,6 +9,7 @@ import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
+import { AvatarPickerModal } from '../components/AvatarPickerModal';
 import { colors } from '../theme/colors';
 import type { InterestCategory } from '../types/models';
 
@@ -22,6 +23,7 @@ export default function EditProfileScreen() {
   const [avatar, setAvatar] = useState(user?.avatar ?? null);
   const [interests, setInterests] = useState<InterestCategory[]>(user?.interests ?? []);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [pickingPreset, setPickingPreset] = useState(false);
 
   function toggleInterest(key: InterestCategory) {
     setInterests((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -38,6 +40,11 @@ export default function EditProfileScreen() {
     }
   }
 
+  function handlePickPreset(url: string) {
+    setAvatar(url);
+    setPickingPreset(false);
+  }
+
   async function handleSave() {
     await updateProfile.mutateAsync({ name: name.trim(), bio: bio.trim() || null, avatar, interests });
     navigation.goBack();
@@ -46,14 +53,22 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity style={styles.avatarWrap} onPress={handlePickAvatar} disabled={uploadingAvatar}>
+        <View style={styles.avatarWrap}>
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatarImage} />
           ) : (
             <Logo size={88} color="#FFFFFF" background={colors.celebration} />
           )}
-          <Text style={styles.avatarHint}>{uploadingAvatar ? 'Uploading…' : 'Tap to change photo'}</Text>
-        </TouchableOpacity>
+          <View style={styles.avatarActions}>
+            <TouchableOpacity onPress={handlePickAvatar} disabled={uploadingAvatar}>
+              <Text style={styles.avatarHint}>{uploadingAvatar ? 'Uploading…' : 'Upload a photo'}</Text>
+            </TouchableOpacity>
+            <Text style={styles.avatarActionsDivider}>·</Text>
+            <TouchableOpacity onPress={() => setPickingPreset(true)} disabled={uploadingAvatar}>
+              <Text style={styles.avatarHint}>Choose an avatar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <View style={styles.form}>
           <AppTextInput label="Name" value={name} onChangeText={setName} placeholder="Your name" />
@@ -77,6 +92,10 @@ export default function EditProfileScreen() {
           />
         </View>
       </ScrollView>
+
+      {pickingPreset && (
+        <AvatarPickerModal onSelect={handlePickPreset} onClose={() => setPickingPreset(false)} />
+      )}
     </SafeAreaView>
   );
 }
@@ -86,6 +105,8 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 60, alignItems: 'center' },
   avatarWrap: { alignItems: 'center', gap: 8, marginBottom: 24 },
   avatarImage: { width: 88, height: 88, borderRadius: 44 },
+  avatarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  avatarActionsDivider: { color: colors.textSecondary },
   avatarHint: { fontSize: 13, color: colors.primary, fontWeight: '600' },
   form: { width: '100%', gap: 14 },
   sectionLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
