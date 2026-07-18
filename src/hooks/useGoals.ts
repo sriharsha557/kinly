@@ -75,7 +75,7 @@ export function useDeleteGoal() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ goalId }: { goalId: string; circleId: string }) => {
-      const { error } = await supabase.from('goals').delete().eq('id', goalId);
+      const { error } = await supabase.from('goals').update({ deleted_at: new Date().toISOString() }).eq('id', goalId);
       if (error) throw error;
     },
     onSuccess: (_data, variables) =>

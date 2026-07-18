@@ -47,7 +47,10 @@ export function useDeleteVisionItem(circleId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('vision_items').delete().eq('id', id);
+      const { error } = await supabase
+        .from('vision_items')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visionItems', circleId] }),

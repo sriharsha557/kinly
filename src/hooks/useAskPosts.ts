@@ -61,7 +61,7 @@ export function useDeleteAskPost(circleId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (askPostId: string) => {
-      const { error } = await supabase.from('ask_posts').delete().eq('id', askPostId);
+      const { error } = await supabase.rpc('soft_delete_ask_post', { p_ask_post_id: askPostId });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['askPosts', circleId] }),
