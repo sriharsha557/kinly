@@ -52,8 +52,8 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
   return (
     <Animated.View entering={FadeInDown.duration(400)}>
       <LinearGradient colors={gradients.growth} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-        <View style={styles.heroBadge}>
-          <HeroArt width={40} height={40} />
+        <View style={styles.heroArt}>
+          <HeroArt width={68} height={68} />
         </View>
         <Text style={styles.title}>🌱 Your Circle</Text>
         <Text style={styles.percent}>{health}%</Text>
@@ -71,16 +71,10 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
 
 const styles = StyleSheet.create({
   card: { borderRadius: radii.card, padding: 20, marginBottom: 16, gap: 6 },
-  heroBadge: {
+  heroArt: {
     position: 'absolute',
-    top: 14,
-    right: 14,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    top: 10,
+    right: 10,
   },
   title: { fontSize: 14, fontWeight: '700', color: '#fff' },
   percent: { fontSize: 40, fontWeight: '800', color: '#fff', marginTop: 2 },
