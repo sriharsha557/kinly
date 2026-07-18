@@ -286,6 +286,60 @@
     .intro-grid{grid-template-columns:1fr;}
   }
 
+  /* ---------- HOW IT WORKS ---------- */
+  .flow-steps{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:0;
+    counter-reset:flow;
+  }
+  .flow-step{
+    position:relative;
+    padding:0 18px 0 0;
+  }
+  .flow-step:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    top:19px;
+    right:0;
+    width:18px;
+    height:1px;
+    background:var(--line);
+  }
+  .flow-step .num{
+    counter-increment:flow;
+    width:38px; height:38px;
+    border-radius:50%;
+    background:var(--sand);
+    color:var(--orange-deep);
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:16px;
+  }
+  .flow-step .num::before{ content: counter(flow); }
+  .flow-step h3{
+    font-size:16.5px;
+    font-style:italic;
+    margin-bottom:6px;
+  }
+  .flow-step p{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.5;
+  }
+  @media (max-width: 860px){
+    .flow-steps{grid-template-columns:1fr 1fr; row-gap:32px;}
+    .flow-step:nth-child(2)::after{display:none;}
+    .flow-step:nth-child(4)::after{display:none;}
+  }
+  @media (max-width: 560px){
+    .flow-steps{grid-template-columns:1fr; row-gap:28px;}
+    .flow-step::after{display:none;}
+  }
+
   /* ---------- FEATURE CARDS ---------- */
   .feature-grid{
     display:grid;
@@ -547,6 +601,7 @@
       <span>kinly</span>
     </a>
     <nav class="nav-links">
+      <a class="hide-mobile" href="#how-it-works">How it works</a>
       <a class="hide-mobile" href="#screens">Screens</a>
       <a class="hide-mobile" href="#garden">The garden</a>
       <a href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
@@ -635,6 +690,42 @@
           <div class="stat"><b>2–10</b><span>friends per Growth Circle</span></div>
           <div class="stat"><b>5</b><span>garden stages, from seed to bloom</span></div>
           <div class="stat"><b>1</b><span>daily prompt, hidden until you answer</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="how-it-works" style="padding-top:0;">
+      <div class="section-head" style="margin-bottom:36px;">
+        <p class="eyebrow">How it works</p>
+        <h2>One loop, every day.</h2>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="num"></div>
+          <h3>Start a circle</h3>
+          <p>Invite 2–10 friends you actually trust into a private Growth Circle.</p>
+        </div>
+        <div class="flow-step">
+          <div class="num"></div>
+          <h3>Set your goals</h3>
+          <p>Pick what you're working on — health, wealth, ideas, learning, or relationships.</p>
+        </div>
+        <div class="flow-step">
+          <div class="num"></div>
+          <h3>Log progress</h3>
+          <p>Check in and answer the circle's daily prompt — a minute or two, most days.</p>
+        </div>
+        <div class="flow-step">
+          <div class="num"></div>
+          <h3>Watch it grow</h3>
+          <p>See your circle's momentum — streaks, gardens, and activity, all in one place.</p>
+        </div>
+        <div class="flow-step">
+          <div class="num"></div>
+          <h3>Show up for them</h3>
+          <p>Nudge a streak, check in on someone who's gone quiet, start a challenge together.</p>
         </div>
       </div>
     </section>
