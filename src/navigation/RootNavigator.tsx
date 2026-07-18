@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -23,9 +23,10 @@ export default function RootNavigator() {
   // Session bootstrap runs in the background while this plays, so the app
   // already knows where to route by the time the video finishes.
   const [showLaunchVideo, setShowLaunchVideo] = useState(true);
+  const handleLaunchVideoFinish = useCallback(() => setShowLaunchVideo(false), []);
 
   if (showLaunchVideo) {
-    return <LaunchVideoScreen onFinish={() => setShowLaunchVideo(false)} />;
+    return <LaunchVideoScreen onFinish={handleLaunchVideoFinish} />;
   }
 
   if (sessionLoading) {
