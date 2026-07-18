@@ -14,9 +14,6 @@ Kinly is a React Native / Expo app for small private accountability circles ("Gr
 
 ## Screen map
 
-### Launch video — [src/screens/LaunchVideoScreen.tsx](src/screens/LaunchVideoScreen.tsx)
-Plays [assets/applaunch.mp4](assets/applaunch.mp4) fullscreen (muted, no loop) before anything else renders — `RootNavigator` holds a `showLaunchVideo` flag and renders only this screen until it finishes, while `useBootstrapSession` keeps resolving in the background so the app already knows where to route once the video ends. Advances on `playToEnd`, on a player error, or after an 8s fallback timeout (never gets stuck); a "Skip" button in the corner does the same. Uses `expo-video` — the first native-module dependency added outside the original scaffold, so unlike every other change this session it needs a real `eas build` (not just `eas update`) to work on any already-installed standalone build; Expo Go and the local dev server pick it up immediately since Expo Go bundles the SDK's core native modules.
-
 ### Onboarding — [src/screens/OnboardingScreen.tsx](src/screens/OnboardingScreen.tsx)
 Single screen, three sequential steps driven by user state (not separate routes):
 1. **AuthStep** — sign in / sign up (email+password) or "Continue with Google" (Supabase OAuth via `expo-web-browser`). Sign-up without email confirmation shows a "check your email" holding state.
