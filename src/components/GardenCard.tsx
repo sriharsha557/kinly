@@ -1,14 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useGardenState, type GardenStage } from '../hooks/useGarden';
+import { useGardenState } from '../hooks/useGarden';
+import { GardenStageArt } from './GardenStageArt';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
-
-const STAGE_EMOJI: Record<GardenStage, string> = {
-  wilted: '🥀',
-  seed: '🌱',
-  sprout: '🌿',
-  tree: '🌳',
-  bloom: '🌸',
-};
 
 function healthMessage(health: number): string {
   if (health >= 80) return 'Everyone is thriving today';
@@ -32,7 +25,7 @@ export function GardenCard({ circleId }: { circleId: string }) {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {data.members.map((member) => (
           <View key={member.userId} style={styles.plant}>
-            <Text style={styles.emoji}>{STAGE_EMOJI[member.stage]}</Text>
+            <GardenStageArt stage={member.stage} size={36} />
             <Text style={styles.name} numberOfLines={1}>
               {member.name}
             </Text>
@@ -58,7 +51,6 @@ const styles = StyleSheet.create({
   message: { fontSize: 12, color: categoryColors.health.text, opacity: 0.8, marginTop: 2, marginBottom: 12 },
   row: { gap: 16 },
   plant: { alignItems: 'center', width: 56 },
-  emoji: { fontSize: 32 },
   name: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, marginTop: 2 },
   streak: { fontSize: 10, color: colors.textSecondary },
 });

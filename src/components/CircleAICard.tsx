@@ -5,6 +5,7 @@ import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
 import { INTEREST_OPTIONS } from './InterestPicker';
 import { colors, radii, shadow } from '../theme/colors';
+import IdeaBulb from '../../assets/illustrations/kinly-ill-idea-bulb.svg';
 
 export function CircleAICard({
   circleId,
@@ -34,7 +35,10 @@ export function CircleAICard({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>🧠 Kinly AI</Text>
+      <View style={styles.titleRow}>
+        <IdeaBulb width={20} height={20} />
+        <Text style={styles.title}>Kinly AI</Text>
+      </View>
       <Text style={styles.message}>{data.message}</Text>
       <View style={styles.pillRow}>
         {strongestOpt && (
@@ -81,6 +85,7 @@ const styles = StyleSheet.create({
     gap: 10,
     ...shadow,
   },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
   message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
