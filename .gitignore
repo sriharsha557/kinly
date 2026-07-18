@@ -44,3 +44,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# raw icon/illustration staging area (curated copies live in assets/illustrations/)
+/kinly-illustrations

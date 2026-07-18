@@ -28,6 +28,7 @@ import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { colors, radii, shadow } from '../theme/colors';
+import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
   const { data: replies, isLoading } = useAskReplies(askPostId);
@@ -107,7 +108,12 @@ function AskCard({
             </TouchableOpacity>
           )}
         </View>
-        {post.goals?.title && <Text style={styles.goalTag}>🎯 {post.goals.title}</Text>}
+        {post.goals?.title && (
+          <View style={styles.goalTagRow}>
+            <GoalIcon width={13} height={13} />
+            <Text style={styles.goalTag}>{post.goals.title}</Text>
+          </View>
+        )}
         <View style={styles.cardFooter}>
           <Text style={styles.meta}>{post.profiles?.name ?? 'Someone'}</Text>
           <Text style={styles.meta}>
@@ -173,9 +179,12 @@ export default function ConnectionScreen() {
                       style={[styles.goalChip, active && styles.goalChipActive]}
                       onPress={() => setGoalId(active ? null : goal.id)}
                     >
-                      <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>
-                        🎯 {goal.title}
-                      </Text>
+                      <View style={styles.goalChipRow}>
+                        <GoalIcon width={12} height={12} />
+                        <Text style={[styles.goalChipText, active && styles.goalChipTextActive]}>
+                          {goal.title}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -243,8 +252,10 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   goalChipActive: { backgroundColor: colors.primary },
+  goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   goalChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
   goalChipTextActive: { color: '#fff' },
+  goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
   postButton: {
     alignSelf: 'flex-end',

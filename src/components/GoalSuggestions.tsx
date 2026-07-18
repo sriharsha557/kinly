@@ -5,6 +5,7 @@ import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { PillButton } from './PillButton';
 import { colors, categoryColors, radii } from '../theme/colors';
+import IdeaIllustration from '../../assets/illustrations/kinly-idea.svg';
 
 function CustomizeGoalModal({
   suggestion,
@@ -84,7 +85,10 @@ export function GoalSuggestions({ circleId, userId }: { circleId: string; userId
 
   return (
     <View style={styles.suggestionsSection}>
-      <Text style={styles.sectionTitle}>Suggested for you</Text>
+      <View style={styles.sectionTitleRow}>
+        <IdeaIllustration width={30} height={30} />
+        <Text style={styles.sectionTitle}>Suggested for you</Text>
+      </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsRow}>
         {suggestions.map((s) => (
           <SuggestionCard key={s.title} suggestion={s} onPress={() => setEditing(s)} />
@@ -103,7 +107,8 @@ export function GoalSuggestions({ circleId, userId }: { circleId: string; userId
 }
 
 const styles = StyleSheet.create({
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
   suggestionsSection: { marginBottom: 20 },
   suggestionsRow: { gap: 10, paddingRight: 16 },
   suggestionCard: {
