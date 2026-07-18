@@ -14,6 +14,7 @@ import { MeetUpCard } from '../components/MeetUpCard';
 import { CircleAICard } from '../components/CircleAICard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { DisclosureSection } from '../components/DisclosureSection';
+import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import SettingsIcon from '../../assets/brand/settings.svg';
@@ -29,10 +30,11 @@ export default function CircleScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
   const scrollRef = useRef<ScrollView>(null);
+  const tabBarClearance = useTabBarClearance();
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.page}>
+      <ScrollView ref={scrollRef} contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}>
         <View style={styles.header}>
           <Text style={styles.title}>Circle</Text>
           <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
@@ -78,7 +80,7 @@ export default function CircleScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16, paddingBottom: 110 },
+  page: { padding: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
   settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },

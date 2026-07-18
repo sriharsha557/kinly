@@ -12,6 +12,7 @@ import { StatTile } from '../components/StatTile';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
+import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
@@ -25,10 +26,11 @@ export default function ProfileScreen() {
   const { data: circle } = useCircleDetail(circleId ?? undefined);
   const { data: stats, isLoading } = useProfileStats(user?.id, circleId ?? undefined);
   const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
+  const tabBarClearance = useTabBarClearance();
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: tabBarClearance }]}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={() => navigation.navigate('EditProfile')}
@@ -118,7 +120,7 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 120 },
+  content: { padding: 20 },
   header: { alignItems: 'center', gap: 4, marginBottom: 24 },
   avatarImage: { width: 72, height: 72, borderRadius: 36 },
   bio: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },

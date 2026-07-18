@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import TodayScreen from '../screens/TodayScreen';
 import CircleScreen from '../screens/CircleScreen';
@@ -9,6 +10,7 @@ import GoalsScreen from '../screens/GoalsScreen';
 import ConnectionScreen from '../screens/ConnectionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { colors, radii, shadow } from '../theme/colors';
+import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN, TAB_BAR_MIN_BOTTOM } from '../hooks/useTabBarClearance';
 import type { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -57,6 +59,13 @@ function TabIcon({
 }
 
 export default function MainTabs() {
+  // The floating pill sat at a flat `bottom: 20`, which overlaps Android's
+  // 3-button navigation bar (much taller than the gesture-nav strip it was
+  // tuned against) - insets.bottom already reflects whichever nav mode the
+  // user has enabled, so anchor to that instead of a constant.
+  const insets = useSafeAreaInsets();
+  const tabBarBottom = Math.max(TAB_BAR_MIN_BOTTOM, insets.bottom + TAB_BAR_MARGIN);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -64,7 +73,7 @@ export default function MainTabs() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { bottom: tabBarBottom }],
         tabBarItemStyle: styles.tabBarItem,
         tabBarIconStyle: styles.tabBarIconStyle,
         tabBarIcon: ({ color, focused }) => (
@@ -86,8 +95,7 @@ const styles = {
     position: 'absolute' as const,
     left: 20,
     right: 20,
-    bottom: 20,
-    height: 64,
+    height: TAB_BAR_HEIGHT,
     borderRadius: radii.pill,
     backgroundColor: colors.surface,
     borderTopWidth: 0,
@@ -95,7 +103,7 @@ const styles = {
     ...shadow,
   },
   tabBarItem: {
-    height: 64,
+    height: TAB_BAR_HEIGHT,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },

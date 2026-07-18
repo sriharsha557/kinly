@@ -11,6 +11,7 @@ import { GardenTeaser } from '../components/GardenTeaser';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
+import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 
@@ -136,13 +137,14 @@ export default function TodayScreen() {
   const userId = user?.id;
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: events, isLoading, isFetching, refetch } = useEvents(circleId ?? undefined);
+  const tabBarClearance = useTabBarClearance();
 
   let lastLabel = '';
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.page}
+        contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
         refreshControl={
           <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
         }
@@ -192,7 +194,7 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16, paddingBottom: 110 },
+  page: { padding: 16 },
   greeting: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
   date: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },

@@ -23,6 +23,7 @@ import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
+import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 
@@ -206,6 +207,7 @@ export default function GoalsScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: goals, isLoading, isFetching, refetch } = useGoals(circleId ?? undefined);
+  const tabBarClearance = useTabBarClearance();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -232,7 +234,7 @@ export default function GoalsScreen() {
               </Animated.View>
             ) : null
           }
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: tabBarClearance }]}
           ListEmptyComponent={<Text style={styles.empty}>No goals yet — add your first one above.</Text>}
           refreshControl={
             <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
@@ -273,7 +275,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addButtonText: { color: '#fff', fontWeight: '700' },
-  list: { gap: 12, paddingBottom: 110 },
+  list: { gap: 12 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radii.card,

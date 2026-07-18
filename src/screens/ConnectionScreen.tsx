@@ -29,6 +29,7 @@ import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { AskCardSkeleton } from '../components/Skeleton';
+import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, radii, shadow } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
@@ -135,6 +136,7 @@ export default function ConnectionScreen() {
   const { data: posts, isLoading, isFetching, refetch } = useAskPosts(circleId ?? undefined);
   const { data: goals } = useGoals(circleId ?? undefined);
   const createPost = useCreateAskPost();
+  const tabBarClearance = useTabBarClearance();
 
   const [question, setQuestion] = useState('');
   const [goalId, setGoalId] = useState<string | null>(null);
@@ -153,7 +155,7 @@ export default function ConnectionScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
-          contentContainerStyle={styles.page}
+          contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
@@ -244,7 +246,7 @@ export default function ConnectionScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16, paddingBottom: 110 },
+  page: { padding: 16 },
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
   composer: {
