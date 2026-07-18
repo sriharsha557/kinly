@@ -20,7 +20,7 @@
     "android": {
       "package": "com.kinly.app",
       "adaptiveIcon": {
-        "backgroundColor": "#F97316",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -36,6 +36,15 @@
         {
           "icon": "./assets/android-icon-monochrome.png",
           "color": "#F97316"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FBF7F2"
         }
       ],
       "expo-font",
