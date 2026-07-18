@@ -5,6 +5,7 @@ import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
 
 function PickBuddyModal({
   circleId,
@@ -56,7 +57,10 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>🤝 Accountability Buddy</Text>
+      <View style={styles.titleRow}>
+        <BuddyIcon width={22} height={22} />
+        <Text style={styles.title}>Accountability Buddy</Text>
+      </View>
 
       {buddy ? (
         <>
@@ -98,6 +102,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     ...shadow,
   },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.relationships.text },
   buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
   status: { fontSize: 12, color: categoryColors.relationships.text, marginTop: 2 },

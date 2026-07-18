@@ -29,6 +29,7 @@ import { GuessWhoCard } from '../components/GuessWhoCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { colors, radii, shadow } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
+import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
   const { data: replies, isLoading } = useAskReplies(askPostId);
@@ -219,7 +220,7 @@ export default function ConnectionScreen() {
 
           {/* Play: lighter, lower-stakes moments — tucked away so they don't outweigh accountability */}
           <View style={styles.gamesSection}>
-            <DisclosureSection label="✨ Light Moments">
+            <DisclosureSection label="Light Moments" icon={DiceIcon}>
               {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
               {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
             </DisclosureSection>

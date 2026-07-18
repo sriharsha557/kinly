@@ -13,6 +13,7 @@ import { ProgressBar } from './ProgressBar';
 import { PillButton } from './PillButton';
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
 
 function NewChallengeModal({
   circleId,
@@ -153,7 +154,10 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>🚀 Circle Challenges</Text>
+        <View style={styles.titleRow}>
+          <RocketIcon width={22} height={22} />
+          <Text style={styles.title}>Circle Challenges</Text>
+        </View>
         <TouchableOpacity onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
         </TouchableOpacity>
@@ -214,6 +218,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.ideas.text },
   newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
   challenge: { gap: 6 },

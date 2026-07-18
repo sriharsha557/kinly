@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { colors, radii, shadow } from '../theme/colors';
@@ -9,10 +10,12 @@ import { colors, radii, shadow } from '../theme/colors';
 // screen aren't competing for the same visual weight as everything else.
 export function DisclosureSection({
   label,
+  icon: Icon,
   defaultOpen = false,
   children,
 }: {
   label: string;
+  icon?: FC<SvgProps>;
   defaultOpen?: boolean;
   children: ReactNode;
 }) {
@@ -21,7 +24,10 @@ export function DisclosureSection({
   return (
     <Animated.View layout={LinearTransition.springify()} style={styles.wrap}>
       <AnimatedPressable style={styles.header} onPress={() => setOpen((prev) => !prev)}>
-        <Text style={styles.label}>{label}</Text>
+        <View style={styles.labelRow}>
+          {Icon && <Icon width={18} height={18} />}
+          <Text style={styles.label}>{label}</Text>
+        </View>
         <Text style={styles.chevron}>{open ? '▲' : '▼'}</Text>
       </AnimatedPressable>
       {open && (
@@ -45,6 +51,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     ...shadow,
   },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
   chevron: { fontSize: 11, color: colors.textSecondary },
   body: { marginTop: 12, gap: 0 },

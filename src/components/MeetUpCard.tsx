@@ -4,6 +4,7 @@ import { useMeetups, useProposeMeetup, useRsvpMeetup, type MeetupWithRsvps } fro
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { RsvpStatus } from '../types/models';
+import MeetupIcon from '../../assets/illustrations/kinly-ill-calendar-meetup.svg';
 
 const RSVP_OPTIONS: { status: RsvpStatus; label: string }[] = [
   { status: 'yes', label: "I'm in" },
@@ -99,7 +100,10 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>📍 Meet Up</Text>
+        <View style={styles.titleRow}>
+          <MeetupIcon width={22} height={22} />
+          <Text style={styles.title}>Meet Up</Text>
+        </View>
         <TouchableOpacity onPress={() => setProposing(true)}>
           <Text style={styles.newLink}>+ Suggest</Text>
         </TouchableOpacity>
@@ -131,6 +135,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.learning.text },
   newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.learning.text },
   empty: { fontSize: 12, color: categoryColors.learning.text, opacity: 0.8 },

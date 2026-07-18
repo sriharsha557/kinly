@@ -1,15 +1,19 @@
+import type { FC } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { StyleSheet, Text, View } from 'react-native';
+import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { colors, radii, shadow } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
+import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
+import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
 
-const ACTIONS: { label: string; emoji: string; tab: keyof MainTabParamList }[] = [
+const ACTIONS: { label: string; emoji?: string; icon?: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
   { label: 'Check In', emoji: '✅', tab: 'Goals' },
-  { label: 'Ask Friends', emoji: '💬', tab: 'Connection' },
-  { label: 'Start Challenge', emoji: '🚀', tab: 'Circle' },
+  { label: 'Ask Friends', icon: ChatIcon, tab: 'Connection' },
+  { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
 ];
 
 export function QuickActionsRow() {
@@ -17,10 +21,10 @@ export function QuickActionsRow() {
 
   return (
     <View style={styles.row}>
-      {ACTIONS.map(({ label, emoji, tab }, index) => (
+      {ACTIONS.map(({ label, emoji, icon: Icon, tab }, index) => (
         <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
           <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
-            <Text style={styles.emoji}>{emoji}</Text>
+            {Icon ? <Icon width={22} height={22} /> : <Text style={styles.emoji}>{emoji}</Text>}
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>
         </Animated.View>
