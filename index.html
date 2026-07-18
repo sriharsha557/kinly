@@ -533,7 +533,6 @@
     .beta-cta{padding:36px 24px;}
     .install-steps{grid-template-columns:1fr 1fr;}
   }
-  .btn.is-disabled{opacity:0.5; cursor:not-allowed; pointer-events:none;}
 
   /* ---------- BUILT WITH ---------- */
   .built-with{
@@ -853,19 +852,18 @@
 
   <div class="wrap">
     <!--
-      Not live yet. Once there's a real install link (EAS internal-
-      distribution build page, or wherever the APK ends up hosted - the
-      same value as EXPO_PUBLIC_ANDROID_APK_URL in the app's own invite
-      messages), update the anchor below: set href to the real URL, drop
-      the is-disabled class, and swap the fine-print line.
+      Live install link: same value as EXPO_PUBLIC_ANDROID_APK_URL in the
+      app's own invite messages. This is tied to one specific EAS build and
+      goes stale whenever a new native build is cut (rare) - update the href
+      below by hand at that point, same as the .env var.
     -->
     <section id="download" style="padding-top:0;">
       <div class="beta-cta">
         <p class="eyebrow">Get the app</p>
         <h2>Join the beta.</h2>
         <p class="sub">Kinly is in active testing on Android right now — an iOS beta will follow once that's sorted out.</p>
-        <a class="btn btn-primary is-disabled" href="#" aria-disabled="true">Join the Beta — Android</a>
-        <p class="fine">Not live yet — check back soon.</p>
+        <a class="btn btn-primary" href="https://expo.dev/accounts/sriharsha87/projects/kinly/builds/21099b0a-1789-4df3-8177-59989527a29a" target="_blank" rel="noopener">Join the Beta — Android</a>
+        <p class="fine">Takes about a minute. Android only for now.</p>
 
         <div class="install-steps">
           <div class="install-step"><span class="n">01</span><p>Tap "Join the Beta" and download the APK.</p></div>
