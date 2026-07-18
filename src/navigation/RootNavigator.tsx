@@ -4,20 +4,24 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import CircleSettingsScreen from '../screens/CircleSettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import MainTabs from './MainTabs';
 import { useAuthStore } from '../state/useAuthStore';
 import { useBootstrapSession } from '../hooks/useBootstrapSession';
 import { usePushRegistration } from '../hooks/usePushRegistration';
+import { useAuthDeepLink } from '../hooks/useAuthDeepLink';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   useBootstrapSession();
+  useAuthDeepLink();
   const user = useAuthStore((state) => state.user);
   usePushRegistration(user?.id);
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
   const sessionLoading = useAuthStore((state) => state.sessionLoading);
+  const passwordRecoveryMode = useAuthStore((state) => state.passwordRecoveryMode);
 
   if (sessionLoading) {
     return (
@@ -25,6 +29,10 @@ export default function RootNavigator() {
         <ActivityIndicator />
       </View>
     );
+  }
+
+  if (passwordRecoveryMode) {
+    return <ResetPasswordScreen />;
   }
 
   const readyForMain = !!user && !!activeCircleId;

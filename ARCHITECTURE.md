@@ -18,7 +18,7 @@ Kinly is a React Native / Expo app for small private accountability circles ("Gr
 
 ### Onboarding — [src/screens/OnboardingScreen.tsx](src/screens/OnboardingScreen.tsx)
 Single screen, three sequential steps driven by user state (not separate routes):
-1. **AuthStep** — sign in / sign up (email+password) or "Continue with Google" (Supabase OAuth via `expo-web-browser`). Sign-up without email confirmation shows a "check your email" holding state.
+1. **AuthStep** — sign in / sign up (email+password) or "Continue with Google" (Supabase OAuth via `expo-web-browser`). Sign-up without email confirmation shows a "check your email" holding state. "Forgot password?" (sign-in mode only) requests a reset link (`requestPasswordReset`) and shows the same kind of holding state. **Requires `kinly://reset-password` to be added to Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**, same as `kinly://auth-callback` was for Google sign-in — without it, `resetPasswordForEmail`'s `redirectTo` gets silently rejected.
 2. **InterestsStep** — shown when `user.interests === null`; picks pillars (health/wealth/ideas/learning/relationships) via `InterestPicker`, saved with `useSetInterests`.
 3. **CircleStep** — create a new circle (generates an invite code) or join one by code (`useCreateCircle` / `useJoinCircle`, both backed by `security definer` RPCs to sidestep RLS ordering issues). After creating, shows an `InviteStep` with a WhatsApp share button.
 
@@ -68,6 +68,7 @@ Name, bio, interest pillars, and avatar — two ways to set the avatar: **Upload
 
 ## Cross-cutting mechanisms
 
+- **Password recovery**: unlike Google sign-in (which resolves entirely inside `WebBrowser.openAuthSessionAsync`), a reset link arrives by email and can open the app cold, so it needs a real global deep-link listener — `useAuthDeepLink` ([src/hooks/useAuthDeepLink.ts](src/hooks/useAuthDeepLink.ts)), mounted once in `RootNavigator`, covers both `Linking.getInitialURL()` (cold start) and `Linking.addEventListener('url', ...)` (warm). Any URL containing `reset-password` gets handed to `completePasswordRecovery()`, which calls `setSession()` with the link's tokens; that makes supabase-js emit a `PASSWORD_RECOVERY` auth event, which `useBootstrapSession` listens for to flip `useAuthStore`'s `passwordRecoveryMode` flag. `RootNavigator` checks that flag before its normal Onboarding/Main branching and renders `ResetPasswordScreen` instead when it's set.
 - **Celebrations**: `MilestoneCardModal` is the single celebratory UI, triggered from goal completion/streak milestones (Goals, Today) and achievement badges (Profile).
 - **Push notifications**: Supabase Database Webhooks → `notify-circle` Edge Function fan-out to Expo push tokens, filtered by each recipient's per-category mutes.
 - **AI features**: all go through Supabase Edge Functions (never called directly from the client with a raw API key) — nudge messages, weekly recap, circle insight, future self.

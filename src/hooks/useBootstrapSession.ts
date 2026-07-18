@@ -7,6 +7,7 @@ export function useBootstrapSession() {
   const setUser = useAuthStore((state) => state.setUser);
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const setSessionLoading = useAuthStore((state) => state.setSessionLoading);
+  const setPasswordRecoveryMode = useAuthStore((state) => state.setPasswordRecoveryMode);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,7 +34,8 @@ export function useBootstrapSession() {
       });
     });
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecoveryMode(true);
       loadFromSession(session?.user.id);
     });
 
@@ -41,5 +43,5 @@ export function useBootstrapSession() {
       isMounted = false;
       subscription.subscription.unsubscribe();
     };
-  }, [setUser, setActiveCircleId, setSessionLoading]);
+  }, [setUser, setActiveCircleId, setSessionLoading, setPasswordRecoveryMode]);
 }

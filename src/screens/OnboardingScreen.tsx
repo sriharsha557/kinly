@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signIn, signInWithGoogle, signUp } from '../lib/auth';
+import { requestPasswordReset, signIn, signInWithGoogle, signUp } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
 import { useSetInterests } from '../hooks/useInterests';
@@ -31,6 +31,22 @@ function AuthStep() {
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+
+  async function handleRequestReset() {
+    setError(null);
+    setResetSubmitting(true);
+    try {
+      await requestPasswordReset(email.trim());
+      setResetSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send reset link');
+    } finally {
+      setResetSubmitting(false);
+    }
+  }
 
   async function handleSubmit() {
     setError(null);
@@ -82,6 +98,51 @@ function AuthStep() {
     );
   }
 
+  if (forgotPasswordMode) {
+    if (resetSent) {
+      return (
+        <View style={styles.form}>
+          <Text style={styles.confirmTitle}>Check your email</Text>
+          <Text style={styles.confirmBody}>
+            We sent a password reset link to {email.trim()}. Tap it to set a new password.
+          </Text>
+          <PillButton
+            label="Back to sign in"
+            variant="outline"
+            onPress={() => {
+              setForgotPasswordMode(false);
+              setResetSent(false);
+            }}
+          />
+        </View>
+      );
+    }
+    return (
+      <View style={styles.form}>
+        <Text style={styles.confirmTitle}>Reset your password</Text>
+        <Text style={styles.confirmBody}>Enter your email and we'll send you a reset link.</Text>
+        <AppTextInput
+          label="E-mail"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
+        />
+        {error && <Text style={styles.error}>{error}</Text>}
+        <PillButton
+          label="Send reset link"
+          onPress={handleRequestReset}
+          loading={resetSubmitting}
+          disabled={!email.trim()}
+        />
+        <TouchableOpacity onPress={() => setForgotPasswordMode(false)}>
+          <Text style={styles.link}>Back to sign in</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.form}>
       {mode === 'signUp' && (
@@ -102,6 +163,12 @@ function AuthStep() {
         onChangeText={setPassword}
         placeholder="••••••••"
       />
+
+      {mode === 'signIn' && (
+        <TouchableOpacity onPress={() => setForgotPasswordMode(true)} style={{ alignSelf: 'flex-end' }}>
+          <Text style={styles.link}>Forgot password?</Text>
+        </TouchableOpacity>
+      )}
 
       {error && <Text style={styles.error}>{error}</Text>}
 
