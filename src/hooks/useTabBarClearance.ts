@@ -1,14 +1,12 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const TAB_BAR_HEIGHT = 64;
-export const TAB_BAR_MARGIN = 12;
-export const TAB_BAR_MIN_BOTTOM = 20;
+export const TAB_BAR_HEIGHT = 58;
 
-// Mirrors MainTabs' own floating-pill positioning so scrollable screen
-// content reserves exactly enough space to clear it, on both gesture
-// navigation and Android's much taller 3-button nav bar.
-export function useTabBarClearance(extra = 26): number {
+// Mirrors MainTabs' own bar height so scrollable screen content reserves
+// exactly enough space to clear it. The bar itself sits flush against the
+// bottom edge with insets.bottom as internal padding, so its total on-screen
+// footprint is TAB_BAR_HEIGHT + insets.bottom - same number used here.
+export function useTabBarClearance(extra = 20): number {
   const insets = useSafeAreaInsets();
-  const tabBarBottom = Math.max(TAB_BAR_MIN_BOTTOM, insets.bottom + TAB_BAR_MARGIN);
-  return tabBarBottom + TAB_BAR_HEIGHT + extra;
+  return TAB_BAR_HEIGHT + insets.bottom + extra;
 }

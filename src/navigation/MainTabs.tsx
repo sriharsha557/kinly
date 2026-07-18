@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
+import type { FC } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import TodayScreen from '../screens/TodayScreen';
@@ -9,62 +8,57 @@ import CircleScreen from '../screens/CircleScreen';
 import GoalsScreen from '../screens/GoalsScreen';
 import ConnectionScreen from '../screens/ConnectionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import { colors, radii, shadow } from '../theme/colors';
-import { TAB_BAR_HEIGHT, TAB_BAR_MARGIN, TAB_BAR_MIN_BOTTOM } from '../hooks/useTabBarClearance';
+import {
+  HomeTabIcon,
+  PeopleTabIcon,
+  GoalsTabIcon,
+  ChatTabIcon,
+  ProfileTabIcon,
+} from '../components/icons/TabIcons';
+import { colors } from '../theme/colors';
+import { TAB_BAR_HEIGHT } from '../hooks/useTabBarClearance';
 import type { MainTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const ICONS: Record<keyof MainTabParamList, keyof typeof Ionicons.glyphMap> = {
-  Today: 'home',
-  Circle: 'people',
-  Goals: 'flag',
-  Connection: 'happy',
-  Profile: 'person',
+const ICONS: Record<keyof MainTabParamList, FC<{ size?: number; color: string }>> = {
+  Today: HomeTabIcon,
+  Circle: PeopleTabIcon,
+  Goals: GoalsTabIcon,
+  Connection: ChatTabIcon,
+  Profile: ProfileTabIcon,
 };
 
+// Instagram-style flat bar: no pill background behind the active icon, just
+// a color change plus a small scale pop for tactile feedback.
 function TabIcon({
-  name,
+  Icon,
   color,
   focused,
 }: {
-  name: keyof typeof Ionicons.glyphMap;
+  Icon: FC<{ size?: number; color: string }>;
   color: string;
   focused: boolean;
 }) {
-  const scale = useSharedValue(focused ? 1 : 0);
+  const scale = useSharedValue(1);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1 : 0, { damping: 14, stiffness: 220 });
+    scale.value = withSpring(focused ? 1.12 : 1, { damping: 14, stiffness: 220 });
   }, [focused, scale]);
 
-  const wrapStyle = useAnimatedStyle(() => ({
-    backgroundColor: colors.primary,
-    opacity: scale.value,
-    transform: [{ scale: 0.6 + scale.value * 0.4 }],
-  }));
-
   const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 + scale.value * 0.08 }],
+    transform: [{ scale: scale.value }],
   }));
 
   return (
-    <View style={styles.iconWrap}>
-      <Animated.View style={[styles.activeIconWrap, wrapStyle]} />
-      <Animated.View style={[styles.iconOverlay, iconStyle]}>
-        <Ionicons name={name} size={22} color={focused ? '#fff' : color} />
-      </Animated.View>
-    </View>
+    <Animated.View style={iconStyle}>
+      <Icon size={24} color={color} />
+    </Animated.View>
   );
 }
 
 export default function MainTabs() {
-  // The floating pill sat at a flat `bottom: 20`, which overlaps Android's
-  // 3-button navigation bar (much taller than the gesture-nav strip it was
-  // tuned against) - insets.bottom already reflects whichever nav mode the
-  // user has enabled, so anchor to that instead of a constant.
   const insets = useSafeAreaInsets();
-  const tabBarBottom = Math.max(TAB_BAR_MIN_BOTTOM, insets.bottom + TAB_BAR_MARGIN);
 
   return (
     <Tab.Navigator
@@ -73,11 +67,13 @@ export default function MainTabs() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: false,
-        tabBarStyle: [styles.tabBar, { bottom: tabBarBottom }],
+        tabBarStyle: [
+          styles.tabBar,
+          { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
+        ],
         tabBarItemStyle: styles.tabBarItem,
-        tabBarIconStyle: styles.tabBarIconStyle,
         tabBarIcon: ({ color, focused }) => (
-          <TabIcon name={ICONS[route.name]} color={color} focused={focused} />
+          <TabIcon Icon={ICONS[route.name]} color={color} focused={focused} />
         ),
       })}
     >
@@ -93,36 +89,16 @@ export default function MainTabs() {
 const styles = {
   tabBar: {
     position: 'absolute' as const,
-    left: 20,
-    right: 20,
-    height: TAB_BAR_HEIGHT,
-    borderRadius: radii.pill,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: colors.surface,
-    borderTopWidth: 0,
-    paddingHorizontal: 8,
-    ...shadow,
+    borderTopWidth: 1,
+    borderTopColor: colors.inputBg,
+    elevation: 0,
   },
   tabBarItem: {
     height: TAB_BAR_HEIGHT,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  tabBarIconStyle: {
-    margin: 0,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  activeIconWrap: {
-    position: 'absolute' as const,
-    width: 40,
-    height: 40,
-    borderRadius: radii.pill,
-  },
-  iconOverlay: {
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
