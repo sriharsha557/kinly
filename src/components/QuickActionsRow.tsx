@@ -10,10 +10,13 @@ import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
 
+// Ordered left-to-right to ascend through the tab bar's own order
+// (Today, Circle, Goals, Connection, Profile), so tapping through the row
+// feels like moving forward across tabs instead of jumping around.
 const ACTIONS: { label: string; emoji?: string; icon?: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
+  { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
   { label: 'Check In', emoji: '✅', tab: 'Goals' },
   { label: 'Ask Friends', icon: ChatIcon, tab: 'Connection' },
-  { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
 ];
 
 export function QuickActionsRow() {
