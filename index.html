@@ -380,6 +380,107 @@
     .garden-explain{grid-template-columns:1fr; padding:36px 26px;}
   }
 
+  /* ---------- SCREENSHOTS ---------- */
+  .screens-row{
+    display:flex;
+    gap:20px;
+    overflow-x:auto;
+    padding:8px 4px 24px;
+    scroll-snap-type:x proximity;
+  }
+  .phone-frame{
+    flex:0 0 auto;
+    width:220px;
+    scroll-snap-align:start;
+  }
+  .phone-frame .glass{
+    width:220px;
+    aspect-ratio:9/19.5;
+    border-radius:26px;
+    border:6px solid var(--ink);
+    background:var(--sand);
+    overflow:hidden;
+    box-shadow:var(--shadow-card);
+  }
+  .phone-frame .glass img{width:100%; height:100%; object-fit:cover;}
+  .phone-frame .glass .placeholder{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-faint);
+    text-align:center;
+    padding:20px;
+  }
+  .phone-frame .caption{
+    margin-top:12px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  /* ---------- DOWNLOAD / BETA CTA ---------- */
+  .beta-cta{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:52px;
+    text-align:center;
+  }
+  .beta-cta h2{
+    font-size:clamp(28px, 4vw, 40px);
+    font-style:italic;
+  }
+  .beta-cta p.sub{
+    margin:14px auto 0;
+    max-width:44ch;
+    color:var(--ink-soft);
+    font-size:16.5px;
+  }
+  .beta-cta .btn-primary{
+    margin-top:28px;
+    padding:15px 30px;
+    font-size:16px;
+  }
+  .beta-cta .fine{
+    margin-top:12px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+  .install-steps{
+    margin:40px auto 0;
+    max-width:640px;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:16px;
+    text-align:left;
+  }
+  .install-step{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:16px 14px;
+  }
+  .install-step .n{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--orange);
+    font-weight:600;
+  }
+  .install-step p{
+    margin:6px 0 0;
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.4;
+  }
+  @media (max-width: 720px){
+    .beta-cta{padding:36px 24px;}
+    .install-steps{grid-template-columns:1fr 1fr;}
+  }
+  .btn.is-disabled{opacity:0.5; cursor:not-allowed; pointer-events:none;}
+
   /* ---------- BUILT WITH ---------- */
   .built-with{
     display:flex;
@@ -589,6 +690,43 @@
   </div>
 
   <div class="wrap">
+    <!--
+      Drop real screenshots into assets/screenshots/ using these exact
+      filenames (9:19.5 aspect ratio, e.g. a raw phone screenshot works
+      fine) and each placeholder below is replaced automatically:
+        today.png, circle.png, goals.png, connection.png, profile.png
+    -->
+    <section id="app-screens" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">See it</p>
+        <h2>What it actually looks like.</h2>
+      </div>
+      <div class="screens-row">
+        <div class="phone-frame">
+          <div class="glass"><img src="assets/screenshots/today.png" alt="Today screen" data-fallback="Today"></div>
+          <div class="caption">Today</div>
+        </div>
+        <div class="phone-frame">
+          <div class="glass"><img src="assets/screenshots/circle.png" alt="Circle screen" data-fallback="Circle"></div>
+          <div class="caption">Circle</div>
+        </div>
+        <div class="phone-frame">
+          <div class="glass"><img src="assets/screenshots/goals.png" alt="Goals screen" data-fallback="Goals"></div>
+          <div class="caption">Goals</div>
+        </div>
+        <div class="phone-frame">
+          <div class="glass"><img src="assets/screenshots/connection.png" alt="Connection screen" data-fallback="Connection"></div>
+          <div class="caption">Connection</div>
+        </div>
+        <div class="phone-frame">
+          <div class="glass"><img src="assets/screenshots/profile.png" alt="Profile screen" data-fallback="Profile"></div>
+          <div class="caption">Profile</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
     <section id="garden">
       <div class="garden-explain">
         <div>
@@ -617,6 +755,32 @@
             <svg viewBox="0 0 60 140" width="40" height="76"><path d="M30,130 L30,70" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="46" r="28" fill="#FFFFFF"/><circle cx="14" cy="34" r="6" fill="#F97316"/><circle cx="44" cy="30" r="5.5" fill="#F9A93F"/></svg>
             <span>Bloom</span>
           </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <!--
+      Not live yet. Once there's a real install link (EAS internal-
+      distribution build page, or wherever the APK ends up hosted - the
+      same value as EXPO_PUBLIC_ANDROID_APK_URL in the app's own invite
+      messages), update the anchor below: set href to the real URL, drop
+      the is-disabled class, and swap the fine-print line.
+    -->
+    <section id="download" style="padding-top:0;">
+      <div class="beta-cta">
+        <p class="eyebrow">Get the app</p>
+        <h2>Join the beta.</h2>
+        <p class="sub">Kinly is in active testing on Android right now — an iOS beta will follow once that's sorted out.</p>
+        <a class="btn btn-primary is-disabled" href="#" aria-disabled="true">Join the Beta — Android</a>
+        <p class="fine">Not live yet — check back soon.</p>
+
+        <div class="install-steps">
+          <div class="install-step"><span class="n">01</span><p>Tap "Join the Beta" and download the APK.</p></div>
+          <div class="install-step"><span class="n">02</span><p>Open the downloaded file from your notifications.</p></div>
+          <div class="install-step"><span class="n">03</span><p>Allow installs from this source when Android asks.</p></div>
+          <div class="install-step"><span class="n">04</span><p>Open Kinly and join your circle.</p></div>
         </div>
       </div>
     </section>
@@ -680,6 +844,17 @@
       stages.classList.add('in-view');
     }
   }
+
+  // Real screenshots aren't in assets/screenshots/ yet - swap any missing
+  // one for a labeled placeholder instead of a broken image icon.
+  document.querySelectorAll('.glass img[data-fallback]').forEach(function(img){
+    img.addEventListener('error', function(){
+      var placeholder = document.createElement('div');
+      placeholder.className = 'placeholder';
+      placeholder.textContent = img.getAttribute('data-fallback');
+      img.replaceWith(placeholder);
+    });
+  });
 </script>
 
 </body>
