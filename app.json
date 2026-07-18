@@ -40,7 +40,8 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "@sentry/react-native"
+      "@sentry/react-native",
+      "expo-video"
     ],
     "extra": {
       "eas": {
