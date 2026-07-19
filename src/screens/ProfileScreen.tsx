@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -104,7 +104,14 @@ export default function ProfileScreen() {
 
         {user && <FutureSelfCard userId={user.id} />}
 
-        <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 32 }} />
+        <TouchableOpacity
+          onPress={() => Linking.openURL('https://sriharsha557.github.io/kinly/privacy.html')}
+          style={{ marginTop: 32, alignItems: 'center' }}
+        >
+          <Text style={styles.privacyLink}>Privacy Policy</Text>
+        </TouchableOpacity>
+
+        <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 12 }} />
       </ScrollView>
 
       {viewingAchievement && (
@@ -138,4 +145,5 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   empty: { color: colors.textSecondary },
+  privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
 });

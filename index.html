@@ -568,7 +568,7 @@
     align-items:center;
     gap:10px;
   }
-  .footer-brand svg{width:26px; height:26px;}
+  .footer-brand svg, .footer-brand img{width:26px; height:26px;}
   .footer-brand span{
     font-family:'Newsreader', serif;
     font-style:italic;
@@ -887,13 +887,7 @@
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-brand">
-        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="72" cy="70" r="11" fill="#F97316"/>
-          <circle cx="128" cy="70" r="11" fill="#F97316"/>
-          <path d="M55,108 C55,145 82,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
-          <path d="M145,108 C145,145 118,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
-          <circle cx="100" cy="150" r="7" fill="#F97316"/>
-        </svg>
+        <img src="assets/brand/logo-web.png" alt="" width="26" height="26">
         <span>Grow together.</span>
       </div>
       <a class="btn btn-ghost" href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener">github.com/sriharsha557/kinly</a>
@@ -901,6 +895,9 @@
     <div class="fineprint">
       <span>Kinly — built for small circles of friends.</span>
       <span>No feeds. No strangers. Just your circle.</span>
+    </div>
+    <div class="fineprint" style="margin-top:8px;">
+      <a href="privacy.html" style="text-decoration:none; color:var(--ink-faint);">Privacy Policy</a>
     </div>
   </div>
 </footer>

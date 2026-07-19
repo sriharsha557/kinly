@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -193,6 +194,19 @@ function AuthStep() {
           {mode === 'signUp' ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </Text>
       </TouchableOpacity>
+
+      {mode === 'signUp' && (
+        <Text style={styles.legalNote}>
+          By creating an account you agree to our{' '}
+          <Text
+            style={styles.legalLink}
+            onPress={() => Linking.openURL('https://sriharsha557.github.io/kinly/privacy.html')}
+          >
+            Privacy Policy
+          </Text>
+          .
+        </Text>
+      )}
     </View>
   );
 }
@@ -361,6 +375,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
   link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
+  legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+  legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
   orDivider: { textAlign: 'center', color: colors.textSecondary },
   error: { color: colors.danger, textAlign: 'center' },
 });
