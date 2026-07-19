@@ -3,7 +3,7 @@ import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 
@@ -121,19 +121,23 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.wealth.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.wealth.text },
-  newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.wealth.text },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   itemCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.inputBg,
     borderRadius: radii.input,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -142,7 +146,7 @@ const styles = StyleSheet.create({
   itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
   itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
   itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
-  empty: { fontSize: 12, color: categoryColors.wealth.text, opacity: 0.8 },
+  empty: { fontSize: 13, color: '#7A7A6E' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

@@ -3,6 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useWeeklyRecap } from '../hooks/useWeeklyRecap';
 import { useCircleDetail } from '../hooks/useCircles';
 import { gradients, radii } from '../theme/colors';
+import { RobotIcon, SproutIcon } from './icons/MonoIcons';
+import { HealthIcon } from './icons/PillarIcons';
 
 function healthDeltaLabel(now: number, weekAgo: number | null): string | null {
   if (weekAgo === null) return null;
@@ -48,7 +50,10 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
   return (
     <LinearGradient colors={gradients.inspiration} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <View style={styles.titleRow}>
-        <Text style={styles.title}>🤖 This Week in Your Circle</Text>
+        <View style={styles.titleTextRow}>
+          <RobotIcon size={18} color="#fff" />
+          <Text style={styles.title}>This Week in Your Circle</Text>
+        </View>
         <TouchableOpacity onPress={handleShare} accessibilityRole="button" accessibilityLabel="Share weekly scorecard">
           <Text style={styles.shareLink}>Share</Text>
         </TouchableOpacity>
@@ -76,12 +81,18 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
       )}
       <View style={styles.footerRow}>
         {data.mostWateredFriendName && (
-          <Text style={styles.footerText}>💧 Most watered: {data.mostWateredFriendName}</Text>
+          <View style={styles.footerLine}>
+            <HealthIcon size={13} color="#fff" />
+            <Text style={styles.footerText}>Most watered: {data.mostWateredFriendName}</Text>
+          </View>
         )}
-        <Text style={styles.footerText}>
-          🌱 {delta ? `${delta} ` : ''}
-          {data.healthNow}% health
-        </Text>
+        <View style={styles.footerLine}>
+          <SproutIcon size={13} color="#fff" />
+          <Text style={styles.footerText}>
+            {delta ? `${delta} ` : ''}
+            {data.healthNow}% health
+          </Text>
+        </View>
       </View>
     </LinearGradient>
   );
@@ -90,6 +101,7 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
 const styles = StyleSheet.create({
   card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 15, fontWeight: '700', color: '#fff' },
   shareLink: { fontSize: 13, fontWeight: '700', color: '#fff', textDecorationLine: 'underline' },
   highlight: { fontSize: 13, color: 'rgba(255,255,255,0.95)', lineHeight: 18 },
@@ -97,6 +109,7 @@ const styles = StyleSheet.create({
   stat: { alignItems: 'center' },
   statValue: { fontSize: 20, fontWeight: '800', color: '#fff' },
   statLabel: { fontSize: 10, color: 'rgba(255,255,255,0.85)' },
-  footerRow: { gap: 2, marginTop: 2 },
+  footerRow: { gap: 4, marginTop: 2 },
+  footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   footerText: { fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: '600' },
 });

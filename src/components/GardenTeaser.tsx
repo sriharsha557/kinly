@@ -9,6 +9,7 @@ import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } fr
 import { AnimatedPressable } from './AnimatedPressable';
 import { useGardenState } from '../hooks/useGarden';
 import { gradients, radii } from '../theme/colors';
+import { SproutIcon } from './icons/MonoIcons';
 import type { MainTabParamList } from '../navigation/types';
 import SproutSoil from '../../assets/illustrations/kinly-ill-sprout-soil.svg';
 import Bud from '../../assets/illustrations/kinly-ill-bud.svg';
@@ -55,7 +56,10 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
         <View style={styles.heroArt}>
           <HeroArt width={68} height={68} />
         </View>
-        <Text style={styles.title}>🌱 Your Circle</Text>
+        <View style={styles.titleRow}>
+          <SproutIcon size={16} color="#fff" />
+          <Text style={styles.title}>Your Circle</Text>
+        </View>
         <Text style={styles.percent}>{health}%</Text>
         <View style={styles.barTrack}>
           <Animated.View style={[styles.barFill, barStyle]} />
@@ -76,6 +80,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 14, fontWeight: '700', color: '#fff' },
   percent: { fontSize: 40, fontWeight: '800', color: '#fff', marginTop: 2 },
   barTrack: {

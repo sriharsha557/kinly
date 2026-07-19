@@ -7,7 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import type { MoodValue } from '../types/models';
 import HappyIcon from '../../assets/icons/mood/happy.svg';
 import NeutralIcon from '../../assets/icons/mood/neutral.svg';
@@ -98,17 +98,21 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.relationships.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 16,
-    ...shadow,
   },
-  title: { fontSize: 15, fontWeight: '700', color: categoryColors.relationships.text, marginBottom: 12 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F', marginBottom: 12 },
   pickRow: { flexDirection: 'row', gap: 10 },
   pickButton: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.inputBg,
     borderRadius: radii.card,
     paddingVertical: 14,
     alignItems: 'center',
@@ -125,8 +129,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  moodBubbleFilled: { backgroundColor: colors.surface },
-  moodBubbleEmpty: { backgroundColor: 'rgba(255,255,255,0.5)' },
+  moodBubbleFilled: { backgroundColor: colors.inputBg },
+  moodBubbleEmpty: { backgroundColor: colors.background },
   moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
-  memberName: { fontSize: 11, fontWeight: '600', color: categoryColors.relationships.text, marginTop: 4 },
+  memberName: { fontSize: 11, fontWeight: '600', color: '#7A7A6E', marginTop: 4 },
 });

@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useGardenState } from '../hooks/useGarden';
 import { GardenStageArt } from './GardenStageArt';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors } from '../theme/colors';
 import SproutIcon from '../../assets/icons/feed/sprout.svg';
 
 function healthMessage(health: number): string {
@@ -43,17 +43,21 @@ export function GardenCard({ circleId }: { circleId: string }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.health.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.health.text },
-  health: { fontSize: 13, fontWeight: '700', color: categoryColors.health.text },
-  message: { fontSize: 12, color: categoryColors.health.text, opacity: 0.8, marginTop: 2, marginBottom: 12 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  health: { fontSize: 13, fontWeight: '700', color: colors.primary },
+  message: { fontSize: 13, color: '#7A7A6E', marginTop: 2, marginBottom: 12 },
   row: { gap: 16 },
   plant: { alignItems: 'center', width: 56 },
   name: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, marginTop: 2 },

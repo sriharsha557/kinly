@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useMeetups, useProposeMeetup, useRsvpMeetup, type MeetupWithRsvps } from '../hooks/useMeetups';
 import { PillButton } from './PillButton';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import type { RsvpStatus } from '../types/models';
 import MeetupIcon from '../../assets/illustrations/kinly-ill-calendar-meetup.svg';
 
@@ -128,18 +128,22 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.learning.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.learning.text },
-  newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.learning.text },
-  empty: { fontSize: 12, color: categoryColors.learning.text, opacity: 0.8 },
-  meetupRow: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 4 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+  empty: { fontSize: 13, color: '#7A7A6E' },
+  meetupRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
   meetupTitle: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
   meetupNote: { fontSize: 12, color: colors.textSecondary },
   meetupMeta: { fontSize: 11, color: colors.textSecondary },

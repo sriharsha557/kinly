@@ -74,8 +74,8 @@ export default function ProfileScreen() {
               value={stats?.currentStreak ?? 0}
             />
             <StatTile
-              background={categoryColors.relationships.bg}
-              textColor={categoryColors.relationships.text}
+              background={categoryColors.wealth.bg}
+              textColor={categoryColors.wealth.text}
               label="Friends helped"
               value={stats?.friendsHelped ?? 0}
             />

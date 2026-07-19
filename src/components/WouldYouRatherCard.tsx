@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useCreatePoll, useLatestPoll, useVotePoll } from '../hooks/useWouldYouRather';
 import { PillButton } from './PillButton';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii, shadow } from '../theme/colors';
+import { RelationshipsIcon } from './icons/PillarIcons';
 
 function NewPollModal({
   circleId,
@@ -59,7 +60,10 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>❤️ Would You Rather</Text>
+        <View style={styles.titleRow}>
+          <RelationshipsIcon size={16} color={colors.primary} />
+          <Text style={styles.title}>Would You Rather</Text>
+        </View>
         <TouchableOpacity onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
         </TouchableOpacity>
@@ -94,16 +98,21 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.relationships.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.relationships.text },
-  newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.relationships.text },
-  empty: { fontSize: 12, color: categoryColors.relationships.text, opacity: 0.8 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+  empty: { fontSize: 13, color: '#7A7A6E' },
   options: { gap: 8 },
   option: {
     backgroundColor: colors.surface,

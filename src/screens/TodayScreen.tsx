@@ -44,7 +44,7 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: EventIcon
   reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
-  mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: NeutralIcon },
+  mood_checkin: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: NeutralIcon },
   streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: WaterIcon },
   progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CameraIcon },
 };
@@ -206,21 +206,23 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
 
       {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
-      <View style={styles.nudgeRow}>
-        {NUDGE_KINDS.map(({ kind, Icon, label }) => (
-          <TouchableOpacity
-            key={kind}
-            style={styles.nudgeButton}
-            onPress={() => handleNudge(kind)}
-            disabled={sendingKind !== null}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            hitSlop={4}
-          >
-            {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <Icon width={18} height={18} />}
-          </TouchableOpacity>
-        ))}
-      </View>
+      {event.user_id !== userId && (
+        <View style={styles.nudgeRow}>
+          {NUDGE_KINDS.map(({ kind, Icon, label }) => (
+            <TouchableOpacity
+              key={kind}
+              style={styles.nudgeButton}
+              onPress={() => handleNudge(kind)}
+              disabled={sendingKind !== null}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              hitSlop={4}
+            >
+              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <Icon width={18} height={18} />}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {waterableGoalId && (
         <TouchableOpacity

@@ -12,7 +12,7 @@ import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from './ProgressBar';
 import { PillButton } from './PillButton';
 import { MilestoneCardModal } from './MilestoneCardModal';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
 
 function NewChallengeModal({
@@ -211,22 +211,26 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.ideas.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.ideas.text },
-  newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
   challenge: { gap: 6 },
   challengeTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  challengeMeta: { fontSize: 11, color: colors.textSecondary },
-  logLink: { fontSize: 12, fontWeight: '700', color: categoryColors.ideas.text },
-  empty: { fontSize: 12, color: categoryColors.ideas.text, opacity: 0.8 },
+  challengeMeta: { fontSize: 11, color: '#7A7A6E' },
+  logLink: { fontSize: 12, fontWeight: '700', color: colors.primary },
+  empty: { fontSize: 13, color: '#7A7A6E' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

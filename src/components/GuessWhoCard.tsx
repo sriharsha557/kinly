@@ -3,7 +3,7 @@ import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import MasksIcon from '../../assets/icons/feed/masks.svg';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 
@@ -149,18 +149,22 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.ideas.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.ideas.text },
-  newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
-  empty: { fontSize: 12, color: categoryColors.ideas.text, opacity: 0.8 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+  empty: { fontSize: 13, color: '#7A7A6E' },
   postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
   fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
   memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

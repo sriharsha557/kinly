@@ -7,7 +7,7 @@ import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
 import { PillButton } from './PillButton';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
 
 // The exact single-day grace window water_streak() itself enforces
@@ -133,18 +133,22 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: categoryColors.relationships.bg,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
-    ...shadow,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: categoryColors.relationships.text },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
   buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-  status: { fontSize: 12, color: categoryColors.relationships.text, marginTop: 2 },
-  changeLink: { fontSize: 12, fontWeight: '600', color: categoryColors.relationships.text },
-  empty: { fontSize: 12, color: categoryColors.relationships.text, opacity: 0.8, marginTop: 6 },
+  status: { fontSize: 13, color: '#7A7A6E', marginTop: 2 },
+  changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
+  empty: { fontSize: 13, color: '#7A7A6E', marginTop: 6 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

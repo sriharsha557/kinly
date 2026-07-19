@@ -5,7 +5,7 @@ import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
 import { INTEREST_OPTIONS } from './InterestPicker';
 import { IdeasIcon } from './icons/PillarIcons';
-import { colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import IdeaBulb from '../../assets/illustrations/kinly-ill-idea-bulb.svg';
 
 export function CircleAICard({
@@ -78,15 +78,19 @@ export function CircleAICard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 16,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
+    padding: 20,
+    paddingLeft: 18,
     marginBottom: 20,
     gap: 10,
-    ...shadow,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
   message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: {
