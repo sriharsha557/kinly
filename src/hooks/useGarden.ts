@@ -36,7 +36,8 @@ export function useGardenState(circleId: string | undefined) {
         supabase
           .from('circle_members')
           .select('user_id, profiles(name)')
-          .eq('circle_id', circleId as string),
+          .eq('circle_id', circleId as string)
+          .eq('status', 'active'),
         supabase
           .from('goals')
           .select('user_id, streak_count, last_logged_date')

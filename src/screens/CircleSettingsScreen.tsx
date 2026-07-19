@@ -14,12 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import {
+  useApproveMember,
   useCircleDetail,
   useCircleMembers,
   useCreateCircle,
   useJoinCircle,
   useLeaveCircle,
   useMyCircles,
+  useRejectMember,
   useUpdateMemberRole,
 } from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
@@ -138,6 +140,8 @@ export default function CircleSettingsScreen() {
   const { data: members, isLoading: membersLoading } = useCircleMembers(circleId ?? undefined);
   const { data: myCircles } = useMyCircles(userId);
   const updateRole = useUpdateMemberRole(circleId ?? undefined);
+  const approveMember = useApproveMember(circleId ?? undefined);
+  const rejectMember = useRejectMember(circleId ?? undefined);
   const leaveCircle = useLeaveCircle();
   const { data: mutedCategories } = useNotificationMutes(circleId ?? undefined, userId);
   const toggleMute = useToggleMute(circleId ?? undefined, userId);
@@ -146,6 +150,8 @@ export default function CircleSettingsScreen() {
 
   const myRole = members?.find((m) => m.user_id === userId)?.role;
   const canManageRoles = myRole === 'owner' || myRole === 'admin';
+  const activeMembers = members?.filter((m) => m.status === 'active') ?? [];
+  const pendingMembers = members?.filter((m) => m.status === 'pending') ?? [];
 
   async function handleShareWhatsApp() {
     if (!circle) return;
@@ -159,7 +165,7 @@ export default function CircleSettingsScreen() {
 
   function handleLeave() {
     if (!circleId) return;
-    const willTransferOwnership = myRole === 'owner' && (members?.length ?? 0) > 1;
+    const willTransferOwnership = myRole === 'owner' && activeMembers.length > 1;
     const message = willTransferOwnership
       ? "Ownership will transfer to another member. You'll need a new invite to rejoin."
       : "You'll need a new invite to rejoin.";
@@ -190,21 +196,56 @@ export default function CircleSettingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.circleName}>{circle?.name}</Text>
 
-        <View style={styles.inviteCard}>
-          <Text style={styles.inviteLabel}>Invite code</Text>
-          <Text style={styles.inviteCode}>{circle?.invite_code}</Text>
-          <PillButton label="Share via WhatsApp" onPress={handleShareWhatsApp} style={{ marginTop: 12 }} />
-          <PillButton
-            label="Other apps"
-            variant="outline"
-            onPress={handleShareOther}
-            style={{ marginTop: 8 }}
-          />
-        </View>
+        {canManageRoles ? (
+          <View style={styles.inviteCard}>
+            <Text style={styles.inviteLabel}>Invite code</Text>
+            <Text style={styles.inviteCode}>{circle?.invite_code}</Text>
+            <PillButton label="Share via WhatsApp" onPress={handleShareWhatsApp} style={{ marginTop: 12 }} />
+            <PillButton
+              label="Other apps"
+              variant="outline"
+              onPress={handleShareOther}
+              style={{ marginTop: 8 }}
+            />
+          </View>
+        ) : (
+          <View style={styles.inviteCard}>
+            <Text style={styles.inviteLabel}>Invite code</Text>
+            <Text style={styles.askOwnerText}>Ask the circle owner for an invite.</Text>
+          </View>
+        )}
 
-        <Text style={styles.sectionTitle}>Members ({members?.length ?? 0}/10)</Text>
+        {canManageRoles && pendingMembers.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Join requests ({pendingMembers.length})</Text>
+            <View style={styles.memberList}>
+              {pendingMembers.map((member) => (
+                <View key={member.user_id} style={styles.memberRow}>
+                  <Text style={styles.memberName}>{member.profiles?.name ?? 'Someone'}</Text>
+                  <View style={styles.roleChips}>
+                    <PillButton
+                      label="Decline"
+                      variant="outline"
+                      onPress={() => rejectMember.mutate(member.user_id)}
+                      loading={rejectMember.isPending}
+                      style={styles.requestBtn}
+                    />
+                    <PillButton
+                      label="Approve"
+                      onPress={() => approveMember.mutate(member.user_id)}
+                      loading={approveMember.isPending}
+                      style={styles.requestBtn}
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        <Text style={styles.sectionTitle}>Members ({activeMembers.length}/10)</Text>
         <View style={styles.memberList}>
-          {members?.map((member) => (
+          {activeMembers.map((member) => (
             <View key={member.user_id} style={styles.memberRow}>
               <Text style={styles.memberName}>{member.profiles?.name ?? 'Member'}</Text>
               {canManageRoles && member.user_id !== userId ? (
@@ -307,6 +348,8 @@ const styles = StyleSheet.create({
   },
   inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
   inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
+  askOwnerText: { fontSize: 14, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
+  requestBtn: { paddingHorizontal: 16, paddingVertical: 8 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
   memberList: { gap: 10 },
   memberRow: {

@@ -18,11 +18,13 @@ export interface Circle {
 }
 
 export type CircleRole = 'owner' | 'admin' | 'member';
+export type CircleMemberStatus = 'pending' | 'active';
 
 export interface CircleMember {
   circle_id: string;
   user_id: string;
   role: CircleRole;
+  status: CircleMemberStatus;
 }
 
 export interface Goal {

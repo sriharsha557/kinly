@@ -1,18 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import type { Circle, CircleRole } from '../types/models';
+import type { Circle, CircleMemberStatus, CircleRole } from '../types/models';
 
-export function useMyCircles(userId: string | undefined) {
+export interface CircleWithMembership extends Circle {
+  membershipStatus: CircleMemberStatus;
+}
+
+// refetchInterval is opt-in (undefined = no polling) so ordinary screens
+// (CircleSettings, the circle switcher) don't poll in the background -
+// RootNavigator passes one while a membership is pending, to detect an
+// approval without a realtime channel (this codebase uses none elsewhere).
+export function useMyCircles(userId: string | undefined, refetchInterval?: number) {
   return useQuery({
     queryKey: ['circles', userId],
     enabled: !!userId,
-    queryFn: async (): Promise<Circle[]> => {
+    refetchInterval,
+    queryFn: async (): Promise<CircleWithMembership[]> => {
       const { data, error } = await supabase
         .from('circle_members')
-        .select('circles(*)')
+        .select('status, circles(*)')
         .eq('user_id', userId as string);
       if (error) throw error;
-      return (data ?? []).flatMap((row) => (row.circles ? [row.circles as unknown as Circle] : []));
+      return (data ?? []).flatMap((row) =>
+        row.circles ? [{ ...(row.circles as unknown as Circle), membershipStatus: row.status as CircleMemberStatus }] : [],
+      );
     },
   });
 }
@@ -29,6 +40,8 @@ export function useCreateCircle() {
   });
 }
 
+// Joining always lands the caller in 'pending' status (migration 0022) -
+// the returned circle is real, but the caller isn't an active member yet.
 export function useJoinCircle() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -36,6 +49,17 @@ export function useJoinCircle() {
       const { data, error } = await supabase.rpc('join_circle_by_invite_code', { code: inviteCode });
       if (error) throw error;
       return data as Circle;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circles'] }),
+  });
+}
+
+export function useCancelJoinRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (circleId: string) => {
+      const { error } = await supabase.rpc('cancel_join_request', { p_circle_id: circleId });
+      if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circles'] }),
   });
@@ -56,6 +80,7 @@ export function useCircleDetail(circleId: string | undefined) {
 export interface CircleMemberWithProfile {
   user_id: string;
   role: CircleRole;
+  status: CircleMemberStatus;
   joined_at: string;
   profiles: { name: string; avatar: string | null } | null;
 }
@@ -67,7 +92,7 @@ export function useCircleMembers(circleId: string | undefined) {
     queryFn: async (): Promise<CircleMemberWithProfile[]> => {
       const { data, error } = await supabase
         .from('circle_members')
-        .select('user_id, role, joined_at, profiles(name, avatar)')
+        .select('user_id, role, status, joined_at, profiles(name, avatar)')
         .eq('circle_id', circleId as string)
         .order('joined_at', { ascending: true });
       if (error) throw error;
@@ -96,6 +121,28 @@ export function useUpdateMemberRole(circleId: string | undefined) {
         .update({ role })
         .eq('circle_id', circleId as string)
         .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] }),
+  });
+}
+
+export function useApproveMember(circleId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc('approve_member', { p_circle_id: circleId as string, p_user_id: userId });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] }),
+  });
+}
+
+export function useRejectMember(circleId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.rpc('reject_member', { p_circle_id: circleId as string, p_user_id: userId });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] }),

@@ -40,7 +40,7 @@ function NewFactModal({
           />
           <Text style={styles.pickLabel}>Who is it about?</Text>
           <View style={styles.memberChips}>
-            {members?.map((m) => (
+            {members?.filter((m) => m.status === 'active').map((m) => (
               <TouchableOpacity
                 key={m.user_id}
                 style={[styles.chip, answerUserId === m.user_id && styles.chipActive]}

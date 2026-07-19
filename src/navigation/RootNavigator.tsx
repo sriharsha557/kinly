@@ -7,12 +7,18 @@ import CircleSettingsScreen from '../screens/CircleSettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import { LaunchVideoScreen } from '../screens/LaunchVideoScreen';
+import PendingApprovalScreen from '../screens/PendingApprovalScreen';
 import MainTabs from './MainTabs';
 import { useAuthStore } from '../state/useAuthStore';
 import { useBootstrapSession } from '../hooks/useBootstrapSession';
 import { usePushRegistration } from '../hooks/usePushRegistration';
 import { useAuthDeepLink } from '../hooks/useAuthDeepLink';
+import { useMyCircles } from '../hooks/useCircles';
 import type { RootStackParamList } from './types';
+
+// While waiting on approval, poll every 5s - frequent enough to feel live,
+// far short of anything that would strain the DB for a single-row lookup.
+const PENDING_POLL_INTERVAL_MS = 5000;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -24,6 +30,7 @@ export default function RootNavigator() {
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
   const sessionLoading = useAuthStore((state) => state.sessionLoading);
   const passwordRecoveryMode = useAuthStore((state) => state.passwordRecoveryMode);
+  const { data: myCircles, isLoading: circlesLoading } = useMyCircles(user?.id, PENDING_POLL_INTERVAL_MS);
   // Session bootstrap runs in the background while this plays, so the app
   // already knows where to route by the time the video finishes.
   const [showLaunchVideo, setShowLaunchVideo] = useState(true);
@@ -46,6 +53,22 @@ export default function RootNavigator() {
   }
 
   const readyForMain = !!user && !!activeCircleId;
+
+  // Membership status (migration 0022) isn't known until useMyCircles
+  // resolves - avoid flashing Main (or the pending screen) before that,
+  // only while we're actually about to route into a circle.
+  if (readyForMain && circlesLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  const activeCircle = readyForMain ? myCircles?.find((c) => c.id === activeCircleId) : undefined;
+  if (activeCircle && activeCircle.membershipStatus === 'pending') {
+    return <PendingApprovalScreen pendingCircle={activeCircle} />;
+  }
 
   return (
     <NavigationContainer>

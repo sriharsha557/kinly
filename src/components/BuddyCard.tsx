@@ -18,7 +18,7 @@ function PickBuddyModal({
 }) {
   const { data: members } = useCircleMembers(circleId);
   const setBuddy = useSetBuddy(circleId, userId);
-  const others = (members ?? []).filter((m) => m.user_id !== userId);
+  const others = (members ?? []).filter((m) => m.user_id !== userId && m.status === 'active');
 
   async function handlePick(buddyId: string) {
     await setBuddy.mutateAsync(buddyId);

@@ -1,10 +1,13 @@
 // Fans out an Expo push notification when a circle-relevant row is inserted.
 // Deploy: Supabase Dashboard -> Edge Functions -> New function "notify-circle"
-// -> paste this file -> Deploy. Then wire up three Database Webhooks (Database
-// -> Webhooks) for INSERT on events / nudges / ask_replies, each pointing at
-// this function's URL with header "Authorization: Bearer <anon key>" (Database
-// Webhooks send no user JWT, so this function must not require one - either
-// set the header above, or turn off "Enforce JWT verification" on the function).
+// -> paste this file -> Deploy. Then wire up five Database Webhooks (Database
+// -> Webhooks): INSERT on events / nudges / ask_replies, plus INSERT and
+// UPDATE on circle_members (the latter two for join-request/approval
+// notifications, added alongside migration 0022's pending-approval flow) -
+// each pointing at this function's URL with header "Authorization: Bearer
+// <anon key>" (Database Webhooks send no user JWT, so this function must not
+// require one - either set the header above, or turn off "Enforce JWT
+// verification" on the function).
 //
 // Uses SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY, which Supabase injects into
 // every Edge Function automatically - no extra secret needed for this one.
@@ -14,6 +17,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 interface WebhookPayload {
   table: string;
   record: Record<string, unknown>;
+  old_record?: Record<string, unknown>;
 }
 
 const EVENT_MESSAGES: Record<string, (actorName: string, payload: Record<string, unknown>) => string> = {
@@ -52,7 +56,7 @@ async function filterMuted(
 
 Deno.serve(async (req) => {
   try {
-    const { table, record }: WebhookPayload = await req.json();
+    const { table, record, old_record }: WebhookPayload = await req.json();
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     let title = 'Kinly';
@@ -72,7 +76,13 @@ Deno.serve(async (req) => {
       const actorName = (actor?.name as string) ?? 'Someone';
       body = (EVENT_MESSAGES[type] ?? (() => `${actorName} has an update`))(actorName, payload);
 
-      const { data: members } = await supabase.from('circle_members').select('user_id').eq('circle_id', circleId);
+      // Pending members (migration 0022) can't see anything circle-scoped
+      // yet, so they must not be notified about it either.
+      const { data: members } = await supabase
+        .from('circle_members')
+        .select('user_id')
+        .eq('circle_id', circleId)
+        .eq('status', 'active');
       recipients = (members ?? []).map((m) => m.user_id as string).filter((id) => id !== actorId);
     } else if (table === 'nudges') {
       const { data: event } = await supabase
@@ -114,6 +124,37 @@ Deno.serve(async (req) => {
 
       const recipientId = post.user_id as string;
       recipients = recipientId !== record.user_id ? [recipientId] : [];
+    } else if (table === 'circle_members' && record.status === 'pending' && !old_record) {
+      // New join request (INSERT) - notify the circle's owner/admins so
+      // they know to approve/decline it.
+      circleId = record.circle_id as string;
+      category = 'membership'; // not a UI-exposed mute category, so this never gets filtered out below
+
+      const { data: circle } = await supabase.from('circles').select('name').eq('id', circleId).single();
+      const { data: joiner } = await supabase.from('profiles').select('name').eq('id', record.user_id as string).single();
+      title = 'New join request';
+      body = `${(joiner?.name as string) ?? 'Someone'} wants to join ${(circle?.name as string) ?? 'your circle'}`;
+
+      const { data: approvers } = await supabase
+        .from('circle_members')
+        .select('user_id')
+        .eq('circle_id', circleId)
+        .eq('status', 'active')
+        .in('role', ['owner', 'admin']);
+      recipients = (approvers ?? []).map((m) => m.user_id as string);
+    } else if (
+      table === 'circle_members' &&
+      record.status === 'active' &&
+      old_record?.status === 'pending'
+    ) {
+      // Approval (UPDATE pending -> active) - notify the joiner they're in.
+      circleId = record.circle_id as string;
+      category = 'membership';
+
+      const { data: circle } = await supabase.from('circles').select('name').eq('id', circleId).single();
+      title = 'Kinly';
+      body = `You're in! Welcome to ${(circle?.name as string) ?? 'the circle'}.`;
+      recipients = [record.user_id as string];
     } else {
       return new Response('ignored');
     }
