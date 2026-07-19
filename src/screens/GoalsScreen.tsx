@@ -17,6 +17,7 @@ import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
+import { pickAndUploadCheckinPhoto } from '../lib/checkinPhotoUpload';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
 import { AnimatedPressable } from '../components/AnimatedPressable';
@@ -103,6 +104,16 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
     if (celebration) setCelebration(celebration);
   }
 
+  // A separate, deliberate opt-in tap - never required, never nagged. The
+  // normal "Log progress" button stays exactly as fast as before; this is
+  // the only path that opens the picker first.
+  async function handleLogWithPhoto() {
+    const photoPath = await pickAndUploadCheckinPhoto(circleId, userId);
+    if (!photoPath) return; // cancelled or permission denied - no log happens
+    const celebration = await logGoal(goal, photoPath);
+    if (celebration) setCelebration(celebration);
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -132,9 +143,20 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         {isComplete ? (
           <Text style={styles.doneBadge}>✓ Completed</Text>
         ) : (
-          <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
-            <Text style={styles.logButtonText}>Log progress</Text>
-          </AnimatedPressable>
+          <View style={styles.logActions}>
+            <TouchableOpacity
+              onPress={handleLogWithPhoto}
+              disabled={isPending}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Log progress with a photo"
+            >
+              <Text style={styles.photoButton}>📷</Text>
+            </TouchableOpacity>
+            <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
+              <Text style={styles.logButtonText}>Log progress</Text>
+            </AnimatedPressable>
+          </View>
         )}
       </View>
       {editing && <EditGoalModal goal={goal} circleId={circleId} onClose={() => setEditing(false)} />}
@@ -300,6 +322,8 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardMeta: { fontSize: 12, color: colors.textSecondary },
   doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
+  logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  photoButton: { fontSize: 18 },
   logButton: {
     backgroundColor: colors.inputBg,
     borderRadius: radii.pill,

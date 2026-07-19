@@ -46,7 +46,8 @@ export type EventType =
   | 'ask'
   | 'challenge_completed'
   | 'mood_checkin'
-  | 'streak_saved';
+  | 'streak_saved'
+  | 'progress_photo';
 
 export interface Event {
   id: string;

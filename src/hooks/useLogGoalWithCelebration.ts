@@ -35,7 +35,7 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
   const logEvent = useLogEvent();
   const createAchievement = useCreateAchievement();
 
-  async function logGoal(goal: Goal): Promise<Celebration | null> {
+  async function logGoal(goal: Goal, photoPath?: string): Promise<Celebration | null> {
     const step = Math.max(1, Math.round(goal.target / 10));
     const wasComplete = goal.progress >= goal.target;
     const previousStreak = goal.streak_count;
@@ -58,9 +58,19 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
     }
 
     let celebration: Celebration | null = null;
+    // Tracks whether photoPath has already ridden along on a celebration
+    // event, so a plain log doesn't also insert a second, redundant event
+    // just for the photo.
+    let photoAttached = false;
 
     if (justCompleted) {
-      await logEvent.mutateAsync({ circleId, userId, type: 'goal_completed', payload: { title: goal.title } });
+      await logEvent.mutateAsync({
+        circleId,
+        userId,
+        type: 'goal_completed',
+        payload: photoPath ? { title: goal.title, photo_path: photoPath } : { title: goal.title },
+      });
+      photoAttached = photoAttached || !!photoPath;
       await createAchievement.mutateAsync({
         userId,
         circleId,
@@ -74,8 +84,12 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
         circleId,
         userId,
         type: 'streak',
-        payload: { title: goal.title, streak_count: updated.streak_count },
+        payload:
+          photoPath && !photoAttached
+            ? { title: goal.title, streak_count: updated.streak_count, photo_path: photoPath }
+            : { title: goal.title, streak_count: updated.streak_count },
       });
+      photoAttached = photoAttached || !!photoPath;
       await createAchievement.mutateAsync({
         userId,
         circleId,
@@ -94,6 +108,18 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
         subtitle: 'Gardens grow faster with friends',
         shareMessage: circle ? inviteMessage(circle.name, circle.invite_code) : undefined,
       };
+    }
+
+    // A plain log (no completion/streak milestone) never gets an events row
+    // otherwise - without this, an attached photo would have nowhere to
+    // surface in Circle Activity and the feature would be pointless.
+    if (photoPath && !photoAttached) {
+      await logEvent.mutateAsync({
+        circleId,
+        userId,
+        type: 'progress_photo',
+        payload: { title: goal.title, photo_path: photoPath },
+      });
     }
 
     return celebration;

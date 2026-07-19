@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { GardenTeaser } from '../components/GardenTeaser';
@@ -25,7 +26,37 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
   mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: '💭' },
   streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💧' },
+  progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: '📷' },
 };
+
+// Thumbnail + tap-to-view-full-screen for an event's optional check-in
+// photo (checkin-photos is a private bucket, so this always resolves a
+// fresh signed URL rather than using a static one).
+function EventPhoto({ path }: { path: string }) {
+  const { data: url, isLoading } = useSignedCheckinPhotoUrl(path);
+  const [viewing, setViewing] = useState(false);
+
+  if (isLoading || !url) {
+    return (
+      <View style={[styles.photoThumb, styles.photoThumbLoading]}>
+        <ActivityIndicator size="small" color={colors.textSecondary} />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <TouchableOpacity onPress={() => setViewing(true)} accessibilityRole="button" accessibilityLabel="View photo">
+        <Image source={{ uri: url }} style={styles.photoThumb} />
+      </TouchableOpacity>
+      <Modal visible={viewing} transparent animationType="fade" onRequestClose={() => setViewing(false)}>
+        <TouchableOpacity style={styles.photoOverlay} activeOpacity={1} onPress={() => setViewing(false)}>
+          <Image source={{ uri: url }} style={styles.photoFull} resizeMode="contain" />
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
 
 const MOOD_EMOJI: Record<string, string> = { great: '😊', okay: '😐', tough: '😞' };
 
@@ -70,6 +101,8 @@ function describeEvent(event: EventWithProfile): string {
     }
     case 'streak_saved':
       return `${name} watered ${payload.to_user_name ?? "a friend's"} streak 💧`;
+    case 'progress_photo':
+      return `${name} logged progress on "${payload.title ?? 'a goal'}"`;
     default:
       return `${name} had an update`;
   }
@@ -143,6 +176,8 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           <Text style={styles.eventTime}>{time}</Text>
         </View>
       </View>
+
+      {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
       <View style={styles.nudgeRow}>
         {NUDGE_KINDS.map(({ kind, emoji, label }) => (
@@ -284,6 +319,10 @@ const styles = StyleSheet.create({
   },
   waterButtonText: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
   nudgeList: { gap: 4 },
+  photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
+  photoThumbLoading: { backgroundColor: 'rgba(255,255,255,0.5)', alignItems: 'center', justifyContent: 'center' },
+  photoOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', alignItems: 'center', justifyContent: 'center' },
+  photoFull: { width: '100%', height: '80%' },
   nudgeMessage: { fontSize: 13, color: colors.textPrimary },
   nudgeSender: { fontWeight: '700' },
   emptyCard: {
