@@ -11,6 +11,7 @@ import { Logo } from '../components/Logo';
 import { StatTile } from '../components/StatTile';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
+import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
@@ -26,6 +27,7 @@ export default function ProfileScreen() {
   const { data: circle } = useCircleDetail(circleId ?? undefined);
   const { data: stats, isLoading } = useProfileStats(user?.id, circleId ?? undefined);
   const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const tabBarClearance = useTabBarClearance();
 
   return (
@@ -112,6 +114,10 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 12 }} />
+
+        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: 20, alignItems: 'center' }}>
+          <Text style={styles.deleteLink}>Delete account</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {viewingAchievement && (
@@ -121,6 +127,8 @@ export default function ProfileScreen() {
           onClose={() => setViewingAchievement(null)}
         />
       )}
+
+      {showDeleteAccount && <DeleteAccountModal onClose={() => setShowDeleteAccount(false)} />}
     </SafeAreaView>
   );
 }
@@ -146,4 +154,5 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   empty: { color: colors.textSecondary },
   privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
+  deleteLink: { fontSize: 13, fontWeight: '600', color: colors.danger },
 });

@@ -101,3 +101,25 @@ export async function fetchProfile(userId: string) {
   if (error) throw error;
   return data;
 }
+
+// Permanently deletes the account: leaves every circle, erases the profile
+// and everything rooted at it (goals, posts, vision items, achievements,
+// events, nudges, future letters), then removes the auth.users row itself -
+// see supabase/functions/delete-account and migration 0020. Irreversible.
+export async function deleteAccount() {
+  const { error } = await supabase.functions.invoke('delete-account');
+  if (error) {
+    let message = 'Could not delete your account. Please try again or contact support.';
+    const context = (error as { context?: Response }).context;
+    if (context && typeof context.json === 'function') {
+      try {
+        const body = await context.json();
+        if (body?.error) message = body.error;
+      } catch {
+        // Response body wasn't JSON - keep the generic message.
+      }
+    }
+    throw new Error(message);
+  }
+  await supabase.auth.signOut();
+}
