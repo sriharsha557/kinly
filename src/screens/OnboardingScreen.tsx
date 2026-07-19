@@ -104,7 +104,7 @@ function AuthStep() {
         <View style={styles.form}>
           <Text style={styles.confirmTitle}>Check your email</Text>
           <Text style={styles.confirmBody}>
-            We sent a password reset link to {email.trim()}. Tap it to set a new password.
+            If that email is registered, you'll receive a reset link shortly. Tap it to set a new password.
           </Text>
           <PillButton
             label="Back to sign in"

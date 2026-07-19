@@ -2,6 +2,8 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { getQueryParams } from 'expo-auth-session/build/QueryParams';
 import { supabase } from './supabase';
+import { newPasswordSchema, resetRequestSchema, safeParse, signInSchema, signUpSchema } from './authValidation';
+import { logValidationFailure, toSafeAuthMessage } from './authErrors';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -29,18 +31,27 @@ export async function signInWithGoogle() {
 }
 
 export async function signUp(email: string, password: string, name: string) {
+  const parsed = safeParse(signUpSchema, { email, password, name });
+  if (!parsed.data) throw new Error(logValidationFailure('signUp', parsed.reason));
+
   const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { name } },
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: { data: { name: parsed.data.name } },
   });
-  if (error) throw error;
+  if (error) throw new Error(toSafeAuthMessage(error, 'signUp'));
   return data;
 }
 
 export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw error;
+  const parsed = safeParse(signInSchema, { email, password });
+  if (!parsed.data) throw new Error(logValidationFailure('signIn', parsed.reason));
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (error) throw new Error(toSafeAuthMessage(error, 'signIn'));
   return data;
 }
 
@@ -50,13 +61,22 @@ export async function signOut() {
 }
 
 export async function requestPasswordReset(email: string) {
+  const parsed = safeParse(resetRequestSchema, { email });
+  if (!parsed.data) throw new Error(logValidationFailure('passwordReset', parsed.reason));
+
   const redirectTo = Linking.createURL('reset-password');
-  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
-  if (error) throw error;
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo });
+  // Supabase itself doesn't reveal whether the email is registered on
+  // success; a thrown error here is a real failure (rate limit, network),
+  // not evidence either way, so it still gets the same neutral copy.
+  if (error) throw new Error(toSafeAuthMessage(error, 'passwordReset'));
 }
 
 export async function updatePassword(newPassword: string) {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  const parsed = safeParse(newPasswordSchema, { password: newPassword });
+  if (!parsed.data) throw new Error('Password must be between 8 and 72 characters.');
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) throw error;
 }
 
