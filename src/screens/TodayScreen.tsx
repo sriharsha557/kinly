@@ -8,6 +8,7 @@ import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEven
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { GardenTeaser } from '../components/GardenTeaser';
+import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
@@ -21,7 +22,20 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
+  mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: '💭' },
 };
+
+const MOOD_EMOJI: Record<string, string> = { great: '😊', okay: '😐', tough: '😞' };
+
+// mood_checkin is the one event type whose icon isn't static per-type - the
+// actual mood (😊/😐/😞) is far more expressive than a placeholder.
+function eventIcon(event: EventWithProfile): string {
+  if (event.type === 'mood_checkin') {
+    const mood = (event.payload as Record<string, unknown>).mood as string;
+    return MOOD_EMOJI[mood] ?? EVENT_STYLE.mood_checkin.icon;
+  }
+  return EVENT_STYLE[event.type].icon;
+}
 
 const NUDGE_KINDS: { kind: NudgeKind; emoji: string; label: string }[] = [
   { kind: 'cheer', emoji: '👏', label: 'Cheer' },
@@ -46,6 +60,12 @@ function describeEvent(event: EventWithProfile): string {
       return `${name} asked: "${payload.question ?? ''}"`;
     case 'challenge_completed':
       return `Your circle completed "${payload.title ?? 'a challenge'}"! 🎉 (${name} sealed it)`;
+    case 'mood_checkin': {
+      const mood = payload.mood as string;
+      if (mood === 'tough') return `${name} is having a tough day`;
+      if (mood === 'okay') return `${name} is having an okay day`;
+      return `${name} is having a great day`;
+    }
     default:
       return `${name} had an update`;
   }
@@ -95,7 +115,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       style={[styles.eventCard, { backgroundColor: style.bg }]}
     >
       <View style={styles.eventHeader}>
-        <Text style={styles.eventIcon}>{style.icon}</Text>
+        <Text style={styles.eventIcon}>{eventIcon(event)}</Text>
         <View style={styles.eventBody}>
           <Text style={[styles.eventText, { color: style.text }]}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
@@ -154,6 +174,7 @@ export default function TodayScreen() {
         </Text>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
+        {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         {circleId && <GardenTeaser circleId={circleId} />}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
         <QuickActionsRow />

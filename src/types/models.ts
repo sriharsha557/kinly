@@ -39,7 +39,7 @@ export interface Goal {
   category: InterestCategory | null;
 }
 
-export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask' | 'challenge_completed';
+export type EventType = 'goal_completed' | 'streak' | 'reminder' | 'ask' | 'challenge_completed' | 'mood_checkin';
 
 export interface Event {
   id: string;
@@ -51,6 +51,16 @@ export interface Event {
 }
 
 export type NudgeKind = 'cheer' | 'water' | 'walk' | 'workout' | 'keep_going' | 'streak';
+
+export type MoodValue = 'great' | 'okay' | 'tough';
+
+export interface MoodCheckin {
+  id: string;
+  user_id: string;
+  circle_id: string;
+  mood: MoodValue;
+  checkin_date: string;
+}
 
 export interface Nudge {
   id: string;

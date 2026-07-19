@@ -26,6 +26,12 @@ const EVENT_MESSAGES: Record<string, (actorName: string, payload: Record<string,
   reminder: (name, payload) => `${name} could use a nudge: ${payload.message ?? ''}`,
   ask: (name, payload) => `${name} asked: "${payload.question ?? ''}"`,
   challenge_completed: (name, payload) => `Your circle completed "${payload.title ?? 'a challenge'}"! 🎉`,
+  mood_checkin: (name, payload) => {
+    const mood = payload.mood as string;
+    if (mood === 'tough') return `${name} is having a tough day — send some encouragement?`;
+    if (mood === 'okay') return `${name} checked in — an okay day`;
+    return `${name} is having a great day!`;
+  },
 };
 
 // Maps each source into the mute category a user can turn off in Circle
