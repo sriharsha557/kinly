@@ -10,12 +10,24 @@ interface MilestoneCardModalProps {
   subtitle?: string;
   circleName?: string;
   onClose: () => void;
+  // Overrides the default achievement-share text - used by the first-ever-
+  // log celebration to share a real invite instead ("join my circle") -
+  // and its button label ("Invite friends" instead of "Share").
+  shareMessage?: string;
+  shareLabel?: string;
 }
 
-export function MilestoneCardModal({ title, subtitle, circleName, onClose }: MilestoneCardModalProps) {
+export function MilestoneCardModal({
+  title,
+  subtitle,
+  circleName,
+  onClose,
+  shareMessage,
+  shareLabel,
+}: MilestoneCardModalProps) {
   async function handleShare() {
     await Share.share({
-      message: `${title}${circleName ? ` — with my Kinly circle "${circleName}"` : ''} 🎉`,
+      message: shareMessage ?? `${title}${circleName ? ` — with my Kinly circle "${circleName}"` : ''} 🎉`,
     });
   }
 
@@ -33,7 +45,7 @@ export function MilestoneCardModal({ title, subtitle, circleName, onClose }: Mil
           </LinearGradient>
         </Animated.View>
         <Animated.View entering={FadeIn.duration(300).delay(250)} style={styles.actions}>
-          <PillButton label="Share" onPress={handleShare} style={{ flex: 1 }} />
+          <PillButton label={shareLabel ?? 'Share'} onPress={handleShare} style={{ flex: 1 }} />
           <PillButton label="Close" variant="outline" onPress={onClose} style={{ flex: 1 }} />
         </Animated.View>
       </Animated.View>

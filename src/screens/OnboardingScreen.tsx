@@ -304,6 +304,7 @@ function CircleStep() {
         loading={createCircle.isPending}
         disabled={!circleName.trim()}
       />
+      <Text style={styles.soloNote}>Start solo, invite friends when you're ready.</Text>
 
       <Text style={styles.orDivider}>or</Text>
 
@@ -333,7 +334,7 @@ export default function OnboardingScreen() {
 
   let subtitle = 'Together, We Thrive.';
   if (user && needsInterests) subtitle = "What do you want to grow? Pick what matters to you.";
-  else if (user) subtitle = 'Create or join your Growth Circle — 2-10 trusted friends, invite-only.';
+  else if (user) subtitle = 'Start solo, invite friends when you\'re ready — or join one with a code.';
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -378,5 +379,6 @@ const styles = StyleSheet.create({
   legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
   legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
   orDivider: { textAlign: 'center', color: colors.textSecondary },
+  soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
   error: { color: colors.danger, textAlign: 'center' },
 });

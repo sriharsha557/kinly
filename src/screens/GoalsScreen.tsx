@@ -69,9 +69,9 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
 }
 
 function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
-  const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId);
-  const deleteGoal = useDeleteGoal();
   const { data: circle } = useCircleDetail(circleId);
+  const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
+  const deleteGoal = useDeleteGoal();
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const isComplete = goal.progress >= goal.target;
@@ -136,6 +136,8 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
           title={celebration.title}
           subtitle={celebration.subtitle}
           circleName={circle?.name}
+          shareMessage={celebration.shareMessage}
+          shareLabel={celebration.shareMessage ? 'Invite friends' : undefined}
           onClose={() => setCelebration(null)}
         />
       )}

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { logAnalyticsEvent } from '../lib/analytics';
 import type { Circle, CircleMemberStatus, CircleRole } from '../types/models';
 
 export interface CircleWithMembership extends Circle {
@@ -36,7 +37,10 @@ export function useCreateCircle() {
       if (error) throw error;
       return data as Circle;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circles'] }),
+    onSuccess: (circle) => {
+      logAnalyticsEvent('circle_created', circle.id);
+      queryClient.invalidateQueries({ queryKey: ['circles'] });
+    },
   });
 }
 
@@ -133,8 +137,12 @@ export function useApproveMember(circleId: string | undefined) {
     mutationFn: async (userId: string) => {
       const { error } = await supabase.rpc('approve_member', { p_circle_id: circleId as string, p_user_id: userId });
       if (error) throw error;
+      return userId;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] }),
+    onSuccess: (approvedUserId) => {
+      logAnalyticsEvent('member_joined', circleId, approvedUserId);
+      queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
+    },
   });
 }
 

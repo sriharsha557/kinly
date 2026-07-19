@@ -19,8 +19,8 @@ const CHECKED_VISIBLE_MS = 550;
 
 export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: goals, isLoading } = useGoals(circleId);
-  const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId);
   const { data: circle } = useCircleDetail(circleId);
+  const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [loggingId, setLoggingId] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
@@ -98,6 +98,8 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
           title={celebration.title}
           subtitle={celebration.subtitle}
           circleName={circle?.name}
+          shareMessage={celebration.shareMessage}
+          shareLabel={celebration.shareMessage ? 'Invite friends' : undefined}
           onClose={() => setCelebration(null)}
         />
       )}
