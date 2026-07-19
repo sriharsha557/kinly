@@ -13,6 +13,7 @@ import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
+import { LifeTimeline } from '../components/LifeTimeline';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
@@ -103,6 +104,9 @@ export default function ProfileScreen() {
         ) : (
           <Text style={styles.empty}>No achievements yet — complete a goal to earn your first badge.</Text>
         )}
+
+        <Text style={styles.sectionTitle}>Your Story</Text>
+        {user && <LifeTimeline userId={user.id} />}
 
         {user && <FutureSelfCard userId={user.id} />}
 

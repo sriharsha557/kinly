@@ -60,6 +60,7 @@ Split into **Support** (visible by default) and **Play** (behind a `DisclosureSe
 - Avatar (tap → `EditProfileScreen`), name, active circle name, bio.
 - Stat tiles: goals completed, best streak, friends helped (`useProfileStats`), plus a shortcut tile to Circle Settings.
 - Achievement badges — tapping one reopens its `MilestoneCardModal`.
+- **Your Story** — `LifeTimeline`, a read-only vertical timeline grouped by month (newest first), derived entirely from the existing `achievements` table (goal completions, streak milestones — the only two types `useLogGoalWithCelebration` ever writes), not scoped to `activeCircleId` since this is "my life story" across every circle, not one circle's feed. No new table, no manual entries (v1 is deliberately cheap — the point is testing whether people scroll it before investing further). Entries reuse `TodayScreen`'s existing goal_completed/streak color-and-icon treatment rather than `categoryColors` per pillar, since `achievements` doesn't store a goal's category to key that off. Empty state: "Your story starts with your first goal."
 - `FutureSelfCard` — AI "future self" reflection feature (`useFutureSelf`).
 - Sign out.
 
