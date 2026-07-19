@@ -31,19 +31,18 @@ import WalkIcon from '../../assets/icons/nudges/walk.svg';
 import WorkoutIcon from '../../assets/icons/nudges/workout.svg';
 import StudyIcon from '../../assets/icons/nudges/study.svg';
 import WaveIcon from '../../assets/icons/feed/wave.svg';
+import ClockIcon from '../../assets/icons/feed/clock.svg';
+import ChatIcon from '../../assets/icons/feed/chat.svg';
+import RocketIcon from '../../assets/icons/feed/rocket.svg';
 
-// Some event types (reminder, ask, challenge_completed) don't have a
-// matching custom icon yet - no "clock"/"chat"/"rocket" was in the icon set
-// provided, so those three deliberately still fall back to emoji rather
-// than mixing in a placeholder that doesn't match the new icon style.
 type EventIcon = FC<SvgProps> | string;
 
 const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: EventIcon }> = {
   goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CheckIcon },
   streak: { bg: '#FFE4D6', text: '#C2410C', icon: StreakIcon },
-  reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
-  ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
-  challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
+  reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: ClockIcon },
+  ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: ChatIcon },
+  challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: RocketIcon },
   mood_checkin: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: NeutralIcon },
   streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: WaterIcon },
   progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CameraIcon },
