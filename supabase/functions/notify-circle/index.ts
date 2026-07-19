@@ -32,6 +32,7 @@ const EVENT_MESSAGES: Record<string, (actorName: string, payload: Record<string,
     if (mood === 'okay') return `${name} checked in — an okay day`;
     return `${name} is having a great day!`;
   },
+  streak_saved: (name, payload) => `${name} watered ${payload.to_user_name ?? "a friend's"} streak 💧`,
 };
 
 // Maps each source into the mute category a user can turn off in Circle

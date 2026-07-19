@@ -10,6 +10,7 @@ export const MUTE_CATEGORIES = [
   { key: 'nudge', label: 'Nudges received' },
   { key: 'challenge_completed', label: 'Challenge completed' },
   { key: 'mood_checkin', label: 'Mood check-ins' },
+  { key: 'streak_saved', label: 'Streak saves' },
 ] as const;
 
 export function useNotificationMutes(circleId: string | undefined, userId: string | undefined) {

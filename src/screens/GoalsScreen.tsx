@@ -15,6 +15,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
+import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
@@ -72,6 +73,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
   const { data: circle } = useCircleDetail(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const deleteGoal = useDeleteGoal();
+  const { data: hasWaterMark } = useHasWaterMark(goal.id);
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const isComplete = goal.progress >= goal.target;
@@ -106,7 +108,12 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{goal.title}</Text>
         <View style={styles.cardHeaderRight}>
-          {goal.streak_count > 0 && <Text style={styles.streak}>🔥 {goal.streak_count}</Text>}
+          {goal.streak_count > 0 && (
+            <Text style={styles.streak}>
+              🔥 {goal.streak_count}
+              {hasWaterMark && ' 💧'}
+            </Text>
+          )}
           <TouchableOpacity
             onPress={handleOptions}
             hitSlop={12}

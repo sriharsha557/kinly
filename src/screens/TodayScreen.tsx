@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
+import { useWaterStreak } from '../hooks/useStreakSaves';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { GardenTeaser } from '../components/GardenTeaser';
@@ -23,6 +24,7 @@ const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }>
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
   mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: '💭' },
+  streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💧' },
 };
 
 const MOOD_EMOJI: Record<string, string> = { great: '😊', okay: '😐', tough: '😞' };
@@ -66,6 +68,8 @@ function describeEvent(event: EventWithProfile): string {
       if (mood === 'okay') return `${name} is having an okay day`;
       return `${name} is having a great day`;
     }
+    case 'streak_saved':
+      return `${name} watered ${payload.to_user_name ?? "a friend's"} streak 💧`;
     default:
       return `${name} had an update`;
   }
@@ -91,6 +95,7 @@ function dayLabel(iso: string): string {
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
   const style = EVENT_STYLE[event.type];
   const sendNudge = useSendNudge(circleId);
+  const waterStreak = useWaterStreak(circleId);
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
@@ -104,6 +109,23 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } finally {
       setSendingKind(null);
+    }
+  }
+
+  // Only reminder events (streak-at-risk) carry a goal_id, and never for
+  // your own streak - watering yourself makes no sense.
+  const payload = event.payload as Record<string, unknown>;
+  const waterableGoalId =
+    event.type === 'reminder' && event.user_id !== userId ? (payload.goal_id as string | undefined) : undefined;
+
+  async function handleWater() {
+    if (!waterableGoalId) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await waterStreak.mutateAsync(waterableGoalId);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (err) {
+      Alert.alert('Could not water this streak', err instanceof Error ? err.message : 'Please try again.');
     }
   }
 
@@ -137,6 +159,18 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           </TouchableOpacity>
         ))}
       </View>
+
+      {waterableGoalId && (
+        <TouchableOpacity
+          style={styles.waterButton}
+          onPress={handleWater}
+          disabled={waterStreak.isPending}
+          accessibilityRole="button"
+          accessibilityLabel="Water their streak"
+        >
+          <Text style={styles.waterButtonText}>{waterStreak.isPending ? 'Watering…' : '💧 Water their streak'}</Text>
+        </TouchableOpacity>
+      )}
 
       {event.nudges.length > 0 && (
         <View style={styles.nudgeList}>
@@ -242,6 +276,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   nudgeButtonText: { fontSize: 16 },
+  waterButton: {
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: radii.pill,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  waterButtonText: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
   nudgeList: { gap: 4 },
   nudgeMessage: { fontSize: 13, color: colors.textPrimary },
   nudgeSender: { fontWeight: '700' },

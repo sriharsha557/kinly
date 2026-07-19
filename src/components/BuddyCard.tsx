@@ -1,11 +1,23 @@
 import { useState } from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useMyBuddy, useSetBuddy, useCheckInOnBuddy } from '../hooks/useBuddy';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
+import { useGoals } from '../hooks/useGoals';
+import { useWaterStreak } from '../hooks/useStreakSaves';
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
+
+// The exact single-day grace window water_streak() itself enforces
+// server-side - mirrored here just to decide whether to show the button at
+// all, not as the source of truth (the RPC re-validates everything).
+function isInGraceWindow(lastLoggedDate: string | null): boolean {
+  if (!lastLoggedDate) return false;
+  const daysSince = Math.floor((Date.now() - new Date(lastLoggedDate).getTime()) / 86_400_000);
+  return daysSince === 2;
+}
 
 function PickBuddyModal({
   circleId,
@@ -49,11 +61,27 @@ function PickBuddyModal({
 export function BuddyCard({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: buddy } = useMyBuddy(circleId, userId);
   const { data: garden } = useGardenState(circleId);
+  const { data: goals } = useGoals(circleId);
   const checkIn = useCheckInOnBuddy(circleId);
+  const waterStreak = useWaterStreak(circleId);
   const [picking, setPicking] = useState(false);
 
   const buddyGarden = garden?.members.find((m) => m.userId === buddy?.buddy_id);
   const isInactive = buddyGarden?.stage === 'wilted';
+  const waterableGoal = (goals ?? []).find(
+    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date),
+  );
+
+  async function handleWater() {
+    if (!waterableGoal) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await waterStreak.mutateAsync(waterableGoal.id);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (err) {
+      Alert.alert('Could not water this streak', err instanceof Error ? err.message : 'Please try again.');
+    }
+  }
 
   return (
     <View style={styles.card}>
@@ -76,6 +104,15 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
               }
               loading={checkIn.isPending}
               style={{ marginTop: 10 }}
+            />
+          )}
+          {waterableGoal && (
+            <PillButton
+              label={`💧 Water ${buddy.buddy_name}'s streak`}
+              variant="outline"
+              onPress={handleWater}
+              loading={waterStreak.isPending}
+              style={{ marginTop: 8 }}
             />
           )}
           <TouchableOpacity onPress={() => setPicking(true)} style={{ marginTop: 8 }}>
