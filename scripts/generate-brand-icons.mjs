@@ -1,33 +1,40 @@
-// Rasterizes brand icon assets from a single master PNG:
-// assets/brand/logo-master.png - the "two people, hands reaching" mark, a
-// gradient raster illustration (photographic shading, not flat vector art),
-// so it's kept as a raster master rather than traced into SVG paths, which
-// would lose the gradient fidelity.
+// Rasterizes brand assets from two raster masters (both kept as raster,
+// not traced into SVG, since they're photographic/gradient illustrations
+// rather than flat vector art):
+//
+// - assets/brand/app-icon-master.png - flat orange background + solid
+//   white "two people, hands reaching" glyph, purpose-built as an app icon.
+//   Drives every native icon surface: icon.png, the Android adaptive-icon
+//   layers, splash-icon.png, favicon.png.
+// - assets/brand/logo-master.png - the original gradient version of the
+//   same mark (orange-to-amber, white background). Drives only the
+//   website's inline nav logo (logo-web.png), which needs to read on a
+//   white/cream page background rather than sit on its own orange field.
 //
 // Run with: node scripts/generate-brand-icons.mjs
 // Requires `sharp` (npm install --no-save sharp) - not a runtime dependency.
 import sharp from 'sharp';
 
-const MASTER = 'assets/brand/logo-master.png';
-const CREAM = '#FBF7F2'; // colors.background - splash bg, matches app theme
+const APP_ICON_MASTER = 'assets/brand/app-icon-master.png';
+const WEB_LOGO_MASTER = 'assets/brand/logo-master.png';
+const BRAND_ORANGE = '#F97316'; // colors.primary - keep the adaptive-icon
+// background pinned to this exact token rather than the master PNG's own
+// sampled background pixel, which lands a shade more saturated (~#fb5c04)
+// than what buttons/headers actually use elsewhere in the app.
 
-// The master's background is near-white (~#FEFDFD). Keying purely on
-// "distance from white" (255 - min(r,g,b)) fades light, low-saturation
-// glyph colors (the amber side of the gradient) toward transparent right
-// along with the true background, since both are "close to white" in that
-// metric. Instead, snap to a hard threshold with a narrow anti-aliasing
-// band right at the edge: anything clearly more saturated than the
-// background goes fully opaque regardless of how light it is.
-const AA_LOW = 12; // distance-from-white below this = pure background
-const AA_HIGH = 40; // distance-from-white above this = pure glyph
-async function keyOutWhite(input) {
-  const img = sharp(input);
-  const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
+// Keys out a solid/near-solid background by distance from a given color,
+// snapping to a hard threshold with a narrow anti-aliasing band at the
+// edge - a plain linear falloff would fade light, low-saturation glyph
+// pixels toward transparent right along with the real background.
+const AA_LOW = 20;
+const AA_HIGH = 80;
+async function keyOutColor(input, bg) {
+  const { data, info } = await sharp(input).raw().toBuffer({ resolveWithObject: true });
   const { width, height, channels } = info;
   const out = Buffer.alloc(width * height * 4);
   for (let i = 0, o = 0; i < data.length; i += channels, o += 4) {
     const r = data[i], g = data[i + 1], b = data[i + 2];
-    const distance = 255 - Math.min(r, g, b);
+    const distance = Math.sqrt((r - bg[0]) ** 2 + (g - bg[1]) ** 2 + (b - bg[2]) ** 2);
     let alpha;
     if (distance <= AA_LOW) alpha = 0;
     else if (distance >= AA_HIGH) alpha = 255;
@@ -80,59 +87,103 @@ async function glyphOnTransparent(keyed, box, size, fill) {
     .png();
 }
 
-async function main() {
-  const keyed = await keyOutWhite(MASTER);
-  const box = await boundingBox(keyed.clone());
+async function flattenToWhite(rgba) {
+  const { data, info } = await rgba.clone().raw().toBuffer({ resolveWithObject: true });
+  const out = Buffer.alloc(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    out[i] = 255;
+    out[i + 1] = 255;
+    out[i + 2] = 255;
+    out[i + 3] = data[i + 3];
+  }
+  return sharp(out, { raw: { width: info.width, height: info.height, channels: 4 } });
+}
 
-  // Main app icon (iOS + general) - full artwork on its native white ground,
-  // OS applies its own corner mask, so an opaque square is correct here.
-  await sharp(MASTER).resize(1024, 1024).png().toFile('assets/icon.png');
+async function samplePixel(input, x, y) {
+  const { data, info } = await sharp(input).raw().toBuffer({ resolveWithObject: true });
+  const i = (y * info.width + x) * info.channels;
+  return [data[i], data[i + 1], data[i + 2]];
+}
+
+async function generateAppIcon() {
+  const bgColor = await samplePixel(APP_ICON_MASTER, 2, 2);
+  const keyed = await keyOutColor(APP_ICON_MASTER, bgColor);
+  const box = await boundingBox(keyed.clone());
+  // Same proportion the glyph already occupies in the master, so icon.png
+  // reproduces its exact composition - just recolored onto BRAND_ORANGE
+  // instead of the master's own slightly-off sampled orange (~#fb5c04),
+  // so every icon surface (this, the adaptive-icon background, favicon)
+  // is pixel-identical in color.
+  const masterFill = Math.max(box.maxX - box.minX, box.maxY - box.minY) / box.width;
+
+  async function iconOnBrandOrange(size) {
+    const glyph = await glyphOnTransparent(keyed, box, size, masterFill);
+    return sharp({ create: { width: size, height: size, channels: 4, background: BRAND_ORANGE } })
+      .composite([{ input: await glyph.png().toBuffer() }])
+      .png();
+  }
+
+  // Main app icon (iOS + general) - OS applies its own corner mask, so an
+  // opaque square is correct here.
+  await (await iconOnBrandOrange(1024)).toFile('assets/icon.png');
   console.log('wrote assets/icon.png');
 
-  // Android adaptive icon: transparent glyph foreground (66% safe zone) +
-  // solid background layer. White background (not brand orange) because the
-  // glyph itself now carries the orange gradient - orange-on-orange would
-  // have muddied the contrast the old white-glyph/orange-bg pairing relied on.
+  // Android adaptive icon: transparent white-glyph foreground (66% safe
+  // zone, deliberately tighter than icon.png's natural fill - the OS's own
+  // circle/squircle mask crops closer to the safe-zone circle) + a solid
+  // BRAND_ORANGE background layer.
   const foreground = await glyphOnTransparent(keyed, box, 1024, 0.66);
   await foreground.toFile('assets/android-icon-foreground.png');
   console.log('wrote assets/android-icon-foreground.png');
 
-  await sharp({ create: { width: 1024, height: 1024, channels: 4, background: '#FFFFFF' } })
+  await sharp({ create: { width: 1024, height: 1024, channels: 4, background: BRAND_ORANGE } })
     .png()
     .toFile('assets/android-icon-background.png');
-  console.log('wrote assets/android-icon-background.png');
+  console.log(`wrote assets/android-icon-background.png (${BRAND_ORANGE})`);
 
-  // Monochrome (Android 13+ themed icons): same silhouette, flattened to
-  // solid white so the OS can tint it with the user's system accent color.
-  const { data, info } = await foreground.clone().raw().toBuffer({ resolveWithObject: true });
-  const mono = Buffer.alloc(data.length);
-  for (let i = 0; i < data.length; i += 4) {
-    mono[i] = 255;
-    mono[i + 1] = 255;
-    mono[i + 2] = 255;
-    mono[i + 3] = data[i + 3];
-  }
-  await sharp(mono, { raw: { width: info.width, height: info.height, channels: 4 } })
-    .png()
-    .toFile('assets/android-icon-monochrome.png');
+  // Monochrome (Android 13+ themed icons) - same silhouette; already white,
+  // flattened just to guarantee a pure white fill for OS tinting.
+  const mono = await flattenToWhite(foreground);
+  await mono.toFile('assets/android-icon-monochrome.png');
   console.log('wrote assets/android-icon-monochrome.png');
 
-  // Splash screen: transparent glyph, smaller/centered (splash reads as a
-  // logo on a plain field, not an icon that needs to fill a safe zone),
-  // shown against the app's own cream background color via expo-splash-screen.
-  const splashGlyph = await glyphOnTransparent(keyed, box, 1024, 0.42);
-  await splashGlyph.toFile('assets/splash-icon.png');
-  console.log('wrote assets/splash-icon.png');
-
   // Favicon - reuses the opaque icon composition at browser tab size.
-  await sharp(MASTER).resize(196, 196).png().toFile('assets/favicon.png');
+  await (await iconOnBrandOrange(196)).toFile('assets/favicon.png');
   console.log('wrote assets/favicon.png');
+}
 
-  // Website nav logo - transparent glyph, generous but not safe-zone-tight
-  // padding, sized for an inline <img> next to the "kinly" wordmark.
+// The gradient master (orange-to-amber, keyed against its own white
+// background) - used anywhere the glyph needs to sit on a light surface
+// and therefore needs its own color to read at all: the website nav and
+// the splash screen. app-icon-master's glyph is solid white, which is
+// correct sitting on an orange field but would be invisible on cream.
+async function keyGradientLogo() {
+  const keyed = await keyOutColor(WEB_LOGO_MASTER, [254, 253, 253]);
+  const box = await boundingBox(keyed.clone());
+  return { keyed, box };
+}
+
+async function generateWebLogo() {
+  const { keyed, box } = await keyGradientLogo();
   const webLogo = await glyphOnTransparent(keyed, box, 256, 0.88);
   await webLogo.toFile('assets/brand/logo-web.png');
   console.log('wrote assets/brand/logo-web.png');
+}
+
+async function generateSplashIcon() {
+  const { keyed, box } = await keyGradientLogo();
+  // Smaller/centered (splash reads as a logo on a plain field, not an icon
+  // that needs to fill a safe zone), shown against the app's own cream
+  // background color via expo-splash-screen.
+  const splashGlyph = await glyphOnTransparent(keyed, box, 1024, 0.42);
+  await splashGlyph.toFile('assets/splash-icon.png');
+  console.log('wrote assets/splash-icon.png');
+}
+
+async function main() {
+  await generateAppIcon();
+  await generateWebLogo();
+  await generateSplashIcon();
 }
 
 main();
