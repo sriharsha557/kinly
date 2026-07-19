@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useGardenState } from '../hooks/useGarden';
 import { GardenStageArt } from './GardenStageArt';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import SproutIcon from '../../assets/icons/feed/sprout.svg';
 
 function healthMessage(health: number): string {
   if (health >= 80) return 'Everyone is thriving today';
@@ -18,7 +19,10 @@ export function GardenCard({ circleId }: { circleId: string }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>🌱 Circle Garden</Text>
+        <View style={styles.titleRow}>
+          <SproutIcon width={18} height={18} />
+          <Text style={styles.title}>Circle Garden</Text>
+        </View>
         <Text style={styles.health}>{data.health}% thriving</Text>
       </View>
       <Text style={styles.message}>{healthMessage(data.health)}</Text>
@@ -46,6 +50,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.health.text },
   health: { fontSize: 13, fontWeight: '700', color: categoryColors.health.text },
   message: { fontSize: 12, color: categoryColors.health.text, opacity: 0.8, marginTop: 2, marginBottom: 12 },

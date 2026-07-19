@@ -33,6 +33,7 @@ import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, radii, shadow } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
+import DeleteIcon from '../../assets/icons/feed/delete.svg';
 
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
   const { data: replies, isLoading } = useAskReplies(askPostId);
@@ -108,7 +109,7 @@ function AskCard({
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
             >
-              <Text style={styles.deleteButton}>🗑</Text>
+              <DeleteIcon width={15} height={15} opacity={0.6} />
             </TouchableOpacity>
           )}
         </View>
@@ -289,7 +290,6 @@ const styles = StyleSheet.create({
   },
   questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
   question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  deleteButton: { fontSize: 15, opacity: 0.6 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   meta: { fontSize: 12, color: colors.textSecondary },
   thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },

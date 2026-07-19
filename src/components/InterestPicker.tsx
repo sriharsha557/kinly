@@ -1,13 +1,20 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import type { FC } from 'react';
 import { colors, categoryColors, radii } from '../theme/colors';
+import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon } from './icons/PillarIcons';
 import type { InterestCategory } from '../types/models';
 
-export const INTEREST_OPTIONS: { key: InterestCategory; label: string; emoji: string }[] = [
-  { key: 'health', label: 'Health', emoji: '💧' },
-  { key: 'wealth', label: 'Wealth', emoji: '💰' },
-  { key: 'ideas', label: 'Ideas', emoji: '🚀' },
-  { key: 'learning', label: 'Learning', emoji: '📚' },
-  { key: 'relationships', label: 'Relationships', emoji: '❤️' },
+interface PillarIconProps {
+  size?: number;
+  color: string;
+}
+
+export const INTEREST_OPTIONS: { key: InterestCategory; label: string; Icon: FC<PillarIconProps> }[] = [
+  { key: 'health', label: 'Health', Icon: HealthIcon },
+  { key: 'wealth', label: 'Wealth', Icon: WealthIcon },
+  { key: 'ideas', label: 'Ideas', Icon: IdeasIcon },
+  { key: 'learning', label: 'Learning', Icon: LearningIcon },
+  { key: 'relationships', label: 'Relationships', Icon: RelationshipsIcon },
 ];
 
 export function InterestPicker({
@@ -19,7 +26,7 @@ export function InterestPicker({
 }) {
   return (
     <View style={styles.chipGrid}>
-      {INTEREST_OPTIONS.map(({ key, label, emoji }) => {
+      {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
         const active = selected.includes(key);
         const category = categoryColors[key];
         return (
@@ -28,7 +35,7 @@ export function InterestPicker({
             style={[styles.chip, { backgroundColor: active ? category.solid : colors.inputBg }]}
             onPress={() => onToggle(key)}
           >
-            <Text style={styles.chipEmoji}>{emoji}</Text>
+            <Icon size={16} color={active ? '#fff' : category.solid} />
             <Text style={[styles.chipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
           </TouchableOpacity>
         );
@@ -47,6 +54,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  chipEmoji: { fontSize: 16 },
   chipLabel: { fontSize: 14, fontWeight: '600' },
 });

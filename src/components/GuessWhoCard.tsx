@@ -4,6 +4,8 @@ import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostW
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import MasksIcon from '../../assets/icons/feed/masks.svg';
+import CheckIcon from '../../assets/icons/feed/check.svg';
 
 function NewFactModal({
   circleId,
@@ -101,9 +103,12 @@ function GuessWhoPostRow({
         </View>
       ) : (
         <View>
-          <Text style={styles.revealed}>
-            ✅ It was {members?.find((m) => m.user_id === post.answer_user_id)?.profiles?.name ?? 'someone'}!
-          </Text>
+          <View style={styles.revealedRow}>
+            <CheckIcon width={14} height={14} />
+            <Text style={styles.revealed}>
+              It was {members?.find((m) => m.user_id === post.answer_user_id)?.profiles?.name ?? 'someone'}!
+            </Text>
+          </View>
           <Text style={styles.guessCount}>{post.guess_who_guesses.length} guessed</Text>
         </View>
       )}
@@ -118,7 +123,10 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>🎭 Guess Who</Text>
+        <View style={styles.titleRow}>
+          <MasksIcon width={18} height={18} />
+          <Text style={styles.title}>Guess Who</Text>
+        </View>
         <TouchableOpacity onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
         </TouchableOpacity>
@@ -148,6 +156,8 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.ideas.text },
   newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
   empty: { fontSize: 12, color: categoryColors.ideas.text, opacity: 0.8 },

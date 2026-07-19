@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useWaterStreak } from '../hooks/useStreakSaves';
@@ -17,17 +19,37 @@ import { EventRowSkeleton } from '../components/Skeleton';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, categoryColors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
+import CheckIcon from '../../assets/icons/feed/check.svg';
+import StreakIcon from '../../assets/icons/nudges/streak.svg';
+import CameraIcon from '../../assets/icons/feed/camera.svg';
+import WaterIcon from '../../assets/icons/nudges/water.svg';
+import HappyIcon from '../../assets/icons/mood/happy.svg';
+import NeutralIcon from '../../assets/icons/mood/neutral.svg';
+import SadIcon from '../../assets/icons/mood/sad.svg';
+import CheerIcon from '../../assets/icons/nudges/cheer.svg';
+import WalkIcon from '../../assets/icons/nudges/walk.svg';
+import WorkoutIcon from '../../assets/icons/nudges/workout.svg';
+import StudyIcon from '../../assets/icons/nudges/study.svg';
+import WaveIcon from '../../assets/icons/feed/wave.svg';
 
-const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: string }> = {
-  goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: '✅' },
-  streak: { bg: '#FFE4D6', text: '#C2410C', icon: '🔥' },
+// Some event types (reminder, ask, challenge_completed) don't have a
+// matching custom icon yet - no "clock"/"chat"/"rocket" was in the icon set
+// provided, so those three deliberately still fall back to emoji rather
+// than mixing in a placeholder that doesn't match the new icon style.
+type EventIcon = FC<SvgProps> | string;
+
+const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: EventIcon }> = {
+  goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CheckIcon },
+  streak: { bg: '#FFE4D6', text: '#C2410C', icon: StreakIcon },
   reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: '⏰' },
   ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💬' },
   challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: '🚀' },
-  mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: '💭' },
-  streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: '💧' },
-  progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: '📷' },
+  mood_checkin: { bg: categoryColors.relationships.bg, text: categoryColors.relationships.text, icon: NeutralIcon },
+  streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: WaterIcon },
+  progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CameraIcon },
 };
+
+const MOOD_ICON: Record<string, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
 
 // Thumbnail + tap-to-view-full-screen for an event's optional check-in
 // photo (checkin-photos is a private bucket, so this always resolves a
@@ -58,25 +80,23 @@ function EventPhoto({ path }: { path: string }) {
   );
 }
 
-const MOOD_EMOJI: Record<string, string> = { great: '😊', okay: '😐', tough: '😞' };
-
 // mood_checkin is the one event type whose icon isn't static per-type - the
 // actual mood (😊/😐/😞) is far more expressive than a placeholder.
-function eventIcon(event: EventWithProfile): string {
+function eventIcon(event: EventWithProfile): EventIcon {
   if (event.type === 'mood_checkin') {
     const mood = (event.payload as Record<string, unknown>).mood as string;
-    return MOOD_EMOJI[mood] ?? EVENT_STYLE.mood_checkin.icon;
+    return MOOD_ICON[mood] ?? EVENT_STYLE.mood_checkin.icon;
   }
   return EVENT_STYLE[event.type].icon;
 }
 
-const NUDGE_KINDS: { kind: NudgeKind; emoji: string; label: string }[] = [
-  { kind: 'cheer', emoji: '👏', label: 'Cheer' },
-  { kind: 'water', emoji: '💧', label: 'Remind to drink water' },
-  { kind: 'walk', emoji: '🚶', label: 'Remind to walk' },
-  { kind: 'workout', emoji: '💪', label: 'Remind to work out' },
-  { kind: 'keep_going', emoji: '📚', label: 'Encourage to keep going' },
-  { kind: 'streak', emoji: '🔥', label: 'Cheer their streak' },
+const NUDGE_KINDS: { kind: NudgeKind; Icon: FC<SvgProps>; label: string }[] = [
+  { kind: 'cheer', Icon: CheerIcon, label: 'Cheer' },
+  { kind: 'water', Icon: WaterIcon, label: 'Remind to drink water' },
+  { kind: 'walk', Icon: WalkIcon, label: 'Remind to walk' },
+  { kind: 'workout', Icon: WorkoutIcon, label: 'Remind to work out' },
+  { kind: 'keep_going', Icon: StudyIcon, label: 'Encourage to keep going' },
+  { kind: 'streak', Icon: StreakIcon, label: 'Cheer their streak' },
 ];
 
 function describeEvent(event: EventWithProfile): string {
@@ -170,7 +190,14 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       style={[styles.eventCard, { backgroundColor: style.bg }]}
     >
       <View style={styles.eventHeader}>
-        <Text style={styles.eventIcon}>{eventIcon(event)}</Text>
+        {(() => {
+          const Icon = eventIcon(event);
+          return typeof Icon === 'string' ? (
+            <Text style={styles.eventIcon}>{Icon}</Text>
+          ) : (
+            <Icon width={20} height={20} />
+          );
+        })()}
         <View style={styles.eventBody}>
           <Text style={[styles.eventText, { color: style.text }]}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
@@ -180,7 +207,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
       <View style={styles.nudgeRow}>
-        {NUDGE_KINDS.map(({ kind, emoji, label }) => (
+        {NUDGE_KINDS.map(({ kind, Icon, label }) => (
           <TouchableOpacity
             key={kind}
             style={styles.nudgeButton}
@@ -190,7 +217,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
             accessibilityLabel={label}
             hitSlop={4}
           >
-            <Text style={styles.nudgeButtonText}>{sendingKind === kind ? '…' : emoji}</Text>
+            {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <Icon width={18} height={18} />}
           </TouchableOpacity>
         ))}
       </View>
@@ -238,9 +265,12 @@ export default function TodayScreen() {
           <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
         }
       >
-        <Text style={styles.greeting}>
-          {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'} 👋
-        </Text>
+        <View style={styles.greetingRow}>
+          <Text style={styles.greeting}>
+            {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'}
+          </Text>
+          <WaveIcon width={22} height={22} />
+        </View>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
@@ -285,6 +315,7 @@ export default function TodayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   page: { padding: 16 },
+  greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   greeting: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
   date: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },

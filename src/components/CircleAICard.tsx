@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
 import { INTEREST_OPTIONS } from './InterestPicker';
+import { IdeasIcon } from './icons/PillarIcons';
 import { colors, radii, shadow } from '../theme/colors';
 import IdeaBulb from '../../assets/illustrations/kinly-ill-idea-bulb.svg';
 
@@ -43,16 +44,14 @@ export function CircleAICard({
       <View style={styles.pillRow}>
         {strongestOpt && (
           <View style={styles.pill}>
-            <Text style={styles.pillText}>
-              {strongestOpt.emoji} Strongest: {strongestOpt.label}
-            </Text>
+            <strongestOpt.Icon size={13} color={colors.textPrimary} />
+            <Text style={styles.pillText}>Strongest: {strongestOpt.label}</Text>
           </View>
         )}
         {weakestOpt && (
           <View style={styles.pill}>
-            <Text style={styles.pillText}>
-              {weakestOpt.emoji} Needs love: {weakestOpt.label}
-            </Text>
+            <weakestOpt.Icon size={13} color={colors.textPrimary} />
+            <Text style={styles.pillText}>Needs love: {weakestOpt.label}</Text>
           </View>
         )}
       </View>
@@ -63,12 +62,13 @@ export function CircleAICard({
           </View>
         ) : (
           <TouchableOpacity
-            style={styles.suggestion}
+            style={[styles.suggestion, styles.suggestionRow]}
             onPress={handleStartChallenge}
             disabled={createChallenge.isPending}
           >
+            <IdeasIcon size={14} color="#fff" />
             <Text style={styles.suggestionText}>
-              💡 {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
+              {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
             </Text>
           </TouchableOpacity>
         ))}
@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
+  suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   suggestionDone: { backgroundColor: colors.success },
   suggestionText: { fontSize: 13, fontWeight: '700', color: '#fff', textAlign: 'center' },
 });

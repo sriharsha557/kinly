@@ -216,7 +216,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
         </TouchableOpacity>
       </View>
       <View style={styles.categoryRow}>
-        {INTEREST_OPTIONS.map(({ key, emoji }) => {
+        {INTEREST_OPTIONS.map(({ key, Icon }) => {
           const active = category === key;
           const cat = categoryColors[key];
           return (
@@ -225,7 +225,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
               style={[styles.categoryChip, { backgroundColor: active ? cat.solid : colors.inputBg }]}
               onPress={() => setCategory(active ? null : key)}
             >
-              <Text style={styles.categoryChipText}>{emoji}</Text>
+              <Icon size={16} color={active ? '#fff' : cat.solid} />
             </TouchableOpacity>
           );
         })}
@@ -289,7 +289,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryChipText: { fontSize: 15 },
   input: {
     flex: 1,
     backgroundColor: colors.inputBg,

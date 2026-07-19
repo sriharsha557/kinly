@@ -4,6 +4,9 @@ import { useMyLetters, useOpenLetter, useWriteLetter } from '../hooks/useFutureS
 import { PillButton } from './PillButton';
 import { colors, radii, shadow } from '../theme/colors';
 import type { FutureLetter } from '../types/models';
+import MailIcon from '../../assets/icons/feed/mail.svg';
+import LockIcon from '../../assets/icons/feed/lock.svg';
+import CelebrateIcon from '../../assets/icons/feed/celebrate.svg';
 
 function WriteLetterModal({ userId, onClose }: { userId: string; onClose: () => void }) {
   const [content, setContent] = useState('');
@@ -53,8 +56,9 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
 
   if (!isUnlocked) {
     return (
-      <View style={styles.letterRow}>
-        <Text style={styles.letterMeta}>🔒 Sealed until {letter.unlock_date}</Text>
+      <View style={[styles.letterRow, styles.letterRowInline]}>
+        <LockIcon width={14} height={14} />
+        <Text style={styles.letterMeta}>Sealed until {letter.unlock_date}</Text>
       </View>
     );
   }
@@ -62,13 +66,14 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
   if (!letter.opened_at && !revealed) {
     return (
       <TouchableOpacity
-        style={styles.letterRow}
+        style={[styles.letterRow, styles.letterRowInline]}
         onPress={() => {
           setRevealed(true);
           openLetter.mutate(letter.id);
         }}
       >
-        <Text style={styles.letterReady}>🎉 A letter from your past self is ready — tap to read</Text>
+        <CelebrateIcon width={16} height={16} />
+        <Text style={styles.letterReady}>A letter from your past self is ready — tap to read</Text>
       </TouchableOpacity>
     );
   }
@@ -88,7 +93,10 @@ export function FutureSelfCard({ userId }: { userId: string }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>✉️ Future Self</Text>
+        <View style={styles.titleRow}>
+          <MailIcon width={18} height={18} />
+          <Text style={styles.title}>Future Self</Text>
+        </View>
         <TouchableOpacity onPress={() => setWriting(true)}>
           <Text style={styles.newLink}>+ Write</Text>
         </TouchableOpacity>
@@ -119,10 +127,12 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
   newLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
   empty: { fontSize: 12, color: colors.textSecondary },
   letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
+  letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   letterMeta: { fontSize: 11, color: colors.textSecondary },
   letterReady: { fontSize: 13, fontWeight: '700', color: colors.primary },
   letterContent: { fontSize: 13, color: colors.textPrimary, lineHeight: 18 },

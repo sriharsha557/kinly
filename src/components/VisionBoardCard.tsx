@@ -4,6 +4,8 @@ import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
+import CameraIcon from '../../assets/icons/feed/camera.svg';
 
 function AddVisionModal({
   circleId,
@@ -50,8 +52,13 @@ function AddVisionModal({
           <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage} disabled={uploading}>
             {imageUrl ? (
               <Image source={{ uri: imageUrl }} style={styles.imagePreview} />
+            ) : uploading ? (
+              <Text style={styles.imagePickerText}>Uploading…</Text>
             ) : (
-              <Text style={styles.imagePickerText}>{uploading ? 'Uploading…' : '📷 Add a photo (optional)'}</Text>
+              <View style={styles.imagePickerRow}>
+                <CameraIcon width={16} height={16} />
+                <Text style={styles.imagePickerText}>Add a photo (optional)</Text>
+              </View>
             )}
           </TouchableOpacity>
           <View style={styles.modalButtons}>
@@ -80,7 +87,10 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>🌌 Vision Board</Text>
+        <View style={styles.titleRow}>
+          <GalaxyIcon width={18} height={18} />
+          <Text style={styles.title}>Vision Board</Text>
+        </View>
         <TouchableOpacity onPress={() => setAdding(true)}>
           <Text style={styles.newLink}>+ Add</Text>
         </TouchableOpacity>
@@ -118,6 +128,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: { fontSize: 16, fontWeight: '700', color: categoryColors.wealth.text },
   newLink: { fontSize: 13, fontWeight: '700', color: categoryColors.wealth.text },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -162,6 +173,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   imagePickerText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+  imagePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   imagePreview: { width: '100%', height: '100%' },
   modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
 });
