@@ -15,7 +15,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, categoryColors, radii, shadow } from '../theme/colors';
+import { colors, radii, shadow } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
 
@@ -62,25 +62,25 @@ export default function ProfileScreen() {
         ) : (
           <View style={styles.grid}>
             <StatTile
-              background={categoryColors.health.bg}
-              textColor={categoryColors.health.text}
+              background={colors.inputBg}
+              textColor={colors.primary}
               label="Goals done"
               value={`${stats?.goalsCompleted ?? 0}/${stats?.goalsTotal ?? 0}`}
             />
             <StatTile
-              background={categoryColors.learning.bg}
-              textColor={categoryColors.learning.text}
+              background={colors.inputBg}
+              textColor={colors.primary}
               label="Best streak"
               value={stats?.currentStreak ?? 0}
             />
             <StatTile
-              background={categoryColors.wealth.bg}
-              textColor={categoryColors.wealth.text}
+              background={colors.inputBg}
+              textColor={colors.primary}
               label="Friends helped"
               value={stats?.friendsHelped ?? 0}
             />
             <StatTile
-              background={colors.celebration}
+              background={colors.primary}
               textColor="#fff"
               ctaLabel="Circle Settings"
               onPress={() => navigation.navigate('CircleSettings')}

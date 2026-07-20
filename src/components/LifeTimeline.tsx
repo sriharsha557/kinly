@@ -1,15 +1,19 @@
+import type { FC } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import type { SvgProps } from 'react-native-svg';
 import { useLifeTimeline, type TimelineEntry } from '../hooks/useLifeTimeline';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { colors, radii, shadow } from '../theme/colors';
+import CheckIcon from '../../assets/icons/feed/check.svg';
+import StreakIcon from '../../assets/icons/nudges/streak.svg';
 
 // Same two event types TodayScreen's Circle Activity already uses for
 // goal_completed/streak - reused here rather than inventing a separate
-// palette, since achievements don't carry a goal category (health/wealth/
-// etc.) to key categoryColors off of.
-const ENTRY_STYLE: Record<string, { bg: string; text: string; icon: string }> = {
-  goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: '✅' },
-  streak: { bg: '#FFE4D6', text: '#C2410C', icon: '🔥' },
+// icon set. Flat bubble background (no per-type hue) matches the rest of
+// the app's card-shell direction - the icon differentiates, not color.
+const ENTRY_ICON: Record<string, FC<SvgProps>> = {
+  goal_completed: CheckIcon,
+  streak: StreakIcon,
 };
 
 function monthLabel(iso: string): string {
@@ -62,18 +66,18 @@ export function LifeTimeline({ userId }: { userId: string }) {
         <View key={group.label} style={styles.group}>
           <Text style={styles.monthHeader}>{group.label}</Text>
           {group.entries.map((entry, index) => {
-            const style = ENTRY_STYLE[entry.type] ?? ENTRY_STYLE.goal_completed;
+            const Icon = ENTRY_ICON[entry.type] ?? ENTRY_ICON.goal_completed;
             return (
               <Animated.View
                 key={entry.id}
                 entering={FadeInDown.duration(300).delay(index * 30)}
                 style={styles.row}
               >
-                <View style={[styles.iconBubble, { backgroundColor: style.bg }]}>
-                  <Text style={styles.icon}>{style.icon}</Text>
+                <View style={styles.iconBubble}>
+                  <Icon width={16} height={16} />
                 </View>
                 <View style={styles.rowBody}>
-                  <Text style={[styles.entryTitle, { color: style.text }]}>{entry.title}</Text>
+                  <Text style={styles.entryTitle}>{entry.title}</Text>
                   <Text style={styles.entryDate}>{relativeDay(entry.achieved_at)}</Text>
                 </View>
               </Animated.View>
@@ -98,10 +102,16 @@ const styles = StyleSheet.create({
     gap: 12,
     ...shadow,
   },
-  iconBubble: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-  icon: { fontSize: 16 },
+  iconBubble: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.inputBg,
+  },
   rowBody: { flex: 1, gap: 2 },
-  entryTitle: { fontSize: 14, fontWeight: '600' },
+  entryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   entryDate: { fontSize: 11, color: colors.textSecondary },
   emptyCard: {
     backgroundColor: colors.surface,

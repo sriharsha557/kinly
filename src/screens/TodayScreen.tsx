@@ -17,7 +17,7 @@ import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, categoryColors, radii, shadow } from '../theme/colors';
+import { colors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -35,17 +35,19 @@ import ClockIcon from '../../assets/icons/feed/clock.svg';
 import ChatIcon from '../../assets/icons/feed/chat.svg';
 import RocketIcon from '../../assets/icons/feed/rocket.svg';
 
-type EventIcon = FC<SvgProps> | string;
-
-const EVENT_STYLE: Record<EventType, { bg: string; text: string; icon: EventIcon }> = {
-  goal_completed: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CheckIcon },
-  streak: { bg: '#FFE4D6', text: '#C2410C', icon: StreakIcon },
-  reminder: { bg: categoryColors.learning.bg, text: categoryColors.learning.text, icon: ClockIcon },
-  ask: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: ChatIcon },
-  challenge_completed: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: RocketIcon },
-  mood_checkin: { bg: categoryColors.wealth.bg, text: categoryColors.wealth.text, icon: NeutralIcon },
-  streak_saved: { bg: categoryColors.ideas.bg, text: categoryColors.ideas.text, icon: WaterIcon },
-  progress_photo: { bg: categoryColors.health.bg, text: categoryColors.health.text, icon: CameraIcon },
+// All event types now render on the same flat white card shell - color no
+// longer differentiates event type, the icon does (see ARCHITECTURE.md's
+// "Card shell" note). Previously each type had its own pastel background
+// (peach/blue/yellow), which read as a rainbow of unrelated colors.
+const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
+  goal_completed: CheckIcon,
+  streak: StreakIcon,
+  reminder: ClockIcon,
+  ask: ChatIcon,
+  challenge_completed: RocketIcon,
+  mood_checkin: NeutralIcon,
+  streak_saved: WaterIcon,
+  progress_photo: CameraIcon,
 };
 
 const MOOD_ICON: Record<string, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
@@ -81,12 +83,12 @@ function EventPhoto({ path }: { path: string }) {
 
 // mood_checkin is the one event type whose icon isn't static per-type - the
 // actual mood (😊/😐/😞) is far more expressive than a placeholder.
-function eventIcon(event: EventWithProfile): EventIcon {
+function eventIcon(event: EventWithProfile): FC<SvgProps> {
   if (event.type === 'mood_checkin') {
     const mood = (event.payload as Record<string, unknown>).mood as string;
-    return MOOD_ICON[mood] ?? EVENT_STYLE.mood_checkin.icon;
+    return MOOD_ICON[mood] ?? EVENT_ICON.mood_checkin;
   }
-  return EVENT_STYLE[event.type].icon;
+  return EVENT_ICON[event.type];
 }
 
 const NUDGE_KINDS: { kind: NudgeKind; Icon: FC<SvgProps>; label: string }[] = [
@@ -145,7 +147,7 @@ function dayLabel(iso: string): string {
 }
 
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
-  const style = EVENT_STYLE[event.type];
+  const Icon = eventIcon(event);
   const sendNudge = useSendNudge(circleId);
   const waterStreak = useWaterStreak(circleId);
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
@@ -186,19 +188,12 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   return (
     <Animated.View
       entering={isCelebration ? ZoomIn.springify().damping(14) : FadeInDown.duration(350)}
-      style={[styles.eventCard, { backgroundColor: style.bg }]}
+      style={styles.eventCard}
     >
       <View style={styles.eventHeader}>
-        {(() => {
-          const Icon = eventIcon(event);
-          return typeof Icon === 'string' ? (
-            <Text style={styles.eventIcon}>{Icon}</Text>
-          ) : (
-            <Icon width={20} height={20} />
-          );
-        })()}
+        <Icon width={20} height={20} />
         <View style={styles.eventBody}>
-          <Text style={[styles.eventText, { color: style.text }]}>{describeEvent(event)}</Text>
+          <Text style={styles.eventText}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
         </View>
       </View>
@@ -323,19 +318,23 @@ const styles = StyleSheet.create({
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
-    borderRadius: radii.card,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary,
     padding: 14,
+    paddingLeft: 12,
     gap: 10,
-    ...shadow,
   },
   eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  eventIcon: { fontSize: 20 },
   eventBody: { flex: 1, gap: 2 },
-  eventText: { fontSize: 14, fontWeight: '600' },
+  eventText: { fontSize: 14, fontWeight: '600', color: '#22281F' },
   eventTime: { fontSize: 11, color: colors.textSecondary },
   nudgeRow: { flexDirection: 'row', gap: 6 },
   nudgeButton: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.inputBg,
     borderRadius: radii.pill,
     width: 44,
     height: 44,
@@ -344,12 +343,12 @@ const styles = StyleSheet.create({
   },
   nudgeButtonText: { fontSize: 16 },
   waterButton: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: colors.inputBg,
     borderRadius: radii.pill,
     paddingVertical: 8,
     alignItems: 'center',
   },
-  waterButtonText: { fontSize: 13, fontWeight: '700', color: categoryColors.ideas.text },
+  waterButtonText: { fontSize: 13, fontWeight: '700', color: colors.primary },
   nudgeList: { gap: 4 },
   photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
   photoThumbLoading: { backgroundColor: 'rgba(255,255,255,0.5)', alignItems: 'center', justifyContent: 'center' },

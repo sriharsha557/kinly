@@ -4,6 +4,7 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { PillButton } from './PillButton';
+import { INTEREST_OPTIONS } from './InterestPicker';
 import { colors, categoryColors, radii } from '../theme/colors';
 import IdeaIllustration from '../../assets/illustrations/kinly-idea.svg';
 
@@ -66,11 +67,16 @@ function CustomizeGoalModal({
 
 function SuggestionCard({ suggestion, onPress }: { suggestion: GoalSuggestion; onPress: () => void }) {
   const category = categoryColors[suggestion.category];
+  const Icon = INTEREST_OPTIONS.find((o) => o.key === suggestion.category)?.Icon;
 
   return (
-    <TouchableOpacity style={[styles.suggestionCard, { backgroundColor: category.bg }]} onPress={onPress}>
-      <Text style={[styles.suggestionText, { color: category.text }]}>{suggestion.title}</Text>
-      <Text style={[styles.suggestionAdd, { color: category.text }]}>+ Add</Text>
+    <TouchableOpacity
+      style={[styles.suggestionCard, { borderLeftColor: category.solid }]}
+      onPress={onPress}
+    >
+      {Icon && <Icon size={16} color={category.solid} />}
+      <Text style={styles.suggestionText}>{suggestion.title}</Text>
+      <Text style={[styles.suggestionAdd, { color: category.solid }]}>+ Add</Text>
     </TouchableOpacity>
   );
 }
@@ -112,13 +118,18 @@ const styles = StyleSheet.create({
   suggestionsSection: { marginBottom: 20 },
   suggestionsRow: { gap: 10, paddingRight: 16 },
   suggestionCard: {
-    borderRadius: radii.card,
+    backgroundColor: '#FFFEFA',
+    borderWidth: 0.5,
+    borderColor: '#E4DFD1',
+    borderRadius: 20,
+    borderLeftWidth: 3,
     padding: 14,
+    paddingLeft: 12,
     width: 160,
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 10,
   },
-  suggestionText: { fontSize: 13, fontWeight: '600' },
+  suggestionText: { fontSize: 13, fontWeight: '600', color: '#22281F' },
   suggestionAdd: { fontSize: 12, fontWeight: '800' },
   modalOverlay: {
     flex: 1,
