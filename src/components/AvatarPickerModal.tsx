@@ -19,10 +19,16 @@ export function AvatarPickerModal({
         <View style={styles.card}>
           <Text style={styles.title}>Choose an avatar</Text>
           <View style={styles.grid}>
-            {seeds.map((seed) => {
+            {seeds.map((seed, index) => {
               const url = diceBearAvatarUrl(seed);
               return (
-                <TouchableOpacity key={seed} onPress={() => onSelect(url)} style={styles.avatarWrap}>
+                <TouchableOpacity
+                  key={seed}
+                  onPress={() => onSelect(url)}
+                  style={styles.avatarWrap}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Avatar option ${index + 1}`}
+                >
                   <Image source={{ uri: url }} style={styles.avatarImage} />
                 </TouchableOpacity>
               );

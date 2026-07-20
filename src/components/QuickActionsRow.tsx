@@ -41,10 +41,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   action: {
     backgroundColor: colors.surface,
-    borderRadius: radii.card,
+    borderRadius: radii.input,
     paddingVertical: 14,
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     ...shadow,
   },
   label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
