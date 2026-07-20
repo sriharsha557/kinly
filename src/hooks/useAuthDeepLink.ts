@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import * as Linking from 'expo-linking';
 import { completeEmailConfirmation, completePasswordRecovery } from '../lib/auth';
+import { useAuthStore } from '../state/useAuthStore';
 
 // Password reset and email confirmation links arrive by email, not through
 // a browser session the app itself opened (unlike Google sign-in's
@@ -22,6 +23,16 @@ function handleUrl(url: string | null) {
       // resolves it directly, so this listener firing again with nothing
       // useful in it is expected, not an error worth surfacing.
     });
+  } else if (url.includes('join')) {
+    // kinly://join?code=ABC12345 - only works for someone who already has
+    // the app installed (a plain custom-scheme link can't trigger a first
+    // install), but for repeat invites/a second circle it saves retyping
+    // an 8-char code from a WhatsApp message. CircleStep reads and clears
+    // this on mount.
+    const code = Linking.parse(url).queryParams?.code;
+    if (typeof code === 'string' && code.length > 0) {
+      useAuthStore.getState().setPendingInviteCode(code);
+    }
   }
 }
 

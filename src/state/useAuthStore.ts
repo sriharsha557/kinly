@@ -9,10 +9,17 @@ interface AuthState {
   sessionLoading: boolean;
   passwordRecoveryMode: boolean;
   hasHydrated: boolean;
+  // Set by a kinly://join?code=... deep link (see useAuthDeepLink.ts) so
+  // OnboardingScreen's CircleStep can pre-fill the invite code field
+  // instead of making someone who already has the app retype an 8-char
+  // code by hand from a WhatsApp message. Not persisted - a one-shot
+  // handoff, consumed and cleared by CircleStep on read.
+  pendingInviteCode: string | null;
   setUser: (user: User | null) => void;
   setActiveCircleId: (circleId: string | null) => void;
   setSessionLoading: (loading: boolean) => void;
   setPasswordRecoveryMode: (recovering: boolean) => void;
+  setPendingInviteCode: (code: string | null) => void;
 }
 
 // activeCircleId used to live in memory only, so it reset to null on every
@@ -31,10 +38,12 @@ export const useAuthStore = create<AuthState>()(
       sessionLoading: true,
       passwordRecoveryMode: false,
       hasHydrated: false,
+      pendingInviteCode: null,
       setUser: (user) => set({ user }),
       setActiveCircleId: (activeCircleId) => set({ activeCircleId }),
       setSessionLoading: (sessionLoading) => set({ sessionLoading }),
       setPasswordRecoveryMode: (passwordRecoveryMode) => set({ passwordRecoveryMode }),
+      setPendingInviteCode: (pendingInviteCode) => set({ pendingInviteCode }),
     }),
     {
       name: 'kinly-auth-store',

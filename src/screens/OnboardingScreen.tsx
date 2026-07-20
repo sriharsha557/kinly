@@ -265,6 +265,8 @@ function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => 
 function CircleStep() {
   const userId = useAuthStore((state) => state.user?.id);
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
+  const pendingInviteCode = useAuthStore((state) => state.pendingInviteCode);
+  const setPendingInviteCode = useAuthStore((state) => state.setPendingInviteCode);
   const { data: circles } = useMyCircles(userId);
   const createCircle = useCreateCircle();
   const joinCircle = useJoinCircle();
@@ -279,6 +281,17 @@ function CircleStep() {
       setActiveCircleId(circles[0].id);
     }
   }, [circles, createdCircle, setActiveCircleId]);
+
+  // A kinly://join?code=... deep link (see useAuthDeepLink.ts) hands off
+  // the code here instead of making someone retype it - consumed once,
+  // then cleared so it doesn't reappear on a later, unrelated visit to
+  // this screen.
+  useEffect(() => {
+    if (pendingInviteCode) {
+      setInviteCode(pendingInviteCode);
+      setPendingInviteCode(null);
+    }
+  }, [pendingInviteCode, setPendingInviteCode]);
 
   async function handleCreate() {
     setError(null);

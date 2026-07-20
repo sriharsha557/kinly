@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCancelJoinRequest, useMyCircles, type CircleWithMembership } from '../hooks/useCircles';
@@ -24,7 +24,12 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
   );
 
   async function handleCancel() {
-    await cancelRequest.mutateAsync(pendingCircle.id);
+    try {
+      await cancelRequest.mutateAsync(pendingCircle.id);
+    } catch (err) {
+      Alert.alert('Could not cancel your request', err instanceof Error ? err.message : 'Please try again.');
+      return;
+    }
     setActiveCircleId(otherActiveCircles[0]?.id ?? null);
   }
 
