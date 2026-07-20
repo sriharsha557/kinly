@@ -57,6 +57,12 @@ const MOOD_PROMPT: Record<MoodValue, string> = {
   tough: 'What made today tough?',
 };
 
+const MOOD_SENTENCE: Record<MoodValue, string> = {
+  great: "You're feeling great today",
+  okay: "You're doing okay today",
+  tough: "You're having a tough day",
+};
+
 function MoodOptionCard({
   Icon,
   label,
@@ -238,19 +244,20 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   return (
     <>
       <View style={styles.card}>
+        <Text style={styles.title}>{"How's today going?"}</Text>
         {!myCheckin ? (
           <TouchableOpacity onPress={() => setModalOpen(true)} accessibilityRole="button" accessibilityLabel="Check in on today's mood">
-            <Text style={styles.title}>{"How's today going?"}</Text>
             <Text style={styles.hint}>Tap to check in</Text>
           </TouchableOpacity>
         ) : (
           <Animated.View entering={FadeIn.duration(300)}>
             <View style={styles.gridHeader}>
-              <Text style={styles.title}>{"How the circle's doing today"}</Text>
+              <Text style={styles.hint}>{MOOD_SENTENCE[myCheckin.mood]}</Text>
               <TouchableOpacity onPress={() => setModalOpen(true)} accessibilityRole="button" accessibilityLabel="Change your check-in">
                 <Text style={styles.changeLink}>Change</Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.sectionCaption}>Circle check-ins today</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gridRow}>
               {activeMembers.map((member) => {
                 const checkin = checkins?.find((c) => c.user_id === member.user_id);
@@ -296,10 +303,19 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     marginBottom: 16,
   },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  hint: { fontSize: 11, color: colors.shellSecondary, marginTop: 2 },
-  gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 2 },
+  hint: { fontSize: 11, color: colors.shellSecondary },
+  gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
+  sectionCaption: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.shellSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 14,
+    marginBottom: 8,
+  },
   gridRow: { gap: 14 },
   memberChip: { alignItems: 'center', width: 52 },
   moodBubble: {

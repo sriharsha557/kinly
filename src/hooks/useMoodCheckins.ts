@@ -38,17 +38,6 @@ export function useSubmitMoodCheckin(circleId: string, userId: string) {
     mutationFn: async ({ mood, tags = [] }: { mood: MoodValue; tags?: string[] }) => {
       const today = todayIso();
 
-      // Only emit a feed event on the FIRST check-in of the day - changing
-      // your mind same-day (a different mood or tags) updates the row
-      // silently, so flip-flopping doesn't spam Circle Activity.
-      const { data: existing } = await supabase
-        .from('mood_checkins')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('circle_id', circleId)
-        .eq('checkin_date', today)
-        .maybeSingle();
-
       const { error } = await supabase
         .from('mood_checkins')
         .upsert(
@@ -57,7 +46,28 @@ export function useSubmitMoodCheckin(circleId: string, userId: string) {
         );
       if (error) throw error;
 
-      if (!existing) {
+      // Changing your mind same-day doesn't create a second feed entry -
+      // it overwrites today's existing mood_checkin event's payload in
+      // place, so Circle Activity always reflects the latest mood instead
+      // of freezing on whatever was picked first. created_at is left
+      // alone deliberately: the event shouldn't jump back to the top of
+      // the feed just because you changed your mind, only its content
+      // should update.
+      const startOfDay = `${today}T00:00:00.000Z`;
+      const { data: existingEvent } = await supabase
+        .from('events')
+        .select('id')
+        .eq('circle_id', circleId)
+        .eq('user_id', userId)
+        .eq('type', 'mood_checkin')
+        .gte('created_at', startOfDay)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existingEvent) {
+        await supabase.from('events').update({ payload: { mood } }).eq('id', existingEvent.id);
+      } else {
         await supabase.from('events').insert({ circle_id: circleId, user_id: userId, type: 'mood_checkin', payload: { mood } });
       }
     },
