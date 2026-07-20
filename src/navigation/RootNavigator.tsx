@@ -30,6 +30,7 @@ export default function RootNavigator() {
   usePushRegistration(user?.id);
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
   const sessionLoading = useAuthStore((state) => state.sessionLoading);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const passwordRecoveryMode = useAuthStore((state) => state.passwordRecoveryMode);
   const { data: myCircles, isLoading: circlesLoading } = useMyCircles(user?.id, PENDING_POLL_INTERVAL_MS);
   // Session bootstrap runs in the background while this plays, so the app
@@ -41,7 +42,7 @@ export default function RootNavigator() {
     return <LaunchVideoScreen onFinish={handleLaunchVideoFinish} />;
   }
 
-  if (sessionLoading) {
+  if (sessionLoading || !hasHydrated) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <LoadingSpinner size={14} />
