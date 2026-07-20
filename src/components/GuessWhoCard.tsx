@@ -88,18 +88,21 @@ function GuessWhoPostRow({
     <View style={styles.postCard}>
       <Text style={styles.fact}>{`"${post.fact}"`}</Text>
       {!revealed ? (
-        <View style={styles.memberChips}>
-          {members
-            ?.filter((m) => m.user_id !== post.created_by)
-            .map((m) => (
-              <TouchableOpacity
-                key={m.user_id}
-                style={styles.chip}
-                onPress={() => submitGuess.mutate({ postId: post.id, userId, guessedUserId: m.user_id })}
-              >
-                <Text style={styles.chipText}>{m.profiles?.name ?? 'Member'}</Text>
-              </TouchableOpacity>
-            ))}
+        <View>
+          <Text style={styles.hint}>Tap who you think it is</Text>
+          <View style={styles.memberChips}>
+            {members
+              ?.filter((m) => m.user_id !== post.created_by)
+              .map((m) => (
+                <TouchableOpacity
+                  key={m.user_id}
+                  style={styles.chip}
+                  onPress={() => submitGuess.mutate({ postId: post.id, userId, guessedUserId: m.user_id })}
+                >
+                  <Text style={styles.chipText}>{m.profiles?.name ?? 'Member'}</Text>
+                </TouchableOpacity>
+              ))}
+          </View>
         </View>
       ) : (
         <View>
@@ -160,6 +163,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
   newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
   empty: { fontSize: 13, color: colors.shellSecondary },
+  hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 6 },
   postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
   fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
   memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

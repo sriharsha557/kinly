@@ -73,6 +73,7 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
         <Text style={styles.empty}>No poll yet — start one for your circle to vote on.</Text>
       ) : (
         <View style={styles.options}>
+          <Text style={styles.hint}>{poll.myChoice ? 'Tap the other one to change your vote' : 'Tap an option to vote'}</Text>
           <TouchableOpacity
             style={[styles.option, poll.myChoice === 'a' && styles.optionActive]}
             onPress={() => votePoll.mutate({ pollId: poll.id, userId, choice: 'a' })}
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
   newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
   empty: { fontSize: 13, color: colors.shellSecondary },
+  hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 2 },
   options: { gap: 8 },
   option: {
     backgroundColor: colors.surface,
