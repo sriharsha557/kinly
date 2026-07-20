@@ -8,18 +8,34 @@ import { AnimatedPressable } from './AnimatedPressable';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { colors, radii } from '../theme/colors';
+import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
-import HappyIcon from '../../assets/icons/mood/happy.svg';
-import NeutralIcon from '../../assets/icons/mood/neutral.svg';
-import SadIcon from '../../assets/icons/mood/sad.svg';
+import HappyIconRaw from '../../assets/icons/mood/happy.svg';
+import NeutralIconRaw from '../../assets/icons/mood/neutral.svg';
+import SadIconRaw from '../../assets/icons/mood/sad.svg';
 
-const MOODS: { value: MoodValue; Icon: FC<SvgProps>; label: string }[] = [
+// Muted, not the app's default textSecondary brown - this row's unpicked
+// buttons need to read as quiet/inactive against a white background, which
+// a warm brown (tuned for body-text contrast) doesn't convey as clearly as
+// a neutral gray does at this size and weight.
+const MUTED = '#ABA695';
+
+interface MoodIconProps {
+  size?: number;
+  color: string;
+}
+
+const MOODS: { value: MoodValue; Icon: FC<MoodIconProps>; label: string }[] = [
   { value: 'great', Icon: HappyIcon, label: 'Great' },
   { value: 'okay', Icon: NeutralIcon, label: 'Okay' },
   { value: 'tough', Icon: SadIcon, label: 'Tough' },
 ];
 
-const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
+// The circle-grid view below (everyone's mood at a glance) stays on the raw
+// hardcoded-orange imports - those bubbles are always on a light inputBg/
+// background fill, so contrast is fine and there's no active/inactive
+// state to flip between.
+const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIconRaw, okay: NeutralIconRaw, tough: SadIconRaw };
 
 // Works with zero goals set - deliberately the first thing a brand-new user
 // can do, and the only Today card that doesn't need any goal data to be
@@ -50,19 +66,24 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   if (!myCheckin) {
     return (
       <View style={styles.card}>
-        <Text style={styles.title}>How's today going?</Text>
+        <Text style={styles.title}>{"How's today going?"}</Text>
         <View style={styles.pickRow}>
-          {MOODS.map(({ value, Icon, label }) => (
-            <AnimatedPressable
-              key={value}
-              style={styles.pickButton}
-              onPress={() => handlePick(value)}
-              disabled={submittingMood !== null}
-            >
-              {submittingMood === value ? <Text style={styles.pickLoading}>…</Text> : <Icon width={28} height={28} />}
-              <Text style={styles.pickLabel}>{label}</Text>
-            </AnimatedPressable>
-          ))}
+          {MOODS.map(({ value, Icon, label }) => {
+            const active = submittingMood === value;
+            return (
+              <AnimatedPressable
+                key={value}
+                style={[styles.pickButton, active && styles.pickButtonActive]}
+                onPress={() => handlePick(value)}
+                disabled={submittingMood !== null}
+                accessibilityRole="button"
+                accessibilityLabel={label}
+              >
+                <Icon size={26} color={active ? '#fff' : MUTED} />
+                <Text style={[styles.pickLabel, active && styles.pickLabelActive]}>{label}</Text>
+              </AnimatedPressable>
+            );
+          })}
         </View>
       </View>
     );
@@ -70,7 +91,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
 
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.card}>
-      <Text style={styles.title}>How the circle's doing today</Text>
+      <Text style={styles.title}>{"How the circle's doing today"}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gridRow}>
         {activeMembers.map((member) => {
           const checkin = checkins?.find((c) => c.user_id === member.user_id);
@@ -112,14 +133,17 @@ const styles = StyleSheet.create({
   pickRow: { flexDirection: 'row', gap: 10 },
   pickButton: {
     flex: 1,
-    backgroundColor: colors.inputBg,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: '#E4DFD1',
     borderRadius: radii.input,
     paddingVertical: 12,
     alignItems: 'center',
     gap: 6,
   },
-  pickLoading: { fontSize: 24, color: colors.textSecondary },
-  pickLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  pickButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  pickLabel: { fontSize: 12, fontWeight: '600', color: MUTED },
+  pickLabelActive: { color: '#fff' },
   gridRow: { gap: 14 },
   memberChip: { alignItems: 'center', width: 52 },
   moodBubble: {

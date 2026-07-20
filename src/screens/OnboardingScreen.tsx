@@ -114,7 +114,7 @@ function AuthStep() {
         <View style={styles.form}>
           <Text style={styles.confirmTitle}>Check your email</Text>
           <Text style={styles.confirmBody}>
-            If that email is registered, you'll receive a reset link shortly. Tap it to set a new password.
+            {"If that email is registered, you'll receive a reset link shortly. Tap it to set a new password."}
           </Text>
           <PillButton
             label="Back to sign in"
@@ -130,7 +130,7 @@ function AuthStep() {
     return (
       <View style={styles.form}>
         <Text style={styles.confirmTitle}>Reset your password</Text>
-        <Text style={styles.confirmBody}>Enter your email and we'll send you a reset link.</Text>
+        <Text style={styles.confirmBody}>{"Enter your email and we'll send you a reset link."}</Text>
         <AppTextInput
           label="E-mail"
           autoCapitalize="none"
@@ -313,7 +313,7 @@ function CircleStep() {
         loading={createCircle.isPending}
         disabled={!circleName.trim()}
       />
-      <Text style={styles.soloNote}>Start solo, invite friends when you're ready.</Text>
+      <Text style={styles.soloNote}>{"Start solo, invite friends when you're ready."}</Text>
 
       <Text style={styles.orDivider}>or</Text>
 

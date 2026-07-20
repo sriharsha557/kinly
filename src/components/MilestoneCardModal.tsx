@@ -1,4 +1,4 @@
-import { Modal, Share, StyleSheet, Text, View } from 'react-native';
+import { Modal, Share, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { Logo } from './Logo';

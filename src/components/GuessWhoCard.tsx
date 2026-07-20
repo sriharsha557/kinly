@@ -86,7 +86,7 @@ function GuessWhoPostRow({
 
   return (
     <View style={styles.postCard}>
-      <Text style={styles.fact}>"{post.fact}"</Text>
+      <Text style={styles.fact}>{`"${post.fact}"`}</Text>
       {!revealed ? (
         <View style={styles.memberChips}>
           {members

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useCreatePoll, useLatestPoll, useVotePoll } from '../hooks/useWouldYouRather';
 import { PillButton } from './PillButton';
-import { colors, radii, shadow } from '../theme/colors';
+import { colors, radii } from '../theme/colors';
 import { RelationshipsIcon } from './icons/PillarIcons';
 
 function NewPollModal({

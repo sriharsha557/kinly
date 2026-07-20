@@ -40,6 +40,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~10.0.0",
     "react-native-svg-transformer": "^1.5.3",
     "typescript": "~5.9.2"
   },
@@ -48,7 +50,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test:functions": "node --env-file=.env scripts/test-edge-functions.mjs"
+    "test:functions": "node --env-file=.env scripts/test-edge-functions.mjs",
+    "lint": "expo lint"
   },
   "private": true
 }

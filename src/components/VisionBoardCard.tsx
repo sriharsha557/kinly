@@ -111,7 +111,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
           ))}
         </View>
       ) : (
-        <Text style={styles.empty}>Add what you're working toward — your circle can see it here.</Text>
+        <Text style={styles.empty}>{"Add what you're working toward — your circle can see it here."}</Text>
       )}
 
       {adding && <AddVisionModal circleId={circleId} userId={userId} onClose={() => setAdding(false)} />}

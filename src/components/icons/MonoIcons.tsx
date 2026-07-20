@@ -61,3 +61,40 @@ export function CheckIcon({ size = 20, color }: MonoIconProps) {
     </Svg>
   );
 }
+
+// Prop-driven versions of assets/icons/mood/{happy,neutral,sad}.svg -
+// MoodCheckinCard's picker needs these muted (not orange) when unpicked
+// and white when the solid-orange selected state is showing, neither of
+// which the raw hardcoded-orange imports can do.
+export function HappyIcon({ size = 20, color }: MonoIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={9} cy={10} r={1} fill={color} />
+      <Circle cx={15} cy={10} r={1} fill={color} />
+      <Path d="M8.3,13.5 Q12,17.5 15.7,13.5" stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function NeutralIcon({ size = 20, color }: MonoIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={9} cy={10} r={1} fill={color} />
+      <Circle cx={15} cy={10} r={1} fill={color} />
+      <Path d="M8.5,14.5 L15.5,14.5" stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function SadIcon({ size = 20, color }: MonoIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx={9} cy={10} r={1} fill={color} />
+      <Circle cx={15} cy={10} r={1} fill={color} />
+      <Path d="M8.3,16.5 Q12,12.5 15.7,16.5" stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}

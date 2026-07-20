@@ -35,15 +35,14 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
           <Logo size={72} color="#FFFFFF" />
           <Text style={styles.title}>Waiting for approval</Text>
           <Text style={styles.subtitle}>
-            Your request to join "{pendingCircle.name}" is with the circle owner. You'll be let in as soon as
-            they approve it.
+            {`Your request to join "${pendingCircle.name}" is with the circle owner. You'll be let in as soon as they approve it.`}
           </Text>
         </GradientHeader>
 
         <View style={styles.body}>
           {otherActiveCircles.length > 0 && (
             <View style={styles.switchList}>
-              <Text style={styles.switchLabel}>Or switch to a circle you're already in:</Text>
+              <Text style={styles.switchLabel}>{"Or switch to a circle you're already in:"}</Text>
               {otherActiveCircles.map((c) => (
                 <TouchableOpacity
                   key={c.id}

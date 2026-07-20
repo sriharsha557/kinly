@@ -52,7 +52,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Today's Progress</Text>
+      <Text style={styles.title}>{"Today's Progress"}</Text>
 
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
