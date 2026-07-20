@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -47,29 +47,37 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   const { data: members } = useCircleMembers(circleId);
   const submitMood = useSubmitMoodCheckin(circleId, userId);
   const [submittingMood, setSubmittingMood] = useState<MoodValue | null>(null);
+  const [editing, setEditing] = useState(false);
 
   if (isLoading) return null;
 
   const myCheckin = checkins?.find((c) => c.user_id === userId);
   const activeMembers = (members ?? []).filter((m) => m.status === 'active');
 
+  // Same upsert either way - useSubmitMoodCheckin only fires a fresh Circle
+  // Activity event on today's *first* check-in, so re-picking to change
+  // your mind later just updates the row silently, no feed spam.
   async function handlePick(mood: MoodValue) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSubmittingMood(mood);
     try {
       await submitMood.mutateAsync(mood);
+      setEditing(false);
     } finally {
       setSubmittingMood(null);
     }
   }
 
-  if (!myCheckin) {
+  if (!myCheckin || editing) {
     return (
       <View style={styles.card}>
         <Text style={styles.title}>{"How's today going?"}</Text>
+        <Text style={styles.hint}>
+          {myCheckin ? "Tap to update today's check-in" : "Tap to check in - you can change this later today"}
+        </Text>
         <View style={styles.pickRow}>
           {MOODS.map(({ value, Icon, label }) => {
-            const active = submittingMood === value;
+            const active = submittingMood ? submittingMood === value : myCheckin?.mood === value;
             return (
               <AnimatedPressable
                 key={value}
@@ -85,13 +93,23 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
             );
           })}
         </View>
+        {editing && (
+          <TouchableOpacity onPress={() => setEditing(false)} disabled={submittingMood !== null}>
+            <Text style={styles.cancelLink}>Cancel</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
 
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.card}>
-      <Text style={styles.title}>{"How the circle's doing today"}</Text>
+      <View style={styles.gridHeader}>
+        <Text style={styles.title}>{"How the circle's doing today"}</Text>
+        <TouchableOpacity onPress={() => setEditing(true)} accessibilityRole="button" accessibilityLabel="Change your check-in">
+          <Text style={styles.changeLink}>Change</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gridRow}>
         {activeMembers.map((member) => {
           const checkin = checkins?.find((c) => c.user_id === member.user_id);
@@ -124,7 +142,11 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     marginBottom: 16,
   },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 12 },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+  hint: { fontSize: 11, color: colors.shellSecondary, marginTop: 2, marginBottom: 12 },
+  cancelLink: { fontSize: 12, fontWeight: '600', color: colors.shellSecondary, textAlign: 'center', marginTop: 10 },
+  gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
   pickRow: { flexDirection: 'row', gap: 10 },
   pickButton: {
     flex: 1,
