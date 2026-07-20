@@ -1,15 +1,24 @@
 // Writes one warm summary sentence for a circle's week, given stats the
-// client already computed (this function does no DB access itself - the
-// client's own RLS-scoped queries already produced the numbers, so all
-// this needs to do is turn them into words).
+// client already computed (the client's own RLS-scoped queries already
+// produced the numbers, so this only needs to turn them into words).
 // Deploy: Supabase Dashboard -> Edge Functions -> New function "weekly-recap"
 // -> paste this file -> Deploy. Uses the same ANTHROPIC_API_KEY secret as
 // generate-nudge-message (project-wide secrets are shared across functions).
+// Keep "Enforce JWT verification" ON - increment_ai_usage() needs a real
+// caller identity (auth.uid()) to cap per-user. useWeeklyRecap() already
+// tolerates a failed/empty response (the highlight line just doesn't
+// render), so a capped user still sees the numeric stats, nothing breaks.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Same reasoning as circle-ai-insight: fires on every Circle tab visit,
+// not just a deliberate action, so the cap stays generous.
+const DAILY_CAP = 20;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,6 +26,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) throw new Error('Missing Authorization header');
+
+    const callerClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: allowed, error: capError } = await callerClient.rpc('increment_ai_usage', {
+      p_fn: 'weekly_recap',
+      p_max: DAILY_CAP,
+    });
+    if (capError) throw capError;
+    if (!allowed) throw new Error('Daily weekly-recap limit reached');
+
     const { goalsCompleted, streakMilestones, nudgesSent, asksPosted } = await req.json();
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');

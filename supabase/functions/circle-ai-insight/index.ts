@@ -1,13 +1,23 @@
 // Writes one coaching sentence + a themed 7-day challenge title, given the
-// circle's per-category streak totals the client already computed. No DB
-// access here, same shape as generate-nudge-message and weekly-recap.
+// circle's per-category streak totals the client already computed.
 // Deploy: Supabase Dashboard -> Edge Functions -> New function
 // "circle-ai-insight" -> paste this file -> Deploy.
+// Keep "Enforce JWT verification" ON - increment_ai_usage() needs a real
+// caller identity (auth.uid()) to cap per-user. useCircleAI() already
+// tolerates a failed/empty response (CircleAICard just doesn't render),
+// so a capped user simply doesn't see today's AI line, nothing breaks.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// This fires on every Circle tab visit (a query, not a deliberate user
+// action), so the cap needs to be generous enough not to bite normal use
+// across a day of reopening the app, while still stopping runaway loops.
+const DAILY_CAP = 20;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -15,6 +25,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) throw new Error('Missing Authorization header');
+
+    const callerClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: allowed, error: capError } = await callerClient.rpc('increment_ai_usage', {
+      p_fn: 'circle_insight',
+      p_max: DAILY_CAP,
+    });
+    if (capError) throw capError;
+    if (!allowed) throw new Error('Daily AI insight limit reached');
+
     const { strongest, weakest, categoryTotals } = await req.json();
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');

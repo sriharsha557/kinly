@@ -2,11 +2,22 @@
 // Deploy: paste into Supabase Dashboard -> Edge Functions -> New function
 // (name it "generate-nudge-message"), or `supabase functions deploy generate-nudge-message`.
 // Requires an ANTHROPIC_API_KEY secret set on the project (never shipped to the client).
+// Keep "Enforce JWT verification" ON - increment_ai_usage() needs a real
+// caller identity (auth.uid()) to cap per-user, same reasoning as
+// delete-account. If this returns an error, generateNudgeMessage() in the
+// client already falls back to a canned FALLBACK_MESSAGES string, so a
+// capped user still gets a nudge sent, just not an AI-personalized one.
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Nudges are meant to be spontaneous and frequent, so this is generous -
+// it's a backstop against spam/bugs, not a normal-use limit.
+const DAILY_CAP = 30;
 
 const KIND_HINTS: Record<string, string> = {
   cheer: 'celebrating something they just did',
@@ -23,6 +34,19 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) throw new Error('Missing Authorization header');
+
+    const callerClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: allowed, error: capError } = await callerClient.rpc('increment_ai_usage', {
+      p_fn: 'nudge',
+      p_max: DAILY_CAP,
+    });
+    if (capError) throw capError;
+    if (!allowed) throw new Error('Daily nudge limit reached');
+
     const { kind, recipientName, context } = await req.json();
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
