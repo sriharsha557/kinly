@@ -534,6 +534,116 @@
     .install-steps{grid-template-columns:1fr 1fr;}
   }
 
+  /* ---------- PROBLEM / POINT GRID ---------- */
+  .point-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px 32px;
+    margin-top:8px;
+  }
+  .point{
+    border-left:2px solid var(--orange);
+    padding-left:16px;
+    font-size:15.5px;
+    color:var(--ink-soft);
+  }
+  .point strong{color:var(--ink);}
+  @media (max-width: 620px){
+    .point-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- COMPARE (SOLO VS KINLY) ---------- */
+  .compare-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  .compare-col{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:26px 26px 28px;
+  }
+  .compare-col.highlight{
+    border-color:var(--orange);
+    box-shadow:var(--shadow-card);
+  }
+  .compare-col h3{
+    font-size:17px;
+    font-style:italic;
+    margin-bottom:16px;
+  }
+  .compare-col.highlight h3{color:var(--orange-deep);}
+  .compare-col ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .compare-col li{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    padding-left:20px;
+    position:relative;
+    line-height:1.5;
+  }
+  .compare-col li::before{
+    content:"–";
+    position:absolute;
+    left:0;
+    color:var(--ink-faint);
+  }
+  .compare-col.highlight li::before{
+    content:"✓";
+    color:var(--orange);
+    font-weight:700;
+  }
+  @media (max-width: 720px){
+    .compare-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- ROADMAP ---------- */
+  .roadmap-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .roadmap-item{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:22px 22px 24px;
+  }
+  .roadmap-badge{
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--orange-deep);
+    background:#FDECDD;
+    border-radius:999px;
+    padding:5px 11px;
+    margin-bottom:14px;
+  }
+  .roadmap-item h3{
+    font-size:16.5px;
+    font-style:italic;
+    margin-bottom:6px;
+  }
+  .roadmap-item p{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0;
+    line-height:1.5;
+  }
+  @media (max-width: 760px){
+    .roadmap-grid{grid-template-columns:1fr;}
+  }
+
   /* ---------- BUILT WITH ---------- */
   .built-with{
     display:flex;
@@ -597,6 +707,7 @@
       <a class="hide-mobile" href="#how-it-works">How it works</a>
       <a class="hide-mobile" href="#screens">Screens</a>
       <a class="hide-mobile" href="#garden">The garden</a>
+      <a class="hide-mobile" href="#why">Why Kinly</a>
       <a href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
     </nav>
   </div>
@@ -659,6 +770,22 @@
           </div>
         </div>
         <div class="ground-line"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="problem" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">The problem</p>
+        <h2>Tracking was never the problem.</h2>
+        <p>Everyone already knows what they should do: exercise, read, save, learn. Habit apps hand you a checkbox for it, and most people still abandon them within weeks. That's because a checkbox never touches the actual problem, which is staying consistent once motivation runs out.</p>
+      </div>
+      <div class="point-grid">
+        <div class="point">Motivation fades faster than the goal takes to reach.</div>
+        <div class="point">Willpower alone rarely survives the whole stretch.</div>
+        <div class="point">When you quietly stop, nobody around you notices.</div>
+        <div class="point">A solo streak breaks once, and the app gets deleted.</div>
       </div>
     </section>
   </div>
@@ -833,6 +960,78 @@
             <svg viewBox="0 0 60 140" width="40" height="76"><path d="M30,130 L30,70" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="46" r="28" fill="#FFFFFF"/><circle cx="14" cy="34" r="6" fill="#F97316"/><circle cx="44" cy="30" r="5.5" fill="#F9A93F"/></svg>
             <span>Bloom</span>
           </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="why" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">Why a circle</p>
+        <h2>What actually changes.</h2>
+        <p>Most habit trackers are built for an audience of one. Kinly assumes the reason you stop isn't a missing feature, it's that nobody's watching.</p>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-col">
+          <h3>Solo habit trackers</h3>
+          <ul>
+            <li>You track alone, so nobody sees when you quit.</li>
+            <li>Your own willpower is the only thing keeping you going.</li>
+            <li>One broken streak and the story just ends there.</li>
+            <li>Charts pile up, but nobody's actually encouraging you.</li>
+          </ul>
+        </div>
+        <div class="compare-col highlight">
+          <h3>Kinly</h3>
+          <ul>
+            <li>Friends see your consistency, and your quiet weeks too.</li>
+            <li>Not wanting to let the circle down keeps you going.</li>
+            <li>A friend nudges you back after a bad week.</li>
+            <li>Opening the app leaves you feeling better, not worse.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="private" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">Private by design</p>
+        <h2>Built like a trusted room.</h2>
+        <p>Kinly isn't a social network with a smaller radius. It's closer to a group chat: what happens in a circle stays in that circle, and nothing about it is designed to be public.</p>
+      </div>
+      <div class="point-grid">
+        <div class="point">Goals, activity, and gardens are scoped to a single circle.</div>
+        <div class="point">Invite codes are owner-controlled, and new joins need approval.</div>
+        <div class="point">No followers, no algorithm, and no ads anywhere in the app.</div>
+        <div class="point">Keep separate circles for family, college friends, or coworkers.</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="roadmap" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">What's next</p>
+        <h2>Still early, on purpose.</h2>
+      </div>
+      <div class="roadmap-grid">
+        <div class="roadmap-item">
+          <span class="roadmap-badge">Now · Beta</span>
+          <h3>Hardening trust</h3>
+          <p>Circle-scoped goals, join approvals, and real feedback from testers.</p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge">Next</span>
+          <h3>Daily mood</h3>
+          <p>A one-swipe evening check-in, so friends can see how your day actually went.</p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-badge">Later</span>
+          <h3>Life timeline</h3>
+          <p>Your wins collected into a story you'll never want to delete.</p>
         </div>
       </div>
     </section>
