@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -137,9 +137,12 @@ function MoodPickerModal({
     setSubmitting(true);
     try {
       await submitMood.mutateAsync({ mood, tags });
-    } finally {
+    } catch (err) {
       setSubmitting(false);
+      Alert.alert('Could not save your check-in', err instanceof Error ? err.message : 'Please try again.');
+      return;
     }
+    setSubmitting(false);
     // Let the tap/fill/bounce animation actually be seen before the sheet
     // switches to the tag step.
     setTimeout(() => setStep('tags'), 320);
@@ -154,9 +157,12 @@ function MoodPickerModal({
       setSubmitting(true);
       try {
         await submitMood.mutateAsync({ mood: selectedMood, tags: selectedTags });
-      } finally {
+      } catch (err) {
         setSubmitting(false);
+        Alert.alert('Could not save your check-in', err instanceof Error ? err.message : 'Please try again.');
+        return;
       }
+      setSubmitting(false);
     }
     onClose();
   }
