@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -29,6 +28,7 @@ import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { AskCardSkeleton } from '../components/Skeleton';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, radii, shadow } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
@@ -49,7 +49,7 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
   return (
     <View style={styles.thread}>
       {isLoading ? (
-        <ActivityIndicator color={colors.primary} />
+        <LoadingSpinner size={10} />
       ) : (
         replies?.map((reply) => (
           <View key={reply.id} style={styles.replyRow}>

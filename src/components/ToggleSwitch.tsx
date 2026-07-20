@@ -1,73 +1,118 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
+  Easing,
   interpolateColor,
   useAnimatedProps,
   useAnimatedStyle,
-  useDerivedValue,
-  withSpring,
+  useSharedValue,
+  withSequence,
+  withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { colors } from '../theme/colors';
 
-const WIDTH = 54;
-const HEIGHT = 30;
-const THUMB = 24;
-const PADDING = 3;
+const SIZE = 28;
+
+// Same heart path as PillarIcons.tsx's RelationshipsIcon, so this toggle's
+// shape matches the rest of the app's icon set rather than being a one-off.
+const HEART_PATH =
+  'M12,20.3 C12,20.3 4.3,14.8 4.3,9.4 C4.3,6.5 6.6,4.3 9.3,4.3 C10.7,4.3 12,5 12,6.5 C12,5 13.3,4.3 14.7,4.3 C17.4,4.3 19.7,6.5 19.7,9.4 C19.7,14.8 12,20.3 12,20.3 Z';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-// Track/thumb swap colors on toggle (colored track + white thumb when on,
-// the reverse when off) rather than a plain sliding-dot switch. A small
-// two-leaf sprout notch sits on the thumb, colored to match the track so it
-// reads as a cutout - a nod to the app's own garden/growth iconography
-// (GardenStageArt) instead of a bare flat circle.
+// Offsets mirror the Uiverse.io source's --tx/--ty custom properties for
+// its 6 spark particles.
+const SPARKS = [
+  { tx: -13, ty: -5 },
+  { tx: 13, ty: -5 },
+  { tx: -16, ty: 6 },
+  { tx: 16, ty: 6 },
+  { tx: 0, ty: -16 },
+  { tx: 0, ty: 13 },
+];
+
+function Spark({ tx, ty, burst }: { tx: number; ty: number; burst: SharedValue<number> }) {
+  const style = useAnimatedStyle(() => ({
+    opacity: 1 - burst.value,
+    transform: [
+      { translateX: burst.value * tx },
+      { translateY: burst.value * ty },
+      { scale: 1 - burst.value * 0.7 },
+    ],
+  }));
+  return <Animated.View style={[styles.spark, style]} />;
+}
+
+// A heart pops and bursts a few sparks when switched on, instead of a plain
+// sliding-dot switch - a specific Uiverse.io reference the user picked
+// (heart checkbox, recolored orange). Outline heart when off, filled +
+// stroked orange when on; color alone (not fill) carries the on/off state.
 export function ToggleSwitch({ value, onValueChange }: { value: boolean; onValueChange: (next: boolean) => void }) {
-  const progress = useDerivedValue(() => withSpring(value ? 1 : 0, { damping: 14, stiffness: 200 }));
+  const progress = useSharedValue(value ? 1 : 0);
+  const scale = useSharedValue(1);
+  const burst = useSharedValue(0);
 
-  const trackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], [colors.inputBg, colors.primary]),
+  useEffect(() => {
+    progress.value = withTiming(value ? 1 : 0, { duration: 200 });
+    if (value) {
+      scale.value = withSequence(
+        withTiming(1.15, { duration: 135 }),
+        withTiming(0.93, { duration: 140 }),
+        withTiming(1, { duration: 120 }),
+      );
+      burst.value = 0;
+      burst.value = withTiming(1, { duration: 550, easing: Easing.out(Easing.ease) });
+    } else {
+      scale.value = withTiming(1, { duration: 150 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const heartProps = useAnimatedProps(() => ({
+    fill: interpolateColor(progress.value, [0, 1], ['transparent', colors.primary]),
+    stroke: interpolateColor(progress.value, [0, 1], [colors.inputBg, colors.primary]),
   }));
 
-  const thumbStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: progress.value * (WIDTH - THUMB - PADDING * 2) }],
-    backgroundColor: interpolateColor(progress.value, [0, 1], [colors.primary, colors.surface]),
-  }));
-
-  const leafProps = useAnimatedProps(() => ({
-    fill: interpolateColor(progress.value, [0, 1], [colors.inputBg, colors.primary]),
-  }));
+  const heartStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Pressable onPress={() => onValueChange(!value)} accessibilityRole="switch" accessibilityState={{ checked: value }}>
-      <Animated.View style={[styles.track, trackStyle]}>
-        <Animated.View style={[styles.thumb, thumbStyle]}>
-          <Svg width={THUMB} height={14} viewBox="0 0 24 14" style={styles.leaves}>
-            <AnimatedPath d="M12 12 C6 12 4 6 6 1 C11 2 12 6 12 12 Z" animatedProps={leafProps} />
-            <AnimatedPath d="M12 12 C18 12 20 6 18 1 C13 2 12 6 12 12 Z" animatedProps={leafProps} />
+    <Pressable
+      onPress={() => onValueChange(!value)}
+      hitSlop={8}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+    >
+      <View style={styles.wrap}>
+        {SPARKS.map((s, i) => (
+          <Spark key={i} tx={s.tx} ty={s.ty} burst={burst} />
+        ))}
+        <Animated.View style={heartStyle}>
+          <Svg width={SIZE} height={SIZE} viewBox="0 0 24 24">
+            <AnimatedPath
+              d={HEART_PATH}
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              animatedProps={heartProps}
+            />
           </Svg>
         </Animated.View>
-      </Animated.View>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  track: {
-    width: WIDTH,
-    height: HEIGHT,
-    borderRadius: HEIGHT / 2,
-    padding: PADDING,
-    justifyContent: 'center',
-  },
-  thumb: {
-    width: THUMB,
-    height: THUMB,
-    borderRadius: THUMB / 2,
-    overflow: 'visible',
-  },
-  leaves: {
+  wrap: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
+  spark: {
     position: 'absolute',
-    top: -7,
-    left: 0,
+    top: SIZE / 2 - 1.5,
+    left: SIZE / 2 - 1.5,
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: colors.primary,
   },
 });

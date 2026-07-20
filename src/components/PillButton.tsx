@@ -1,5 +1,6 @@
-import { ActivityIndicator, StyleSheet, Text, ViewStyle } from 'react-native';
+import { StyleSheet, Text, ViewStyle } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
+import { LoadingSpinner } from './LoadingSpinner';
 import { colors, radii } from '../theme/colors';
 
 interface PillButtonProps {
@@ -20,7 +21,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={isOutline ? colors.primary : '#fff'} />
+        <LoadingSpinner size={9} color={isOutline ? colors.primary : '#fff'} />
       ) : (
         <Text style={isOutline ? styles.outlineText : styles.solidText}>{label}</Text>
       )}

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -43,7 +44,7 @@ export default function RootNavigator() {
   if (sessionLoading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+        <LoadingSpinner size={14} />
       </View>
     );
   }
@@ -60,7 +61,7 @@ export default function RootNavigator() {
   if (readyForMain && circlesLoading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+        <LoadingSpinner size={14} />
       </View>
     );
   }

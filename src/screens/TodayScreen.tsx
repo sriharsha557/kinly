@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
@@ -16,6 +16,7 @@ import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { colors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
@@ -62,7 +63,7 @@ function EventPhoto({ path }: { path: string }) {
   if (isLoading || !url) {
     return (
       <View style={[styles.photoThumb, styles.photoThumbLoading]}>
-        <ActivityIndicator size="small" color={colors.textSecondary} />
+        <LoadingSpinner size={8} color={colors.textSecondary} />
       </View>
     );
   }

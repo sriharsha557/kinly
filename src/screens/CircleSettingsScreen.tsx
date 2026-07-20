@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Modal,
   ScrollView,
@@ -26,6 +25,7 @@ import {
 } from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { MUTE_CATEGORIES, useNotificationMutes, useToggleMute } from '../hooks/useNotificationMutes';
 import { colors, radii, shadow } from '../theme/colors';
@@ -185,8 +185,8 @@ export default function CircleSettingsScreen() {
 
   if (circleLoading || membersLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+      <SafeAreaView style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <LoadingSpinner size={12} />
       </SafeAreaView>
     );
   }

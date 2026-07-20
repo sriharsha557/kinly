@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { useProfileStats } from '../hooks/useProfileStats';
 import { signOut } from '../lib/auth';
 import { Logo } from '../components/Logo';
 import { StatTile } from '../components/StatTile';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PillButton } from '../components/PillButton';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { DeleteAccountModal } from '../components/DeleteAccountModal';
@@ -58,7 +59,9 @@ export default function ProfileScreen() {
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
+          <View style={{ marginTop: 24, alignItems: 'center' }}>
+            <LoadingSpinner size={12} />
+          </View>
         ) : (
           <View style={styles.grid}>
             <StatTile
