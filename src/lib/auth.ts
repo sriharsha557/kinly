@@ -37,7 +37,12 @@ export async function signUp(email: string, password: string, name: string) {
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { data: { name: parsed.data.name } },
+    // Without this, Supabase redirects the "Confirm your email" link to the
+    // project's default Site URL (still localhost - nobody's pointed it at
+    // the app) instead of back into Kinly. Same pattern as Google sign-in/
+    // password reset below. Confirmation itself still succeeds server-side
+    // either way - this only fixes where the link lands afterward.
+    options: { data: { name: parsed.data.name }, emailRedirectTo: Linking.createURL('auth-callback') },
   });
   if (error) throw new Error(toSafeAuthMessage(error, 'signUp'));
   return data;
@@ -91,6 +96,25 @@ export async function completePasswordRecovery(url: string) {
 
   const { access_token, refresh_token } = params;
   if (!access_token || !refresh_token) throw new Error('Reset link did not include a session');
+
+  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (error) throw error;
+}
+
+// The "Confirm your email" link opens kinly://auth-callback#access_token=...
+// (Supabase already verified the email server-side by this point - this
+// just signs the device in immediately instead of sending a freshly
+// confirmed user back to the login form). Google sign-in resolves its own
+// auth-callback URL directly via openAuthSessionAsync's return value, so
+// this only ever does real work for the email-confirmation case; if it
+// fires for something else with no tokens present, there's simply nothing
+// to do.
+export async function completeEmailConfirmation(url: string) {
+  const { params, errorCode } = getQueryParams(url);
+  if (errorCode) throw new Error(errorCode);
+
+  const { access_token, refresh_token } = params;
+  if (!access_token || !refresh_token) return;
 
   const { error } = await supabase.auth.setSession({ access_token, refresh_token });
   if (error) throw error;
