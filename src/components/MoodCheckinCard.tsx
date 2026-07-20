@@ -7,7 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
-import { cardShell, colors, radii } from '../theme/colors';
+import { cardShell, colors } from '../theme/colors';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 import HappyIconRaw from '../../assets/icons/mood/happy.svg';
@@ -18,7 +18,7 @@ import SadIconRaw from '../../assets/icons/mood/sad.svg';
 // buttons need to read as quiet/inactive against a white background, which
 // a warm brown (tuned for body-text contrast) doesn't convey as clearly as
 // a neutral gray does at this size and weight.
-const MUTED = '#ABA695';
+const MUTED = '#B8B39A';
 
 interface MoodIconProps {
   size?: number;
@@ -79,7 +79,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
                 accessibilityRole="button"
                 accessibilityLabel={label}
               >
-                <Icon size={26} color={active ? '#fff' : MUTED} />
+                <Icon size={24} color={active ? '#FFFFFF' : MUTED} />
                 <Text style={[styles.pickLabel, active && styles.pickLabelActive]}>{label}</Text>
               </AnimatedPressable>
             );
@@ -128,17 +128,17 @@ const styles = StyleSheet.create({
   pickRow: { flexDirection: 'row', gap: 10 },
   pickButton: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: '#E4DFD1',
-    borderRadius: radii.input,
-    paddingVertical: 12,
     alignItems: 'center',
     gap: 6,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E4DFD1',
+    backgroundColor: 'transparent',
   },
   pickButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  pickLabel: { fontSize: 12, fontWeight: '600', color: MUTED },
-  pickLabelActive: { color: '#fff' },
+  pickLabel: { fontSize: 11, fontWeight: '500', color: MUTED },
+  pickLabelActive: { color: '#FFFFFF' },
   gridRow: { gap: 14 },
   memberChip: { alignItems: 'center', width: 52 },
   moodBubble: {
