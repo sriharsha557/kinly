@@ -5,6 +5,7 @@ import type { MoodValue } from '../types/models';
 export interface MoodCheckinWithProfile {
   user_id: string;
   mood: MoodValue;
+  tags: string[];
   profiles: { name: string } | null;
 }
 
@@ -22,7 +23,7 @@ export function useTodayMoodCheckins(circleId: string | undefined) {
     queryFn: async (): Promise<MoodCheckinWithProfile[]> => {
       const { data, error } = await supabase
         .from('mood_checkins')
-        .select('user_id, mood, profiles(name)')
+        .select('user_id, mood, tags, profiles(name)')
         .eq('circle_id', circleId as string)
         .eq('checkin_date', todayIso());
       if (error) throw error;
@@ -34,12 +35,12 @@ export function useTodayMoodCheckins(circleId: string | undefined) {
 export function useSubmitMoodCheckin(circleId: string, userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (mood: MoodValue) => {
+    mutationFn: async ({ mood, tags = [] }: { mood: MoodValue; tags?: string[] }) => {
       const today = todayIso();
 
       // Only emit a feed event on the FIRST check-in of the day - changing
-      // your mind same-day (a different emoji) updates the row silently,
-      // so flip-flopping doesn't spam Circle Activity.
+      // your mind same-day (a different mood or tags) updates the row
+      // silently, so flip-flopping doesn't spam Circle Activity.
       const { data: existing } = await supabase
         .from('mood_checkins')
         .select('id')
@@ -51,7 +52,7 @@ export function useSubmitMoodCheckin(circleId: string, userId: string) {
       const { error } = await supabase
         .from('mood_checkins')
         .upsert(
-          { user_id: userId, circle_id: circleId, mood, checkin_date: today },
+          { user_id: userId, circle_id: circleId, mood, tags, checkin_date: today },
           { onConflict: 'user_id,circle_id,checkin_date' },
         );
       if (error) throw error;
