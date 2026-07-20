@@ -14,14 +14,19 @@ interface StatTileProps {
   deltas?: Delta[];
   ctaLabel?: string;
   onPress?: () => void;
+  // 'third' for a 3-column grid (Profile's 6-tile layout); 'half' (the
+  // default) is the original 2-column size, kept for anything that isn't
+  // ready to move to three across.
+  size?: 'half' | 'third';
 }
 
-export function StatTile({ background, textColor, label, value, deltas, ctaLabel, onPress }: StatTileProps) {
+export function StatTile({ background, textColor, label, value, deltas, ctaLabel, onPress, size = 'half' }: StatTileProps) {
   const Wrapper = onPress ? TouchableOpacity : View;
+  const sizeStyle = size === 'third' ? styles.tileThird : styles.tileHalf;
 
   if (ctaLabel) {
     return (
-      <Wrapper style={[styles.tile, { backgroundColor: background }]} onPress={onPress}>
+      <Wrapper style={[styles.tile, sizeStyle, { backgroundColor: background }]} onPress={onPress}>
         <Text style={[styles.ctaArrow, { color: textColor }]}>↗</Text>
         <Text style={[styles.ctaLabel, { color: textColor }]}>{ctaLabel}</Text>
       </Wrapper>
@@ -29,12 +34,15 @@ export function StatTile({ background, textColor, label, value, deltas, ctaLabel
   }
 
   return (
-    <Wrapper style={[styles.tile, { backgroundColor: background }]} onPress={onPress}>
+    <Wrapper style={[styles.tile, sizeStyle, { backgroundColor: background }]} onPress={onPress}>
       <View style={styles.header}>
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
-        <Text style={[styles.arrow, { color: textColor }]}>↗</Text>
+        <Text style={[styles.label, size === 'third' && styles.labelThird, { color: textColor }]}>{label}</Text>
+        {/* Only ever shown when the tile actually does something on tap -
+            it used to render unconditionally, promising a drill-down that
+            three of the four tiles never had. */}
+        {onPress && <Text style={[styles.arrow, { color: textColor }]}>↗</Text>}
       </View>
-      <Text style={[styles.value, { color: textColor }]}>{value}</Text>
+      <Text style={[styles.value, size === 'third' && styles.valueThird, { color: textColor }]}>{value}</Text>
       {deltas && deltas.length > 0 && (
         <View style={styles.deltaRow}>
           {deltas.map((delta) => (
@@ -51,16 +59,17 @@ export function StatTile({ background, textColor, label, value, deltas, ctaLabel
 
 const styles = StyleSheet.create({
   tile: {
-    flexBasis: '48%',
     borderRadius: radii.tile,
-    padding: 16,
-    minHeight: 140,
     justifyContent: 'space-between',
   },
+  tileHalf: { flexBasis: '48%', padding: 16, minHeight: 140 },
+  tileThird: { flexBasis: '31%', padding: 12, minHeight: 116 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   label: { fontSize: 14, fontWeight: '600' },
+  labelThird: { fontSize: 12 },
   arrow: { fontSize: 16 },
   value: { fontSize: 32, fontWeight: '800' },
+  valueThird: { fontSize: 24 },
   deltaRow: { flexDirection: 'row', gap: 6 },
   pill: {
     backgroundColor: colors.pillBg,

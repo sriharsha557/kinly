@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCircleDetail } from '../hooks/useCircles';
+import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useProfileStats } from '../hooks/useProfileStats';
 import { signOut } from '../lib/auth';
 import { Logo } from '../components/Logo';
@@ -17,10 +19,17 @@ import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { cardShell, colors } from '../theme/colors';
-import type { RootStackParamList } from '../navigation/types';
+import type { MainTabParamList, RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
 
-type Nav = NativeStackNavigationProp<RootStackParamList>;
+// Profile is itself a tab screen, but also needs to reach sibling tabs
+// (Goals, Circle) for the stat tiles below and root-stack screens
+// (CircleSettings, EditProfile) - a plain NativeStackNavigationProp only
+// typed the latter, so navigating to a tab route didn't type-check.
+type Nav = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList>,
+  NativeStackNavigationProp<RootStackParamList>
+>;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
@@ -28,6 +37,8 @@ export default function ProfileScreen() {
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: circle } = useCircleDetail(circleId ?? undefined);
   const { data: stats, isLoading } = useProfileStats(user?.id, circleId ?? undefined);
+  const { data: members } = useCircleMembers(circleId ?? undefined);
+  const memberCount = (members ?? []).filter((m) => m.status === 'active').length;
   const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const tabBarClearance = useTabBarClearance();
@@ -65,27 +76,50 @@ export default function ProfileScreen() {
         ) : (
           <View style={styles.grid}>
             <StatTile
+              size="third"
               background={colors.inputBg}
               textColor={colors.primary}
               label="Goals done"
               value={`${stats?.goalsCompleted ?? 0}/${stats?.goalsTotal ?? 0}`}
+              onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
+              size="third"
               background={colors.inputBg}
               textColor={colors.primary}
-              label="Best streak"
+              label="Active goals"
+              value={stats?.activeGoals ?? 0}
+              onPress={() => navigation.navigate('Goals')}
+            />
+            <StatTile
+              size="third"
+              background={colors.inputBg}
+              textColor={colors.primary}
+              label="Current streak"
               value={stats?.currentStreak ?? 0}
+              onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
+              size="third"
               background={colors.inputBg}
               textColor={colors.primary}
-              label="Friends helped"
-              value={stats?.friendsHelped ?? 0}
+              label="Completion rate"
+              value={`${stats?.completionRate ?? 0}%`}
+              onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
+              size="third"
+              background={colors.inputBg}
+              textColor={colors.primary}
+              label="Circle members"
+              value={memberCount}
+              onPress={() => navigation.navigate('Circle')}
+            />
+            <StatTile
+              size="third"
               background={colors.primary}
               textColor="#fff"
-              ctaLabel="Circle Settings"
+              ctaLabel="Settings"
               onPress={() => navigation.navigate('CircleSettings')}
             />
           </View>
