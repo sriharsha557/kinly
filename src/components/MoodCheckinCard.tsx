@@ -127,7 +127,7 @@ function MoodPickerModal({
   existingTags: string[];
   onClose: () => void;
 }) {
-  const submitMood = useSubmitMoodCheckin(circleId, userId);
+  const submitMood = useSubmitMoodCheckin(circleId);
   const [step, setStep] = useState<'mood' | 'tags'>('mood');
   const [selectedMood, setSelectedMood] = useState<MoodValue | null>(existingMood);
   const [selectedTags, setSelectedTags] = useState<string[]>(existingTags);

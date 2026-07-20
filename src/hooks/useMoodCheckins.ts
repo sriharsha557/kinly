@@ -32,44 +32,23 @@ export function useTodayMoodCheckins(circleId: string | undefined) {
   });
 }
 
-export function useSubmitMoodCheckin(circleId: string, userId: string) {
+// Both writes (mood_checkins row + its Circle Activity event) happen
+// atomically inside submit_mood_checkin() (migration 0031) - a real
+// partial unique index on events backs the upsert there, so two
+// concurrent submissions (double-tap, two devices) can't both miss an
+// existing row and create duplicates the way a client-side read-then-
+// write would. auth.uid() inside the RPC identifies the caller, so this
+// no longer needs a userId param at all.
+export function useSubmitMoodCheckin(circleId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ mood, tags = [] }: { mood: MoodValue; tags?: string[] }) => {
-      const today = todayIso();
-
-      const { error } = await supabase
-        .from('mood_checkins')
-        .upsert(
-          { user_id: userId, circle_id: circleId, mood, tags, checkin_date: today },
-          { onConflict: 'user_id,circle_id,checkin_date' },
-        );
+      const { error } = await supabase.rpc('submit_mood_checkin', {
+        p_circle_id: circleId,
+        p_mood: mood,
+        p_tags: tags,
+      });
       if (error) throw error;
-
-      // Changing your mind same-day doesn't create a second feed entry -
-      // it overwrites today's existing mood_checkin event's payload in
-      // place, so Circle Activity always reflects the latest mood instead
-      // of freezing on whatever was picked first. created_at is left
-      // alone deliberately: the event shouldn't jump back to the top of
-      // the feed just because you changed your mind, only its content
-      // should update.
-      const startOfDay = `${today}T00:00:00.000Z`;
-      const { data: existingEvent } = await supabase
-        .from('events')
-        .select('id')
-        .eq('circle_id', circleId)
-        .eq('user_id', userId)
-        .eq('type', 'mood_checkin')
-        .gte('created_at', startOfDay)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (existingEvent) {
-        await supabase.from('events').update({ payload: { mood } }).eq('id', existingEvent.id);
-      } else {
-        await supabase.from('events').insert({ circle_id: circleId, user_id: userId, type: 'mood_checkin', payload: { mood } });
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moodCheckins', circleId] });
