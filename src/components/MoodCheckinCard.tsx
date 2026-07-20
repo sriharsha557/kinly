@@ -87,7 +87,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
                 accessibilityRole="button"
                 accessibilityLabel={label}
               >
-                <Icon size={24} color={active ? '#FFFFFF' : MUTED} />
+                <Icon size={20} color={active ? '#FFFFFF' : MUTED} />
                 <Text style={[styles.pickLabel, active && styles.pickLabelActive]}>{label}</Text>
               </AnimatedPressable>
             );
@@ -147,19 +147,21 @@ const styles = StyleSheet.create({
   cancelLink: { fontSize: 12, fontWeight: '600', color: colors.shellSecondary, textAlign: 'center', marginTop: 10 },
   gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
-  pickRow: { flexDirection: 'row', gap: 10 },
+  pickRow: { flexDirection: 'row', gap: 8 },
   pickButton: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#E4DFD1',
     backgroundColor: 'transparent',
   },
   pickButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  pickLabel: { fontSize: 11, fontWeight: '500', color: MUTED },
+  pickLabel: { fontSize: 13, fontWeight: '500', color: MUTED },
   pickLabelActive: { color: '#FFFFFF' },
   gridRow: { gap: 14 },
   memberChip: { alignItems: 'center', width: 52 },
