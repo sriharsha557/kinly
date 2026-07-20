@@ -1,4 +1,11 @@
+import { Image } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+
+// The real brand mark's own aspect ratio (see OnboardingScreen.tsx) - the
+// source glyph is wider than tall, so PeopleTabIcon can't force a square
+// box without squishing it.
+const BRAND_MARK = require('../../../assets/brand/logo-white-glyph.png');
+const BRAND_MARK_RATIO = 676 / 525;
 
 // Same "friendly face" mark family as assets/icons/*.svg, reproduced as
 // prop-driven react-native-svg primitives (like Logo.tsx) instead of raw
@@ -38,16 +45,19 @@ export function HomeTabIcon({ size = 22, color }: TabIconProps) {
   );
 }
 
+// Renders the actual brand mark (tinted per active/inactive state via
+// RN's Image tintColor, same recolor behavior the other tab icons get
+// from their `color` prop) instead of the old "friendly face" family the
+// rest of this file still uses - Circle is the one tab that maps directly
+// onto the brand's own "two people together" mark, so it's worth being
+// literal here rather than matching the sibling icons' geometry family.
 export function PeopleTabIcon({ size = 22, color }: TabIconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 9.5 200 200">
-      <Circle cx={72} cy={55} r={10} fill={color} />
-      <Circle cx={128} cy={55} r={10} fill={color} />
-      <Path d="M50,95 C50,140 80,162 100,148" fill="none" stroke={color} strokeWidth={15} strokeLinecap="round" />
-      <Path d="M150,95 C150,140 120,162 100,148" fill="none" stroke={color} strokeWidth={15} strokeLinecap="round" />
-      <Circle cx={100} cy={128} r={12} fill={color} />
-      <Path d="M78,168 C78,150 122,150 122,168" fill="none" stroke={color} strokeWidth={12} strokeLinecap="round" />
-    </Svg>
+    <Image
+      source={BRAND_MARK}
+      resizeMode="contain"
+      style={{ width: size * BRAND_MARK_RATIO, height: size, tintColor: color }}
+    />
   );
 }
 

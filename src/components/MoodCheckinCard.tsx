@@ -7,7 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
-import { colors, radii } from '../theme/colors';
+import { cardShell, colors, radii } from '../theme/colors';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 import HappyIconRaw from '../../assets/icons/mood/happy.svg';
@@ -119,12 +119,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 20,
     paddingLeft: 18,
     marginBottom: 16,

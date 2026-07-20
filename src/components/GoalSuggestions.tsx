@@ -5,7 +5,7 @@ import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { PillButton } from './PillButton';
 import { INTEREST_OPTIONS } from './InterestPicker';
-import { colors, categoryColors, radii } from '../theme/colors';
+import { cardShell, colors, categoryColors, radii } from '../theme/colors';
 import IdeaIllustration from '../../assets/illustrations/kinly-idea.svg';
 
 function CustomizeGoalModal({
@@ -118,11 +118,7 @@ const styles = StyleSheet.create({
   suggestionsSection: { marginBottom: 20 },
   suggestionsRow: { gap: 10, paddingRight: 16 },
   suggestionCard: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
+    ...cardShell,
     padding: 14,
     paddingLeft: 12,
     width: 160,

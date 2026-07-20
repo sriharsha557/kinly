@@ -26,7 +26,7 @@ import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { categoryColors, colors, radii, shadow } from '../theme/colors';
+import { cardShell, categoryColors, colors, radii } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -315,11 +315,10 @@ const styles = StyleSheet.create({
   addButtonText: { color: '#fff', fontWeight: '700' },
   list: { gap: 12 },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
+    ...cardShell,
     padding: 16,
+    paddingLeft: 14,
     gap: 10,
-    ...shadow,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },

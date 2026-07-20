@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useMyLetters, useOpenLetter, useWriteLetter } from '../hooks/useFutureSelf';
 import { PillButton } from './PillButton';
-import { colors, radii, shadow } from '../theme/colors';
+import { cardShell, colors, radii } from '../theme/colors';
 import type { FutureLetter } from '../types/models';
 import MailIcon from '../../assets/icons/feed/mail.svg';
 import LockIcon from '../../assets/icons/feed/lock.svg';
@@ -119,12 +119,11 @@ export function FutureSelfCard({ userId }: { userId: string }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
+    ...cardShell,
     padding: 16,
+    paddingLeft: 14,
     marginTop: 12,
     gap: 10,
-    ...shadow,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },

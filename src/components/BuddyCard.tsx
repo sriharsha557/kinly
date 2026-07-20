@@ -7,7 +7,7 @@ import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
 import { PillButton } from './PillButton';
-import { colors, radii } from '../theme/colors';
+import { cardShell, colors, radii } from '../theme/colors';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
 
 // The exact single-day grace window water_streak() itself enforces
@@ -133,12 +133,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 20,
     paddingLeft: 18,
     marginBottom: 20,

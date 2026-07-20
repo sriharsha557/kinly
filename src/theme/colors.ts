@@ -70,3 +70,19 @@ export const shadow = {
   shadowOffset: { width: 0, height: 6 },
   elevation: 3,
 } as const;
+
+// The flat white-shell card treatment (see ARCHITECTURE.md's "Card shell"
+// note) - was hand-duplicated identically across ~10 files, which is how
+// the MoodCheckinCard/QuickActionsRow radii.card-on-a-small-button bug
+// happened twice. Only the border/color/radius properties that never vary
+// are here; padding/marginBottom/gap stay per-component since those
+// genuinely differ by content density (a small suggestion chip vs. a full
+// card). Spread this first, then add layout-specific properties after.
+export const cardShell = {
+  backgroundColor: '#FFFEFA',
+  borderWidth: 0.5,
+  borderColor: '#E4DFD1',
+  borderRadius: 20,
+  borderLeftWidth: 3,
+  borderLeftColor: colors.primary,
+} as const;

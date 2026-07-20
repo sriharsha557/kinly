@@ -16,7 +16,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, radii, shadow } from '../theme/colors';
+import { cardShell, colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
 
@@ -44,7 +44,7 @@ export default function ProfileScreen() {
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
             ) : (
-              <Logo size={72} color="#FFFFFF" background={colors.celebration} />
+              <Logo size={72} color="#FFFFFF" background={colors.primary} />
             )}
           </TouchableOpacity>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
@@ -152,11 +152,10 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
   badgeList: { gap: 10 },
   badge: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
+    ...cardShell,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    ...shadow,
+    paddingLeft: 14,
   },
   badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
   empty: { color: colors.textSecondary },

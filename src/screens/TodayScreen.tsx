@@ -18,7 +18,7 @@ import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, radii, shadow } from '../theme/colors';
+import { cardShell, colors, radii, shadow } from '../theme/colors';
 import type { EventType, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -326,12 +326,7 @@ const styles = StyleSheet.create({
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
   eventCard: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 14,
     paddingLeft: 12,
     gap: 10,

@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useGardenState } from '../hooks/useGarden';
 import { GardenStageArt } from './GardenStageArt';
-import { colors } from '../theme/colors';
+import { cardShell, colors } from '../theme/colors';
 import SproutIcon from '../../assets/icons/feed/sprout.svg';
 
 function healthMessage(health: number): string {
@@ -43,12 +43,7 @@ export function GardenCard({ circleId }: { circleId: string }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 20,
     paddingLeft: 18,
     marginBottom: 20,

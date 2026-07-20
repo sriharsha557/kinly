@@ -3,7 +3,7 @@ import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, Vie
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
-import { colors, radii } from '../theme/colors';
+import { cardShell, colors, radii } from '../theme/colors';
 import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 
@@ -121,12 +121,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 20,
     paddingLeft: 18,
     marginBottom: 20,

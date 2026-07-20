@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useMeetups, useProposeMeetup, useRsvpMeetup, type MeetupWithRsvps } from '../hooks/useMeetups';
 import { PillButton } from './PillButton';
-import { colors, radii } from '../theme/colors';
+import { cardShell, colors, radii } from '../theme/colors';
 import type { RsvpStatus } from '../types/models';
 import MeetupIcon from '../../assets/illustrations/kinly-ill-calendar-meetup.svg';
 
@@ -128,12 +128,7 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFEFA',
-    borderWidth: 0.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.primary,
+    ...cardShell,
     padding: 20,
     paddingLeft: 18,
     marginBottom: 20,
