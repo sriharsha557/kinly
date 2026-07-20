@@ -19,7 +19,7 @@ import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { cardShell, colors, radii, shadow } from '../theme/colors';
-import type { EventType, NudgeKind } from '../types/models';
+import type { EventType, MoodValue, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
@@ -51,7 +51,7 @@ const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
   progress_photo: CameraIcon,
 };
 
-const MOOD_ICON: Record<string, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
+const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
 
 // Thumbnail + tap-to-view-full-screen for an event's optional check-in
 // photo (checkin-photos is a private bucket, so this always resolves a
@@ -86,7 +86,7 @@ function EventPhoto({ path }: { path: string }) {
 // actual mood (😊/😐/😞) is far more expressive than a placeholder.
 function eventIcon(event: EventWithProfile): FC<SvgProps> {
   if (event.type === 'mood_checkin') {
-    const mood = (event.payload as Record<string, unknown>).mood as string;
+    const mood = (event.payload as Record<string, unknown>).mood as MoodValue;
     return MOOD_ICON[mood] ?? EVENT_ICON.mood_checkin;
   }
   return EVENT_ICON[event.type];
@@ -114,7 +114,7 @@ function describeEvent(event: EventWithProfile): string {
     case 'ask':
       return `${name} asked: "${payload.question ?? ''}"`;
     case 'challenge_completed':
-      return `Your circle completed "${payload.title ?? 'a challenge'}"! 🎉 (${name} sealed it)`;
+      return `Your circle completed "${payload.title ?? 'a challenge'}"! (${name} sealed it)`;
     case 'mood_checkin': {
       const mood = payload.mood as string;
       if (mood === 'tough') return `${name} is having a tough day`;
@@ -122,7 +122,7 @@ function describeEvent(event: EventWithProfile): string {
       return `${name} is having a great day`;
     }
     case 'streak_saved':
-      return `${name} watered ${payload.to_user_name ?? "a friend's"} streak 💧`;
+      return `${name} watered ${payload.to_user_name ?? "a friend's"} streak`;
     case 'progress_photo':
       return `${name} logged progress on "${payload.title ?? 'a goal'}"`;
     default:
@@ -203,7 +203,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
 
       {event.user_id !== userId && (
         <View style={styles.nudgeRow}>
-          {NUDGE_KINDS.map(({ kind, Icon, label }) => (
+          {NUDGE_KINDS.map(({ kind, Icon: NudgeIcon, label }) => (
             <TouchableOpacity
               key={kind}
               style={styles.nudgeButton}
@@ -213,7 +213,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
               accessibilityLabel={label}
               hitSlop={4}
             >
-              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <Icon width={18} height={18} />}
+              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} />}
             </TouchableOpacity>
           ))}
         </View>
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   eventBody: { flex: 1, gap: 2 },
-  eventText: { fontSize: 14, fontWeight: '600', color: '#22281F' },
+  eventText: { fontSize: 14, fontWeight: '600', color: colors.shellTitle },
   eventTime: { fontSize: 11, color: colors.textSecondary },
   nudgeRow: { flexDirection: 'row', gap: 6 },
   nudgeButton: {

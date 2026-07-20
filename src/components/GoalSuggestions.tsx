@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 10,
   },
-  suggestionText: { fontSize: 13, fontWeight: '600', color: '#22281F' },
+  suggestionText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
   suggestionAdd: { fontSize: 12, fontWeight: '800' },
   modalOverlay: {
     flex: 1,

@@ -30,6 +30,15 @@ export const colors = {
   danger: '#EF4444',
 
   pillBg: 'rgba(255,255,255,0.6)',
+
+  // Deliberately separate from textPrimary/textSecondary, not a typo for
+  // them - these are the warm-ink pair used specifically on the cardShell
+  // white background (see ARCHITECTURE.md's "Card shell" note), tuned a
+  // touch lighter than textPrimary/textSecondary for that context. Was
+  // hand-duplicated as a raw hex across ~12 files before this token
+  // existed.
+  shellTitle: '#22281F',
+  shellSecondary: '#7A7A6E',
 } as const;
 
 // Per-pillar accent colors (health/investments/ideas/learning/relationships).

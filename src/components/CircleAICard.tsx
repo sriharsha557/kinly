@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
   message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pill: {

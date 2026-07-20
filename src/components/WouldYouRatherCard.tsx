@@ -105,9 +105,9 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
   newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-  empty: { fontSize: 13, color: '#7A7A6E' },
+  empty: { fontSize: 13, color: colors.shellSecondary },
   options: { gap: 8 },
   option: {
     backgroundColor: colors.surface,

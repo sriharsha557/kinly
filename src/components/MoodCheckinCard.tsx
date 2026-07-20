@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     paddingLeft: 18,
     marginBottom: 16,
   },
-  title: { fontSize: 15, fontWeight: '500', color: '#22281F', marginBottom: 12 },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 12 },
   pickRow: { flexDirection: 'row', gap: 10 },
   pickButton: {
     flex: 1,
@@ -151,5 +151,5 @@ const styles = StyleSheet.create({
   moodBubbleFilled: { backgroundColor: colors.inputBg },
   moodBubbleEmpty: { backgroundColor: colors.background },
   moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
-  memberName: { fontSize: 11, fontWeight: '600', color: '#7A7A6E', marginTop: 4 },
+  memberName: { fontSize: 11, fontWeight: '600', color: colors.shellSecondary, marginTop: 4 },
 });

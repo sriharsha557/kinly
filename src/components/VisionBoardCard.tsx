@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
   newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   itemCard: {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
   itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
   itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
-  empty: { fontSize: 13, color: '#7A7A6E' },
+  empty: { fontSize: 13, color: colors.shellSecondary },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
