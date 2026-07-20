@@ -28,6 +28,10 @@ import { GoalCardSkeleton } from '../components/Skeleton';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { categoryColors, colors, radii, shadow } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
+import StreakIcon from '../../assets/icons/nudges/streak.svg';
+import WaterIcon from '../../assets/icons/nudges/water.svg';
+import CameraIcon from '../../assets/icons/feed/camera.svg';
+import CheckIcon from '../../assets/icons/feed/check.svg';
 
 function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: string; onClose: () => void }) {
   const [title, setTitle] = useState(goal.title);
@@ -120,10 +124,11 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         <Text style={styles.cardTitle}>{goal.title}</Text>
         <View style={styles.cardHeaderRight}>
           {goal.streak_count > 0 && (
-            <Text style={styles.streak}>
-              🔥 {goal.streak_count}
-              {hasWaterMark && ' 💧'}
-            </Text>
+            <View style={styles.streakRow}>
+              <StreakIcon width={14} height={14} />
+              <Text style={styles.streak}>{goal.streak_count}</Text>
+              {hasWaterMark && <WaterIcon width={13} height={13} />}
+            </View>
           )}
           <TouchableOpacity
             onPress={handleOptions}
@@ -141,17 +146,20 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
           {goal.progress} / {goal.target}
         </Text>
         {isComplete ? (
-          <Text style={styles.doneBadge}>✓ Completed</Text>
+          <View style={styles.doneRow}>
+            <CheckIcon width={14} height={14} />
+            <Text style={styles.doneBadge}>Completed</Text>
+          </View>
         ) : (
           <View style={styles.logActions}>
             <TouchableOpacity
               onPress={handleLogWithPhoto}
               disabled={isPending}
-              hitSlop={10}
+              hitSlop={13}
               accessibilityRole="button"
               accessibilityLabel="Log progress with a photo"
             >
-              <Text style={styles.photoButton}>📷</Text>
+              <CameraIcon width={18} height={18} />
             </TouchableOpacity>
             <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
               <Text style={styles.logButtonText}>Log progress</Text>
@@ -316,13 +324,14 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  streak: { fontSize: 14 },
+  streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
   optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardMeta: { fontSize: 12, color: colors.textSecondary },
+  doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
   logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  photoButton: { fontSize: 18 },
   logButton: {
     backgroundColor: colors.inputBg,
     borderRadius: radii.pill,

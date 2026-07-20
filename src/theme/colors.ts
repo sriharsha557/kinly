@@ -14,7 +14,11 @@ export const colors = {
   inputBg: '#FDECDD',
 
   textPrimary: '#2B1B10',
-  textSecondary: '#9C7A5E',
+  // Darkened from #9C7A5E, which only hit ~3.7:1 against the app's light
+  // backgrounds (surface/background/card shell) - below WCAG AA's 4.5:1 for
+  // normal text. This shade hits ~5.7-6.1:1 while staying in the same warm
+  // brown family.
+  textSecondary: '#7A5C42',
 
   // Deliberately distinct from primary/health.solid (#F97316) - "success" is a
   // generic status color, not the health category, even though both read orange.

@@ -227,7 +227,14 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           accessibilityRole="button"
           accessibilityLabel="Water their streak"
         >
-          <Text style={styles.waterButtonText}>{waterStreak.isPending ? 'Watering…' : '💧 Water their streak'}</Text>
+          {waterStreak.isPending ? (
+            <Text style={styles.waterButtonText}>Watering…</Text>
+          ) : (
+            <View style={styles.waterButtonRow}>
+              <WaterIcon width={14} height={14} />
+              <Text style={styles.waterButtonText}>Water their streak</Text>
+            </View>
+          )}
         </TouchableOpacity>
       )}
 
@@ -349,6 +356,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: 'center',
   },
+  waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   waterButtonText: { fontSize: 13, fontWeight: '700', color: colors.primary },
   nudgeList: { gap: 4 },
   photoThumb: { width: '100%', height: 160, borderRadius: radii.input },

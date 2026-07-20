@@ -9,13 +9,14 @@ import { colors, radii, shadow } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
+import CheckIcon from '../../assets/icons/feed/check.svg';
 
 // Ordered left-to-right to ascend through the tab bar's own order
 // (Today, Circle, Goals, Connection, Profile), so tapping through the row
 // feels like moving forward across tabs instead of jumping around.
-const ACTIONS: { label: string; emoji?: string; icon?: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
+const ACTIONS: { label: string; icon: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
   { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
-  { label: 'Check In', emoji: '✅', tab: 'Goals' },
+  { label: 'Check In', icon: CheckIcon, tab: 'Goals' },
   { label: 'Ask Friends', icon: ChatIcon, tab: 'Connection' },
 ];
 
@@ -24,10 +25,10 @@ export function QuickActionsRow() {
 
   return (
     <View style={styles.row}>
-      {ACTIONS.map(({ label, emoji, icon: Icon, tab }, index) => (
+      {ACTIONS.map(({ label, icon: Icon, tab }, index) => (
         <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
           <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
-            {Icon ? <Icon width={22} height={22} /> : <Text style={styles.emoji}>{emoji}</Text>}
+            <Icon width={22} height={22} />
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>
         </Animated.View>
@@ -46,6 +47,5 @@ const styles = StyleSheet.create({
     gap: 4,
     ...shadow,
   },
-  emoji: { fontSize: 20 },
   label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
 });
