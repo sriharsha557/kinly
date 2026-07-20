@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -16,12 +17,20 @@ import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircle
 import { useSetInterests } from '../hooks/useInterests';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { GradientHeader } from '../components/GradientHeader';
-import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
 import { colors, radii, shadow } from '../theme/colors';
 import type { Circle, InterestCategory } from '../types/models';
+
+// The real brand mark (two people, an infinity/hands-reaching shape) -
+// replaces Logo.tsx's older "friendly face" primitive here, which never
+// got reconciled with the rest of the brand pass. Pre-cropped to its own
+// ink bounding box (source is an Android adaptive-icon foreground layer,
+// padded for that use) so it displays at full visual weight instead of
+// looking small inside leftover safe-zone padding.
+const BRAND_MARK = require('../../assets/brand/logo-white-glyph.png');
+const BRAND_MARK_RATIO = 676 / 525;
 
 function AuthStep() {
   const [mode, setMode] = useState<'signIn' | 'signUp'>('signIn');
@@ -328,13 +337,25 @@ function CircleStep() {
   );
 }
 
+// Only the two counted, post-auth steps get dots - signing in/up is a gate
+// before the flow, not a step within it.
+function StepDots({ step, total }: { step: number; total: number }) {
+  return (
+    <View style={styles.stepDots}>
+      {Array.from({ length: total }, (_, i) => (
+        <View key={i} style={[styles.stepDot, i + 1 === step && styles.stepDotActive]} />
+      ))}
+    </View>
+  );
+}
+
 export default function OnboardingScreen() {
   const user = useAuthStore((state) => state.user);
   const needsInterests = !!user && user.interests === null;
 
   let subtitle = 'Together, We Thrive.';
-  if (user && needsInterests) subtitle = "What do you want to grow? Pick what matters to you.";
-  else if (user) subtitle = 'Start solo, invite friends when you\'re ready — or join one with a code.';
+  if (user && needsInterests) subtitle = 'Pick what matters most today. You can change this anytime.';
+  else if (user) subtitle = "Start solo, invite friends when you're ready, or join one with a code.";
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -344,12 +365,13 @@ export default function OnboardingScreen() {
       >
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <GradientHeader>
-            <Logo size={100} color="#FFFFFF" />
+            <Image source={BRAND_MARK} style={{ height: 92, width: 92 * BRAND_MARK_RATIO }} resizeMode="contain" />
             <Text style={styles.title}>Kinly</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
           </GradientHeader>
 
           <View style={styles.body}>
+            {user && <StepDots step={needsInterests ? 1 : 2} total={2} />}
             {!user ? <AuthStep /> : needsInterests ? <InterestsStep /> : <CircleStep />}
           </View>
         </ScrollView>
@@ -381,4 +403,7 @@ const styles = StyleSheet.create({
   orDivider: { textAlign: 'center', color: colors.textSecondary },
   soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
   error: { color: colors.danger, textAlign: 'center' },
+  stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
+  stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.inputBg },
+  stepDotActive: { backgroundColor: colors.primary, width: 20 },
 });

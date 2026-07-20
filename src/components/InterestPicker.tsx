@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { colors, categoryColors, radii } from '../theme/colors';
 import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon } from './icons/PillarIcons';
+import { CheckIcon } from './icons/MonoIcons';
 import type { InterestCategory } from '../types/models';
 
 interface PillarIconProps {
@@ -34,9 +35,12 @@ export function InterestPicker({
             key={key}
             style={[styles.chip, { backgroundColor: active ? category.solid : colors.inputBg }]}
             onPress={() => onToggle(key)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: active }}
           >
-            <Icon size={16} color={active ? '#fff' : category.solid} />
+            <Icon size={18} color={active ? '#fff' : category.solid} />
             <Text style={[styles.chipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
+            {active && <CheckIcon size={15} color="#fff" />}
           </TouchableOpacity>
         );
       })}
@@ -45,14 +49,15 @@ export function InterestPicker({
 }
 
 const styles = StyleSheet.create({
-  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
+    minHeight: 46,
     borderRadius: radii.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  chipLabel: { fontSize: 14, fontWeight: '600' },
+  chipLabel: { fontSize: 15, fontWeight: '600' },
 });

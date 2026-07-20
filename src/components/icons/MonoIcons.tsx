@@ -1,12 +1,13 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
-// Prop-driven versions of assets/icons/feed/{robot,sprout}.svg - needed
-// wherever the icon sits on a colored gradient (WeeklyRecapCard,
-// GardenTeaser) instead of the white card shell, where the raw
-// hardcoded-orange .svg imports would have poor contrast. Same pattern as
-// PillarIcons.tsx / TabIcons.tsx. assets/icons/nudges/water.svg is
-// identical path data to pillars/health.svg, so HealthIcon (already
-// prop-driven) covers the water-droplet case without a duplicate.
+// Prop-driven versions of assets/icons/feed/{robot,sprout,check}.svg -
+// needed wherever the icon sits on a colored gradient (WeeklyRecapCard,
+// GardenTeaser) or a variable per-category solid color (InterestPicker's
+// selected-chip checkmark) instead of the white card shell, where the raw
+// hardcoded-orange .svg imports would have poor or wrong-colored contrast.
+// Same pattern as PillarIcons.tsx / TabIcons.tsx. assets/icons/nudges/
+// water.svg is identical path data to pillars/health.svg, so HealthIcon
+// (already prop-driven) covers the water-droplet case without a duplicate.
 
 interface MonoIconProps {
   size?: number;
@@ -48,6 +49,15 @@ export function SproutIcon({ size = 20, color }: MonoIconProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </Svg>
+  );
+}
+
+export function CheckIcon({ size = 20, color }: MonoIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M8,12.3 L10.8,15.2 L16.2,9" stroke={color} strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
