@@ -50,9 +50,6 @@ export const gradients = {
   hero: [colors.celebration, colors.primarySoft] as const,
   achievement: [colors.amber, colors.celebration] as const,
   growth: [categoryColors.health.solid, colors.success] as const,
-  // The one place blue still appears alongside orange - Learning meeting
-  // Ideas is a deliberate accent, not a lapse in the orange-first rule.
-  inspiration: [categoryColors.ideas.solid, categoryColors.learning.solid] as const,
   brand: [colors.primary, colors.primarySoft] as const,
 };
 

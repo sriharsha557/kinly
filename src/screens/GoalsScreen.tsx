@@ -224,7 +224,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
         </TouchableOpacity>
       </View>
       <View style={styles.categoryRow}>
-        {INTEREST_OPTIONS.map(({ key, Icon }) => {
+        {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
           const active = category === key;
           const cat = categoryColors[key];
           return (
@@ -232,8 +232,12 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
               key={key}
               style={[styles.categoryChip, { backgroundColor: active ? cat.solid : colors.inputBg }]}
               onPress={() => setCategory(active ? null : key)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: active }}
+              accessibilityLabel={label}
             >
-              <Icon size={16} color={active ? '#fff' : cat.solid} />
+              <Icon size={15} color={active ? '#fff' : cat.solid} />
+              <Text style={[styles.categoryChipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -289,14 +293,17 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
   addGoalWrap: { marginBottom: 16, gap: 8 },
   form: { flexDirection: 'row', gap: 8 },
-  categoryRow: { flexDirection: 'row', gap: 8 },
+  categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryChip: {
-    width: 34,
-    height: 34,
-    borderRadius: radii.pill,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
+    minHeight: 34,
+    borderRadius: radii.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
+  categoryChipLabel: { fontSize: 13, fontWeight: '600' },
   input: {
     flex: 1,
     backgroundColor: colors.inputBg,

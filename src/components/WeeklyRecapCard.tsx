@@ -1,8 +1,7 @@
 import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useWeeklyRecap } from '../hooks/useWeeklyRecap';
 import { useCircleDetail } from '../hooks/useCircles';
-import { gradients, radii } from '../theme/colors';
+import { cardShell, colors } from '../theme/colors';
 import { RobotIcon, SproutIcon } from './icons/MonoIcons';
 import { HealthIcon } from './icons/PillarIcons';
 
@@ -48,10 +47,10 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
   }
 
   return (
-    <LinearGradient colors={gradients.inspiration} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <View style={styles.card}>
       <View style={styles.titleRow}>
         <View style={styles.titleTextRow}>
-          <RobotIcon size={18} color="#fff" />
+          <RobotIcon size={18} color={colors.primary} />
           <Text style={styles.title}>This Week in Your Circle</Text>
         </View>
         <TouchableOpacity onPress={handleShare} accessibilityRole="button" accessibilityLabel="Share weekly scorecard">
@@ -82,34 +81,34 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
       <View style={styles.footerRow}>
         {data.mostWateredFriendName && (
           <View style={styles.footerLine}>
-            <HealthIcon size={13} color="#fff" />
+            <HealthIcon size={13} color={colors.primary} />
             <Text style={styles.footerText}>Most watered: {data.mostWateredFriendName}</Text>
           </View>
         )}
         <View style={styles.footerLine}>
-          <SproutIcon size={13} color="#fff" />
+          <SproutIcon size={13} color={colors.primary} />
           <Text style={styles.footerText}>
             {delta ? `${delta} ` : ''}
             {data.healthNow}% health
           </Text>
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
+  card: { ...cardShell, padding: 16, paddingLeft: 14, marginBottom: 20, gap: 10 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '700', color: '#fff' },
-  shareLink: { fontSize: 13, fontWeight: '700', color: '#fff', textDecorationLine: 'underline' },
-  highlight: { fontSize: 13, color: 'rgba(255,255,255,0.95)', lineHeight: 18 },
+  title: { fontSize: 15, fontWeight: '500', color: '#22281F' },
+  shareLink: { fontSize: 13, fontWeight: '700', color: colors.primary, textDecorationLine: 'underline' },
+  highlight: { fontSize: 13, color: '#7A7A6E', lineHeight: 18 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
   stat: { alignItems: 'center' },
-  statValue: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  statLabel: { fontSize: 10, color: 'rgba(255,255,255,0.85)' },
+  statValue: { fontSize: 20, fontWeight: '800', color: '#22281F' },
+  statLabel: { fontSize: 10, color: '#7A7A6E' },
   footerRow: { gap: 4, marginTop: 2 },
   footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  footerText: { fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: '600' },
+  footerText: { fontSize: 12, color: '#7A7A6E', fontWeight: '600' },
 });
