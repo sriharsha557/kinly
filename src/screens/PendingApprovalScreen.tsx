@@ -1,11 +1,15 @@
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCancelJoinRequest, useMyCircles, type CircleWithMembership } from '../hooks/useCircles';
-import { Logo } from '../components/Logo';
 import { GradientHeader } from '../components/GradientHeader';
 import { PillButton } from '../components/PillButton';
 import { colors } from '../theme/colors';
+
+// Same brand mark used in OnboardingScreen's header - Logo.tsx's old
+// "friendly face" primitive was still showing up here too.
+const BRAND_MARK = require('../../assets/brand/logo-white-glyph.png');
+const BRAND_MARK_RATIO = 676 / 525;
 
 // Shown instead of MainTabs while the active circle's membership is
 // 'pending' (migration 0022) - RootNavigator polls useMyCircles (via its
@@ -37,7 +41,7 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <GradientHeader>
-          <Logo size={72} color="#FFFFFF" />
+          <Image source={BRAND_MARK} style={{ height: 66, width: 66 * BRAND_MARK_RATIO }} resizeMode="contain" />
           <Text style={styles.title}>Waiting for approval</Text>
           <Text style={styles.subtitle}>
             {`Your request to join "${pendingCircle.name}" is with the circle owner. You'll be let in as soon as they approve it.`}

@@ -1,9 +1,13 @@
-import { Modal, Share, StyleSheet, Text } from 'react-native';
+import { Image, Modal, Share, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
-import { Logo } from './Logo';
 import { PillButton } from './PillButton';
 import { gradients, radii } from '../theme/colors';
+
+// Same brand mark used in OnboardingScreen's header - Logo.tsx's old
+// "friendly face" primitive was still showing up here too.
+const BRAND_MARK = require('../../assets/brand/logo-white-glyph.png');
+const BRAND_MARK_RATIO = 676 / 525;
 
 interface MilestoneCardModalProps {
   title: string;
@@ -37,7 +41,7 @@ export function MilestoneCardModal({
         <Animated.View entering={ZoomIn.springify().damping(13).delay(80)}>
           <LinearGradient colors={gradients.achievement} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             <Animated.View entering={ZoomIn.springify().damping(10).delay(200)}>
-              <Logo size={64} color="#FFFFFF" />
+              <Image source={BRAND_MARK} style={{ height: 56, width: 56 * BRAND_MARK_RATIO }} resizeMode="contain" />
             </Animated.View>
             <Text style={styles.title}>{title}</Text>
             {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}

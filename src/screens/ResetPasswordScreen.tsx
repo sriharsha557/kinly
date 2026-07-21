@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updatePassword } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 import { GradientHeader } from '../components/GradientHeader';
-import { Logo } from '../components/Logo';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { colors } from '../theme/colors';
+
+// Same brand mark used in OnboardingScreen's header - Logo.tsx's old
+// "friendly face" primitive was still showing up here too.
+const BRAND_MARK = require('../../assets/brand/logo-white-glyph.png');
+const BRAND_MARK_RATIO = 676 / 525;
 
 export default function ResetPasswordScreen() {
   const setPasswordRecoveryMode = useAuthStore((state) => state.setPasswordRecoveryMode);
@@ -44,7 +48,7 @@ export default function ResetPasswordScreen() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
           <GradientHeader>
-            <Logo size={100} color="#FFFFFF" />
+            <Image source={BRAND_MARK} style={{ height: 92, width: 92 * BRAND_MARK_RATIO }} resizeMode="contain" />
             <Text style={styles.title}>Set a new password</Text>
             <Text style={styles.subtitle}>Choose a new password for your account.</Text>
           </GradientHeader>
