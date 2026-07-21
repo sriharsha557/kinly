@@ -25,13 +25,13 @@ import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
+import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { cardShell, categoryColors, colors, radii } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
-import CheckIcon from '../../assets/icons/feed/check.svg';
 
 function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: string; onClose: () => void }) {
   const [title, setTitle] = useState(goal.title);
@@ -147,7 +147,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         </Text>
         {isComplete ? (
           <View style={styles.doneRow}>
-            <CheckIcon width={14} height={14} />
+            <ToggleSwitch value onValueChange={() => {}} />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
         ) : (
