@@ -3,6 +3,7 @@ import {
   Alert,
   FlatList,
   Modal,
+  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -15,6 +16,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
+import { useSyncStepGoals } from '../hooks/useSyncStepGoals';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
 import { pickAndUploadCheckinPhoto } from '../lib/checkinPhotoUpload';
@@ -82,6 +84,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const isComplete = goal.progress >= goal.target;
+  const isStepGoal = goal.goal_source === 'health_steps';
 
   function handleOptions() {
     Alert.alert(goal.title, undefined, [
@@ -150,6 +153,8 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
             <ToggleSwitch value onValueChange={() => {}} />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
+        ) : isStepGoal ? (
+          <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
             <TouchableOpacity
@@ -186,15 +191,24 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const [category, setCategory] = useState<InterestCategory | null>(null);
+  const [trackSteps, setTrackSteps] = useState(false);
   const createGoal = useCreateGoal();
 
   async function handleAdd() {
     const targetValue = Number(target);
     if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({ circleId, userId, title: title.trim(), target: targetValue, category });
+    await createGoal.mutateAsync({
+      circleId,
+      userId,
+      title: title.trim(),
+      target: targetValue,
+      category,
+      source: trackSteps ? 'health_steps' : 'manual',
+    });
     setTitle('');
     setTarget('');
     setCategory(null);
+    setTrackSteps(false);
   }
 
   return (
@@ -242,6 +256,12 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           );
         })}
       </View>
+      {Platform.OS === 'android' && (
+        <View style={styles.stepsToggleRow}>
+          <ToggleSwitch value={trackSteps} onValueChange={setTrackSteps} />
+          <Text style={styles.stepsToggleLabel}>Track automatically with Health Connect (steps)</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -251,10 +271,18 @@ export default function GoalsScreen() {
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: goals, isLoading, isFetching, refetch } = useGoals(circleId ?? undefined);
   const tabBarClearance = useTabBarClearance();
+  const { celebration: stepCelebration, dismissCelebration } = useSyncStepGoals(
+    circleId ?? undefined,
+    userId,
+    goals,
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
+      {stepCelebration && (
+        <MilestoneCardModal title={stepCelebration.title} subtitle={stepCelebration.subtitle} onClose={dismissCelebration} />
+      )}
 
       {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
 
@@ -304,6 +332,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   categoryChipLabel: { fontSize: 13, fontWeight: '600' },
+  stepsToggleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
+  stepsToggleLabel: { fontSize: 12, color: colors.textSecondary, flex: 1 },
   input: {
     flex: 1,
     backgroundColor: colors.inputBg,
@@ -337,6 +367,7 @@ const styles = StyleSheet.create({
   cardMeta: { fontSize: 12, color: colors.textSecondary },
   doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
+  syncedLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
   logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   logButton: {
     backgroundColor: colors.inputBg,

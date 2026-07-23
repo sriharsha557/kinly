@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import type { Goal, InterestCategory } from '../types/models';
+import type { Goal, GoalSource, InterestCategory } from '../types/models';
 
 export function useGoals(circleId: string | undefined) {
   return useQuery({
@@ -24,15 +24,23 @@ interface NewGoal {
   title: string;
   target: number;
   category?: InterestCategory | null;
+  source?: GoalSource;
 }
 
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ circleId, userId, title, target, category }: NewGoal): Promise<Goal> => {
+    mutationFn: async ({ circleId, userId, title, target, category, source }: NewGoal): Promise<Goal> => {
       const { data, error } = await supabase
         .from('goals')
-        .insert({ circle_id: circleId, user_id: userId, title, target, category: category ?? null })
+        .insert({
+          circle_id: circleId,
+          user_id: userId,
+          title,
+          target,
+          category: category ?? null,
+          goal_source: source ?? 'manual',
+        })
         .select()
         .single();
       if (error) throw error;
@@ -77,6 +85,30 @@ export function useDeleteGoal() {
     mutationFn: async ({ goalId }: { goalId: string; circleId: string }) => {
       const { error } = await supabase.from('goals').update({ deleted_at: new Date().toISOString() }).eq('id', goalId);
       if (error) throw error;
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+  });
+}
+
+export function useSyncStepGoal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      goalId,
+      circleId,
+      steps,
+    }: {
+      goalId: string;
+      circleId: string;
+      steps: number;
+    }): Promise<Goal> => {
+      const { data, error } = await supabase.rpc('sync_step_goal', {
+        p_goal_id: goalId,
+        p_steps: Math.round(steps),
+      });
+      if (error) throw error;
+      return data as Goal;
     },
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),

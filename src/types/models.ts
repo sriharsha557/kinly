@@ -27,6 +27,8 @@ export interface CircleMember {
   status: CircleMemberStatus;
 }
 
+export type GoalSource = 'manual' | 'health_steps';
+
 export interface Goal {
   id: string;
   user_id: string;
@@ -37,6 +39,8 @@ export interface Goal {
   streak_count: number;
   last_logged_date: string | null;
   category: InterestCategory | null;
+  goal_source: GoalSource;
+  last_synced_date: string | null;
 }
 
 export type EventType =

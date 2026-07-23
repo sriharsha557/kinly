@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import { inviteMessage } from '../lib/share';
 import type { Circle, Goal } from '../types/models';
 
-const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
+export const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
 export interface Celebration {
   title: string;

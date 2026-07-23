@@ -55,7 +55,17 @@
       "expo-font",
       "expo-web-browser",
       "@sentry/react-native",
-      "expo-video"
+      "expo-video",
+      "react-native-health-connect",
+      "./plugins/withHealthConnect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

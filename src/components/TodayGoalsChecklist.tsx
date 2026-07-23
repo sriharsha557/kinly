@@ -29,7 +29,11 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const today = todayIso();
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
   const pending = myGoals.filter(
-    (g) => g.progress < g.target && g.last_logged_date !== today && !checkedIds.has(g.id),
+    (g) =>
+      g.goal_source !== 'health_steps' &&
+      g.progress < g.target &&
+      g.last_logged_date !== today &&
+      !checkedIds.has(g.id),
   );
 
   async function handleLog(goalId: string) {
