@@ -1,9 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from './supabase';
+import { ensureMediaLibraryPermission } from './mediaPermission';
 
 export async function pickAndUploadAvatar(userId: string): Promise<string | null> {
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
+  const granted = await ensureMediaLibraryPermission();
+  if (!granted) return null;
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],

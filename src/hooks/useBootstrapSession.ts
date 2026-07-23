@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
+import { Alert } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { fetchProfile } from '../lib/auth';
+import { consumeExpectedSignOut, fetchProfile } from '../lib/auth';
 import { useAuthStore } from '../state/useAuthStore';
 
 export function useBootstrapSession() {
@@ -36,6 +37,13 @@ export function useBootstrapSession() {
 
     const { data: subscription } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') setPasswordRecoveryMode(true);
+      if (event === 'SIGNED_OUT' && !session) {
+        const wasExpected = consumeExpectedSignOut();
+        const hadUser = useAuthStore.getState().user !== null;
+        if (!wasExpected && hadUser) {
+          Alert.alert('Session expired', "You've been signed out - please sign in again.");
+        }
+      }
       loadFromSession(session?.user.id);
     });
 

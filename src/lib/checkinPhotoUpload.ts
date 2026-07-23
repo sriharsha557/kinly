@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from './supabase';
+import { ensureMediaLibraryPermission } from './mediaPermission';
 
 // Compresses via expo-image-picker's own `quality` option, not
 // expo-image-manipulator - that package isn't an installed dependency here
@@ -13,8 +14,8 @@ const QUALITY = 0.5;
 // Returns a storage PATH, not a URL - the bucket is private, so callers
 // need useSignedCheckinPhotoUrl() to actually display it.
 export async function pickAndUploadCheckinPhoto(circleId: string, userId: string): Promise<string | null> {
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) return null;
+  const granted = await ensureMediaLibraryPermission();
+  if (!granted) return null;
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],

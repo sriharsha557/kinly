@@ -60,7 +60,25 @@ export async function signIn(email: string, password: string) {
   return data;
 }
 
+// supabase-js fires the same 'SIGNED_OUT' auth event both for an explicit
+// signOut() call and for an involuntary one (refresh token expired/invalid,
+// so the client gives up and signs out locally) - this flag is how
+// useBootstrapSession's onAuthStateChange listener tells them apart, so it
+// only shows a "your session expired" message for the involuntary case.
+let expectingSignOut = false;
+
+export function markExpectedSignOut() {
+  expectingSignOut = true;
+}
+
+export function consumeExpectedSignOut(): boolean {
+  const was = expectingSignOut;
+  expectingSignOut = false;
+  return was;
+}
+
 export async function signOut() {
+  markExpectedSignOut();
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
@@ -145,5 +163,6 @@ export async function deleteAccount() {
     }
     throw new Error(message);
   }
+  markExpectedSignOut();
   await supabase.auth.signOut();
 }
