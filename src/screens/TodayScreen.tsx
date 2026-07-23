@@ -256,7 +256,16 @@ export default function TodayScreen() {
   const user = useAuthStore((state) => state.user);
   const userId = user?.id;
   const circleId = useAuthStore((state) => state.activeCircleId);
-  const { data: events, isLoading, isFetching, refetch } = useEvents(circleId ?? undefined);
+  const {
+    data,
+    isLoading,
+    isFetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useEvents(circleId ?? undefined);
+  const events = data?.pages.flat();
   const tabBarClearance = useTabBarClearance();
 
   let lastLabel = '';
@@ -302,6 +311,21 @@ export default function TodayScreen() {
                 </View>
               );
             })}
+            {hasNextPage && (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                accessibilityRole="button"
+                accessibilityLabel="Load more activity"
+              >
+                {isFetchingNextPage ? (
+                  <LoadingSpinner size={14} />
+                ) : (
+                  <Text style={styles.loadMoreLabel}>Load more</Text>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <View style={styles.emptyCard}>
@@ -325,6 +349,15 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
   list: { gap: 10 },
   dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+  loadMoreButton: {
+    alignSelf: 'center',
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radii.pill,
+    backgroundColor: colors.inputBg,
+  },
+  loadMoreLabel: { fontSize: 13, fontWeight: '700', color: colors.primary },
   eventCard: {
     ...cardShell,
     padding: 14,

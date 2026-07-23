@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Event, EventType, Nudge, NudgeKind } from '../types/models';
 
@@ -11,20 +11,33 @@ export interface EventWithProfile extends Event {
   nudges: NudgeWithProfile[];
 }
 
+const EVENTS_PAGE_SIZE = 20;
+
+// Cursor-based on created_at rather than offset/.range() - offset pagination
+// re-numbers every page when a new event lands between fetches (a live
+// circle feed gets new rows constantly), which reshuffles/duplicates rows
+// across pages. A plain `created_at` cursor can in principle skip/duplicate
+// a row on an exact-timestamp tie, but for a small friend circle's event
+// feed that's negligible next to the reshuffling offset pagination causes.
 export function useEvents(circleId: string | undefined) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['events', circleId],
     enabled: !!circleId,
-    queryFn: async (): Promise<EventWithProfile[]> => {
-      const { data, error } = await supabase
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }): Promise<EventWithProfile[]> => {
+      let query = supabase
         .from('events')
         .select('*, profiles(name), nudges(*, profiles(name))')
         .eq('circle_id', circleId as string)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(EVENTS_PAGE_SIZE);
+      if (pageParam) query = query.lt('created_at', pageParam);
+      const { data, error } = await query;
       if (error) throw error;
       return data as unknown as EventWithProfile[];
     },
+    getNextPageParam: (lastPage) =>
+      lastPage.length === EVENTS_PAGE_SIZE ? lastPage[lastPage.length - 1].created_at : undefined,
   });
 }
 
