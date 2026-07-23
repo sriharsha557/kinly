@@ -25,7 +25,7 @@ The v1 six-tile grid (Goals done, Active goals, Current streak, Completion rate,
 - [x] Error Boundary with "Try again" / "Go home" — shipped.
 - [x] Sentry crash reporting live — shipped.
 - [ ] Sentry release/source-map upload — blocked on `SENTRY_ORG`, `SENTRY_PROJECT`, and an auth token from the Sentry dashboard.
-- [ ] Circle Activity pagination — cursor-based, replacing `.limit(50)` in `useEvents`.
+- [x] Circle Activity pagination — cursor-based `useInfiniteQuery`, replacing `.limit(50)` in `useEvents`. See ARCHITECTURE.md "Circle Activity pagination."
 - [ ] E2E tests for critical flows (sign up → create goal → create/join circle) — Maestro recommended over Detox; framework choice not yet confirmed.
 
 ## iOS launch
@@ -33,7 +33,7 @@ The v1 six-tile grid (Goals done, Active goals, Current streak, Completion rate,
 Blockers (Apple will reject without these):
 - [ ] Sign in with Apple — required because `signInWithOAuth({ provider: 'google' })` already exists in `src/lib/auth.ts` (Guideline 4.8: any third-party login requires an Apple option too).
 - [ ] Apple Developer Program enrollment + EAS iOS credentials/provisioning — no iOS build pipeline exists yet (project is Android-only).
-- [ ] Content report/block mechanism for circle chat/comments — Guideline 1.2 UGC moderation requirement.
+- [x] Content report/block mechanism for circle chat/comments — Guideline 1.2 UGC moderation requirement. See ARCHITECTURE.md "UGC safety (report + block)."
 - [ ] HealthKit privacy-usage-string + data-handling review (once step tracking below ships) — stricter review than a normal app; health data can't be used beyond the stated purpose.
 
 Needed, not blockers:

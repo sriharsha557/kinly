@@ -23,6 +23,8 @@ import {
   type AskPostWithProfile,
 } from '../hooks/useAskPosts';
 import { useGoals } from '../hooks/useGoals';
+import { useBlockUser, useReportContent } from '../hooks/useReports';
+import { showModerationSheet } from '../lib/moderation';
 import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
@@ -38,6 +40,8 @@ import DeleteIcon from '../../assets/icons/feed/delete.svg';
 function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circleId: string; userId: string }) {
   const { data: replies, isLoading } = useAskReplies(askPostId);
   const createReply = useCreateReply(circleId);
+  const reportContent = useReportContent();
+  const blockUser = useBlockUser();
   const [body, setBody] = useState('');
 
   async function handleSend() {
@@ -46,16 +50,30 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
     setBody('');
   }
 
+  function handleReplyOptions(replyId: string, authorId: string, authorName: string) {
+    if (authorId === userId) return;
+    showModerationSheet({
+      authorName,
+      onReport: (reason) => reportContent.mutate({ targetType: 'ask_reply', targetId: replyId, reason }),
+      onBlock: () => blockUser.mutate(authorId),
+    });
+  }
+
   return (
     <View style={styles.thread}>
       {isLoading ? (
         <LoadingSpinner size={10} />
       ) : (
         replies?.map((reply) => (
-          <View key={reply.id} style={styles.replyRow}>
+          <TouchableOpacity
+            key={reply.id}
+            style={styles.replyRow}
+            onLongPress={() => handleReplyOptions(reply.id, reply.user_id, reply.profiles?.name ?? 'Someone')}
+            delayLongPress={400}
+          >
             <Text style={styles.replyAuthor}>{reply.profiles?.name ?? 'Someone'}</Text>
             <Text style={styles.replyBody}>{reply.body}</Text>
-          </View>
+          </TouchableOpacity>
         ))
       )}
       <View style={styles.replyInputRow}>
@@ -88,6 +106,8 @@ function AskCard({
   onToggle: () => void;
 }) {
   const deletePost = useDeleteAskPost(circleId);
+  const reportContent = useReportContent();
+  const blockUser = useBlockUser();
   const isMine = post.user_id === userId;
 
   function handleDelete() {
@@ -97,12 +117,21 @@ function AskCard({
     ]);
   }
 
+  function handleOptions() {
+    const authorName = post.profiles?.name ?? 'Someone';
+    showModerationSheet({
+      authorName,
+      onReport: (reason) => reportContent.mutate({ targetType: 'ask_post', targetId: post.id, reason }),
+      onBlock: () => blockUser.mutate(post.user_id),
+    });
+  }
+
   return (
     <View style={styles.card}>
       <TouchableOpacity onPress={onToggle}>
         <View style={styles.questionRow}>
           <Text style={styles.question}>{post.question}</Text>
-          {isMine && (
+          {isMine ? (
             <TouchableOpacity
               onPress={handleDelete}
               hitSlop={12}
@@ -110,6 +139,15 @@ function AskCard({
               accessibilityLabel="Delete this post"
             >
               <DeleteIcon width={15} height={15} opacity={0.6} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleOptions}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={`Options for ${post.profiles?.name ?? 'this'} post`}
+            >
+              <Text style={styles.optionsButton}>⋯</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -290,6 +328,7 @@ const styles = StyleSheet.create({
   },
   questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
   question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+  optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
   meta: { fontSize: 12, color: colors.textSecondary },
   thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },

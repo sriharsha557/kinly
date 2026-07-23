@@ -8,6 +8,8 @@ import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { useBlockUser, useReportContent } from '../hooks/useReports';
+import { showModerationSheet } from '../lib/moderation';
 import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
@@ -151,8 +153,19 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const Icon = eventIcon(event);
   const sendNudge = useSendNudge(circleId);
   const waterStreak = useWaterStreak(circleId);
+  const reportContent = useReportContent();
+  const blockUser = useBlockUser();
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+  function handleNudgeOptions(nudgeId: string, authorId: string, authorName: string) {
+    if (authorId === userId) return;
+    showModerationSheet({
+      authorName,
+      onReport: (reason) => reportContent.mutate({ targetType: 'nudge', targetId: nudgeId, reason }),
+      onBlock: () => blockUser.mutate(authorId),
+    });
+  }
 
   async function handleNudge(kind: NudgeKind) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -241,10 +254,16 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       {event.nudges.length > 0 && (
         <View style={styles.nudgeList}>
           {event.nudges.map((nudge) => (
-            <Text key={nudge.id} style={styles.nudgeMessage}>
-              <Text style={styles.nudgeSender}>{nudge.profiles?.name ?? 'Someone'}: </Text>
-              {nudge.message}
-            </Text>
+            <TouchableOpacity
+              key={nudge.id}
+              onLongPress={() => handleNudgeOptions(nudge.id, nudge.from_user_id, nudge.profiles?.name ?? 'Someone')}
+              delayLongPress={400}
+            >
+              <Text style={styles.nudgeMessage}>
+                <Text style={styles.nudgeSender}>{nudge.profiles?.name ?? 'Someone'}: </Text>
+                {nudge.message}
+              </Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}
