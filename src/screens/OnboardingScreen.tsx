@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -20,7 +20,7 @@ import { GradientHeader } from '../components/GradientHeader';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { Circle, InterestCategory } from '../types/models';
 
 // The real brand mark (two people, an infinity/hands-reaching shape) -
@@ -44,6 +44,8 @@ function AuthStep() {
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetSubmitting, setResetSubmitting] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleRequestReset() {
     setError(null);
@@ -223,6 +225,8 @@ function AuthStep() {
 function InterestsStep() {
   const [selected, setSelected] = useState<InterestCategory[]>([]);
   const setInterests = useSetInterests();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function toggle(key: InterestCategory) {
     setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -246,6 +250,9 @@ function InterestsStep() {
 }
 
 function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => void }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   async function handleShareWhatsApp() {
     await shareToWhatsApp(inviteMessage(circle.name, circle.invite_code));
   }
@@ -275,6 +282,8 @@ function CircleStep() {
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [createdCircle, setCreatedCircle] = useState<Circle | null>(null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   useEffect(() => {
     if (!createdCircle && circles && circles.length > 0) {
@@ -353,6 +362,8 @@ function CircleStep() {
 // Only the two counted, post-auth steps get dots - signing in/up is a gate
 // before the flow, not a step within it.
 function StepDots({ step, total }: { step: number; total: number }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={styles.stepDots}>
       {Array.from({ length: total }, (_, i) => (
@@ -364,6 +375,8 @@ function StepDots({ step, total }: { step: number; total: number }) {
 
 export default function OnboardingScreen() {
   const user = useAuthStore((state) => state.user);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const needsInterests = !!user && user.interests === null;
 
   let subtitle = 'Together, We Thrive.';
@@ -393,30 +406,32 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  body: { padding: 24, paddingTop: 28 },
-  form: { gap: 14 },
-  confirmTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
-  confirmBody: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-  inviteCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    alignItems: 'center',
-    ...shadow,
-  },
-  inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-  inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
-  title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
-  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
-  link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
-  legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
-  legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
-  orDivider: { textAlign: 'center', color: colors.textSecondary },
-  soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
-  error: { color: colors.danger, textAlign: 'center' },
-  stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
-  stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.inputBg },
-  stepDotActive: { backgroundColor: colors.primary, width: 20 },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    body: { padding: 24, paddingTop: 28 },
+    form: { gap: 14 },
+    confirmTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
+    confirmBody: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+    inviteCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      alignItems: 'center',
+      ...shadow,
+    },
+    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+    inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
+    subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+    link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
+    legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+    legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
+    orDivider: { textAlign: 'center', color: colors.textSecondary },
+    soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
+    error: { color: colors.danger, textAlign: 'center' },
+    stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
+    stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.inputBg },
+    stepDotActive: { backgroundColor: colors.primary, width: 20 },
+  });
+}

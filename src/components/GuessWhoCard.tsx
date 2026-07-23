@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import MasksIcon from '../../assets/icons/feed/masks.svg';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 
@@ -20,6 +20,8 @@ function NewFactModal({
   const [fact, setFact] = useState('');
   const [answerUserId, setAnswerUserId] = useState<string | null>(null);
   const createPost = useCreateGuessWho(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handlePost() {
     if (!fact.trim() || !answerUserId) return;
@@ -37,7 +39,7 @@ function NewFactModal({
             value={fact}
             onChangeText={setFact}
             placeholder="once forgot their passport at the airport"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
             multiline
           />
           <Text style={styles.pickLabel}>Who is it about?</Text>
@@ -81,6 +83,8 @@ function GuessWhoPostRow({
 }) {
   const { data: members } = useCircleMembers(circleId);
   const submitGuess = useSubmitGuess(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const myGuess = post.guess_who_guesses.find((g) => g.user_id === userId);
   const revealed = !!myGuess;
 
@@ -122,6 +126,8 @@ function GuessWhoPostRow({
 export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: posts } = useGuessWhoPosts(circleId);
   const [creating, setCreating] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.card}>
@@ -150,55 +156,57 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-  empty: { fontSize: 13, color: colors.shellSecondary },
-  hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 6 },
-  postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
-  fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
-  memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  chipActive: { backgroundColor: colors.primary },
-  chipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  chipTextActive: { color: '#fff' },
-  revealed: { fontSize: 13, fontWeight: '700', color: colors.success },
-  guessCount: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 10,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  pickLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+    empty: { fontSize: 13, color: colors.shellSecondary },
+    hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 6 },
+    postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
+    fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
+    memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    chip: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    chipActive: { backgroundColor: colors.primary },
+    chipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    chipTextActive: { color: '#fff' },
+    revealed: { fontSize: 13, fontWeight: '700', color: colors.success },
+    guessCount: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 10,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    pickLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

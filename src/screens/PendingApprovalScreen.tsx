@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCancelJoinRequest, useMyCircles, type CircleWithMembership } from '../hooks/useCircles';
 import { GradientHeader } from '../components/GradientHeader';
 import { PillButton } from '../components/PillButton';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 // Same brand mark used in OnboardingScreen's header - Logo.tsx's old
 // "friendly face" primitive was still showing up here too.
@@ -22,6 +23,8 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const { data: circles } = useMyCircles(userId);
   const cancelRequest = useCancelJoinRequest();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const otherActiveCircles = (circles ?? []).filter(
     (c) => c.id !== pendingCircle.id && c.membershipStatus === 'active',
@@ -69,7 +72,7 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
             variant="outline"
             onPress={handleCancel}
             loading={cancelRequest.isPending}
-            style={{ marginTop: 16, borderColor: colors.danger }}
+            style={{ marginTop: 16, borderColor: theme.colors.danger }}
           />
         </View>
       </ScrollView>
@@ -77,24 +80,26 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  title: { fontSize: 22, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
-  subtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
-    marginTop: 8,
-    textAlign: 'center',
-    paddingHorizontal: 12,
-    lineHeight: 20,
-  },
-  body: { padding: 24 },
-  switchList: { gap: 8 },
-  switchLabel: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
-  switchRow: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 14,
-  },
-  switchRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    title: { fontSize: 22, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
+    subtitle: {
+      fontSize: 14,
+      color: 'rgba(255,255,255,0.9)',
+      marginTop: 8,
+      textAlign: 'center',
+      paddingHorizontal: 12,
+      lineHeight: 20,
+    },
+    body: { padding: 24 },
+    switchList: { gap: 8 },
+    switchLabel: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
+    switchRow: {
+      backgroundColor: colors.surface,
+      borderRadius: 14,
+      padding: 14,
+    },
+    switchRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+  });
+}

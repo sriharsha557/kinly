@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PillButton } from './PillButton';
 import { queryClient } from '../lib/queryClient';
 import { asyncStoragePersister } from '../lib/persister';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { SadIcon } from './icons/MonoIcons';
 
 // Sentry.ErrorBoundary's fallback render prop - shown instead of a blank/
@@ -22,6 +22,8 @@ import { SadIcon } from './icons/MonoIcons';
 // again" alone just re-reads the same bad state.
 export function ErrorFallback({ resetError }: { resetError: () => void }) {
   const [clearing, setClearing] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleGoHome() {
     setClearing(true);
@@ -37,7 +39,7 @@ export function ErrorFallback({ resetError }: { resetError: () => void }) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <SadIcon size={40} color={colors.primary} />
+        <SadIcon size={40} color={theme.colors.primary} />
         <Text style={styles.title}>Something went wrong</Text>
         <Text style={styles.body}>
           Kinly hit a snag. This has been reported - tap below to try again.
@@ -51,10 +53,12 @@ export function ErrorFallback({ resetError }: { resetError: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
-  title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginTop: 8, textAlign: 'center' },
-  body: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 24, width: '100%' },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
+    title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginTop: 8, textAlign: 'center' },
+    body: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+    actions: { flexDirection: 'row', gap: 10, marginTop: 24, width: '100%' },
+  });
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import * as Haptics from 'expo-haptics';
@@ -14,7 +14,7 @@ import type { SvgProps } from 'react-native-svg';
 import { PillButton } from './PillButton';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
-import { cardShell, colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 import HappyIconRaw from '../../assets/icons/mood/happy.svg';
@@ -76,6 +76,9 @@ function MoodOptionCard({
   disabled: boolean;
   onPress: () => void;
 }) {
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const progress = useSharedValue(active ? 1 : 0);
   const tap = useSharedValue(1);
 
@@ -128,6 +131,8 @@ function MoodPickerModal({
   onClose: () => void;
 }) {
   const submitMood = useSubmitMoodCheckin(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [step, setStep] = useState<'mood' | 'tags'>('mood');
   const [selectedMood, setSelectedMood] = useState<MoodValue | null>(existingMood);
   const [selectedTags, setSelectedTags] = useState<string[]>(existingTags);
@@ -235,6 +240,8 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   const { data: checkins, isLoading } = useTodayMoodCheckins(circleId);
   const { data: members } = useCircleMembers(circleId);
   const [modalOpen, setModalOpen] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading) return null;
 
@@ -296,83 +303,85 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 16,
-  },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 2 },
-  hint: { fontSize: 11, color: colors.shellSecondary },
-  gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
-  sectionCaption: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.shellSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginTop: 14,
-    marginBottom: 8,
-  },
-  gridRow: { gap: 14 },
-  memberChip: { alignItems: 'center', width: 52 },
-  moodBubble: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moodBubbleFilled: { backgroundColor: colors.inputBg },
-  moodBubbleEmpty: { backgroundColor: colors.background },
-  moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
-  memberName: { fontSize: 11, fontWeight: '600', color: colors.shellSecondary, marginTop: 4 },
+function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 16,
+    },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 2 },
+    hint: { fontSize: 11, color: colors.shellSecondary },
+    gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
+    sectionCaption: {
+      fontSize: 10,
+      fontWeight: '600',
+      color: colors.shellSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+      marginTop: 14,
+      marginBottom: 8,
+    },
+    gridRow: { gap: 14 },
+    memberChip: { alignItems: 'center', width: 52 },
+    moodBubble: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moodBubbleFilled: { backgroundColor: colors.inputBg },
+    moodBubbleEmpty: { backgroundColor: colors.background },
+    moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
+    memberName: { fontSize: 11, fontWeight: '600', color: colors.shellSecondary, marginTop: 4 },
 
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  overlayDismiss: { ...StyleSheet.absoluteFillObject },
-  sheet: {
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 36,
-    gap: 4,
-    ...shadow,
-  },
-  sheetHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#E4DFD1',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  sheetTitle: { fontSize: 19, fontWeight: '700', color: colors.shellTitle, textAlign: 'center' },
-  sheetSubtitle: { fontSize: 13, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: 16 },
-  moodStack: { gap: 12, marginTop: 18 },
-  moodOption: {
-    borderWidth: 1.5,
-    borderColor: '#E4DFD1',
-    borderRadius: 20,
-    paddingVertical: 20,
-    alignItems: 'center',
-    gap: 10,
-    ...shadow,
-  },
-  moodOptionLabel: { fontSize: 16, fontWeight: '600', color: colors.shellTitle },
-  moodOptionLabelActive: { color: '#FFFFFF' },
-  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tagChip: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: '#E4DFD1',
-    borderRadius: radii.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tagChipText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
-  tagChipTextActive: { color: '#FFFFFF' },
-});
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+    overlayDismiss: { ...StyleSheet.absoluteFillObject },
+    sheet: {
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      padding: 24,
+      paddingBottom: 36,
+      gap: 4,
+      ...shadow,
+    },
+    sheetHandle: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: '#E4DFD1',
+      alignSelf: 'center',
+      marginBottom: 16,
+    },
+    sheetTitle: { fontSize: 19, fontWeight: '700', color: colors.shellTitle, textAlign: 'center' },
+    sheetSubtitle: { fontSize: 13, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: 16 },
+    moodStack: { gap: 12, marginTop: 18 },
+    moodOption: {
+      borderWidth: 1.5,
+      borderColor: '#E4DFD1',
+      borderRadius: 20,
+      paddingVertical: 20,
+      alignItems: 'center',
+      gap: 10,
+      ...shadow,
+    },
+    moodOptionLabel: { fontSize: 16, fontWeight: '600', color: colors.shellTitle },
+    moodOptionLabelActive: { color: '#FFFFFF' },
+    tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    tagChip: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: '#E4DFD1',
+      borderRadius: radii.pill,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+    },
+    tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    tagChipText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
+    tagChipTextActive: { color: '#FFFFFF' },
+  });
+}

@@ -15,7 +15,7 @@ import {
   ChatTabIcon,
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
-import { colors } from '../theme/colors';
+import { useTheme, type Theme } from '../theme/ThemeProvider';
 import { TAB_BAR_HEIGHT } from '../hooks/useTabBarClearance';
 import type { MainTabParamList } from './types';
 
@@ -59,6 +59,9 @@ function TabIcon({
 
 export default function MainTabs() {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = createStyles(theme);
 
   return (
     <Tab.Navigator
@@ -86,20 +89,22 @@ export default function MainTabs() {
   );
 }
 
-const styles = {
-  tabBar: {
-    position: 'absolute' as const,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.inputBg,
-    elevation: 0,
-  },
-  tabBarItem: {
-    height: TAB_BAR_HEIGHT,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-};
+function createStyles({ colors }: Theme) {
+  return {
+    tabBar: {
+      position: 'absolute' as const,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.inputBg,
+      elevation: 0,
+    },
+    tabBarItem: {
+      height: TAB_BAR_HEIGHT,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+  };
+}

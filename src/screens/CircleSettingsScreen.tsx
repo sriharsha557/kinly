@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -28,7 +28,7 @@ import { ToggleSwitch } from '../components/ToggleSwitch';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
 import { MUTE_CATEGORIES, useNotificationMutes, useToggleMute } from '../hooks/useNotificationMutes';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { CircleRole } from '../types/models';
 
 const ROLE_ORDER: CircleRole[] = ['member', 'admin', 'owner'];
@@ -42,6 +42,8 @@ function RoleChip({
   active: boolean;
   onPress?: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <TouchableOpacity
       style={[styles.roleChip, active && styles.roleChipActive]}
@@ -67,6 +69,8 @@ function JoinOrCreateModal({
   const [error, setError] = useState<string | null>(null);
   const createCircle = useCreateCircle();
   const joinCircle = useJoinCircle();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleCreate() {
     setError(null);
@@ -98,7 +102,7 @@ function JoinOrCreateModal({
             value={circleName}
             onChangeText={setCircleName}
             placeholder="Circle name"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
           />
           <PillButton
             label="Create Circle"
@@ -112,7 +116,7 @@ function JoinOrCreateModal({
             value={inviteCode}
             onChangeText={setInviteCode}
             placeholder="Invite code"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="none"
           />
           <PillButton
@@ -147,6 +151,8 @@ export default function CircleSettingsScreen() {
   const toggleMute = useToggleMute(circleId ?? undefined, userId);
 
   const [showJoinCreate, setShowJoinCreate] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const myRole = members?.find((m) => m.user_id === userId)?.role;
   const canManageRoles = myRole === 'owner' || myRole === 'admin';
@@ -317,7 +323,7 @@ export default function CircleSettingsScreen() {
           variant="outline"
           onPress={handleLeave}
           loading={leaveCircle.isPending}
-          style={{ marginTop: 10, borderColor: colors.danger }}
+          style={{ marginTop: 10, borderColor: theme.colors.danger }}
         />
       </ScrollView>
 
@@ -335,86 +341,88 @@ export default function CircleSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 40 },
-  circleName: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 16 },
-  inviteCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    alignItems: 'center',
-    ...shadow,
-  },
-  inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-  inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
-  askOwnerText: { fontSize: 14, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
-  requestBtn: { paddingHorizontal: 16, paddingVertical: 8 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
-  memberList: { gap: 10 },
-  memberRow: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 14,
-    gap: 10,
-    ...shadow,
-  },
-  memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-  roleChips: { flexDirection: 'row', gap: 6 },
-  roleChip: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  roleChipActive: { backgroundColor: colors.primary },
-  roleChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textTransform: 'capitalize' },
-  roleChipTextActive: { color: '#fff' },
-  circleRow: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    ...shadow,
-  },
-  circleRowActive: { borderWidth: 1.5, borderColor: colors.primary },
-  circleRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-  circleRowTextActive: { color: colors.primary },
-  circleRowActiveTag: { fontSize: 11, fontWeight: '700', color: colors.primary },
-  notifyRow: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    ...shadow,
-  },
-  notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  orDivider: { textAlign: 'center', color: colors.textSecondary },
-  cancelLink: { textAlign: 'center', color: colors.textSecondary, fontWeight: '600' },
-  error: { color: colors.danger, textAlign: 'center' },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 40 },
+    circleName: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 16 },
+    inviteCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      alignItems: 'center',
+      ...shadow,
+    },
+    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+    inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    askOwnerText: { fontSize: 14, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
+    requestBtn: { paddingHorizontal: 16, paddingVertical: 8 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
+    memberList: { gap: 10 },
+    memberRow: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 14,
+      gap: 10,
+      ...shadow,
+    },
+    memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    roleChips: { flexDirection: 'row', gap: 6 },
+    roleChip: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    roleChipActive: { backgroundColor: colors.primary },
+    roleChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textTransform: 'capitalize' },
+    roleChipTextActive: { color: '#fff' },
+    circleRow: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 14,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      ...shadow,
+    },
+    circleRowActive: { borderWidth: 1.5, borderColor: colors.primary },
+    circleRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    circleRowTextActive: { color: colors.primary },
+    circleRowActiveTag: { fontSize: 11, fontWeight: '700', color: colors.primary },
+    notifyRow: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 14,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      ...shadow,
+    },
+    notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 12,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    orDivider: { textAlign: 'center', color: colors.textSecondary },
+    cancelLink: { textAlign: 'center', color: colors.textSecondary, fontWeight: '600' },
+    error: { color: colors.danger, textAlign: 'center' },
+  });
+}

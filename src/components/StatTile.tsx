@@ -1,5 +1,6 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface Delta {
   label: string;
@@ -21,6 +22,8 @@ interface StatTileProps {
 }
 
 export function StatTile({ background, textColor, label, value, deltas, ctaLabel, onPress, size = 'half' }: StatTileProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const Wrapper = onPress ? TouchableOpacity : View;
   const sizeStyle = size === 'third' ? styles.tileThird : styles.tileHalf;
 
@@ -57,30 +60,32 @@ export function StatTile({ background, textColor, label, value, deltas, ctaLabel
   );
 }
 
-const styles = StyleSheet.create({
-  tile: {
-    borderRadius: radii.tile,
-    justifyContent: 'space-between',
-  },
-  tileHalf: { flexBasis: '48%', padding: 16, minHeight: 140 },
-  tileThird: { flexBasis: '31%', padding: 12, minHeight: 116 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  label: { fontSize: 14, fontWeight: '600' },
-  labelThird: { fontSize: 12 },
-  arrow: { fontSize: 16 },
-  value: { fontSize: 32, fontWeight: '800' },
-  valueThird: { fontSize: 24 },
-  deltaRow: { flexDirection: 'row', gap: 6 },
-  pill: {
-    backgroundColor: colors.pillBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    flexDirection: 'row',
-    gap: 4,
-  },
-  pillValue: { fontSize: 11, fontWeight: '700', color: colors.textPrimary },
-  pillLabel: { fontSize: 11, color: colors.textSecondary },
-  ctaArrow: { fontSize: 20, alignSelf: 'flex-end' },
-  ctaLabel: { fontSize: 20, fontWeight: '800' },
-});
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    tile: {
+      borderRadius: radii.tile,
+      justifyContent: 'space-between',
+    },
+    tileHalf: { flexBasis: '48%', padding: 16, minHeight: 140 },
+    tileThird: { flexBasis: '31%', padding: 12, minHeight: 116 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    label: { fontSize: 14, fontWeight: '600' },
+    labelThird: { fontSize: 12 },
+    arrow: { fontSize: 16 },
+    value: { fontSize: 32, fontWeight: '800' },
+    valueThird: { fontSize: 24 },
+    deltaRow: { flexDirection: 'row', gap: 6 },
+    pill: {
+      backgroundColor: colors.pillBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      flexDirection: 'row',
+      gap: 4,
+    },
+    pillValue: { fontSize: 11, fontWeight: '700', color: colors.textPrimary },
+    pillLabel: { fontSize: 11, color: colors.textSecondary },
+    ctaArrow: { fontSize: 20, alignSelf: 'flex-end' },
+    ctaLabel: { fontSize: 20, fontWeight: '800' },
+  });
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {
   useChallenges,
@@ -12,7 +12,7 @@ import { useCircleDetail } from '../hooks/useCircles';
 import { ProgressBar } from './ProgressBar';
 import { PillButton } from './PillButton';
 import { MilestoneCardModal } from './MilestoneCardModal';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
 
 function NewChallengeModal({
@@ -27,6 +27,8 @@ function NewChallengeModal({
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const createChallenge = useCreateChallenge(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleCreate() {
     const targetValue = Number(target);
@@ -45,14 +47,14 @@ function NewChallengeModal({
             value={title}
             onChangeText={setTitle}
             placeholder="e.g. 30-Day Water Challenge"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
           />
           <TextInput
             style={styles.modalInput}
             value={target}
             onChangeText={setTarget}
             placeholder="Shared target"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
             keyboardType="numeric"
           />
           <View style={styles.modalButtons}>
@@ -88,6 +90,8 @@ function LogContributionModal({
   const logContribution = useLogChallengeContribution(circleId);
   const logEvent = useLogEvent();
   const createAchievement = useCreateAchievement();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleLog() {
     const value = Number(amount);
@@ -124,7 +128,7 @@ function LogContributionModal({
             value={amount}
             onChangeText={setAmount}
             placeholder="Your contribution"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
             keyboardType="numeric"
             autoFocus
           />
@@ -150,6 +154,8 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
   const [creating, setCreating] = useState(false);
   const [logging, setLogging] = useState<ChallengeWithProgress | null>(null);
   const [celebrating, setCelebrating] = useState<ChallengeWithProgress | null>(null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.card}>
@@ -209,43 +215,45 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-  challenge: { gap: 6 },
-  challengeTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-  challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  challengeMeta: { fontSize: 11, color: colors.shellSecondary },
-  logLink: { fontSize: 12, fontWeight: '700', color: colors.primary },
-  empty: { fontSize: 13, color: colors.shellSecondary },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+    challenge: { gap: 6 },
+    challengeTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
+    challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    challengeMeta: { fontSize: 11, color: colors.shellSecondary },
+    logLink: { fontSize: 12, fontWeight: '700', color: colors.primary },
+    empty: { fontSize: 13, color: colors.shellSecondary },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 12,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

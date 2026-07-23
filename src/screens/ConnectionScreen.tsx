@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -32,7 +32,7 @@ import { DisclosureSection } from '../components/DisclosureSection';
 import { AskCardSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
 import DeleteIcon from '../../assets/icons/feed/delete.svg';
@@ -43,6 +43,8 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
   const [body, setBody] = useState('');
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleSend() {
     if (!body.trim()) return;
@@ -80,7 +82,7 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
         <TextInput
           style={styles.replyInput}
           placeholder="Write a reply..."
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={theme.colors.textSecondary}
           value={body}
           onChangeText={setBody}
         />
@@ -108,6 +110,8 @@ function AskCard({
   const deletePost = useDeleteAskPost(circleId);
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isMine = post.user_id === userId;
 
   function handleDelete() {
@@ -176,6 +180,8 @@ export default function ConnectionScreen() {
   const { data: goals } = useGoals(circleId ?? undefined);
   const createPost = useCreateAskPost();
   const tabBarClearance = useTabBarClearance();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [question, setQuestion] = useState('');
   const [goalId, setGoalId] = useState<string | null>(null);
@@ -197,7 +203,7 @@ export default function ConnectionScreen() {
           contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
           keyboardShouldPersistTaps="handled"
           refreshControl={
-            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
           }
         >
           <Text style={styles.title}>Connection Moments</Text>
@@ -214,7 +220,7 @@ export default function ConnectionScreen() {
             <TextInput
               style={styles.composerInput}
               placeholder="Should I invest in this? Review my resume?"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={theme.colors.textSecondary}
               value={question}
               onChangeText={setQuestion}
               multiline
@@ -283,75 +289,77 @@ export default function ConnectionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16 },
-  title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
-  composer: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 12,
-    gap: 8,
-    marginBottom: 16,
-    ...shadow,
-  },
-  composerInput: { minHeight: 44, color: colors.textPrimary, fontSize: 14 },
-  goalChips: { gap: 6 },
-  goalChip: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  goalChipActive: { backgroundColor: colors.primary },
-  goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  goalChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  goalChipTextActive: { color: '#fff' },
-  goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
-  postButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  postButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  list: { gap: 12 },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 16,
-    gap: 8,
-    ...shadow,
-  },
-  questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
-  question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  meta: { fontSize: 12, color: colors.textSecondary },
-  thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },
-  replyRow: { gap: 2 },
-  replyAuthor: { fontSize: 12, fontWeight: '700', color: colors.textPrimary },
-  replyBody: { fontSize: 13, color: colors.textSecondary },
-  replyInputRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
-  replyInput: {
-    flex: 1,
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    color: colors.textPrimary,
-    fontSize: 13,
-  },
-  replySend: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.input,
-    paddingHorizontal: 12,
-    justifyContent: 'center',
-  },
-  replySendText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
-  gamesSection: { marginTop: 24 },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    page: { padding: 16 },
+    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
+    composer: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 12,
+      gap: 8,
+      marginBottom: 16,
+      ...shadow,
+    },
+    composerInput: { minHeight: 44, color: colors.textPrimary, fontSize: 14 },
+    goalChips: { gap: 6 },
+    goalChip: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+    },
+    goalChipActive: { backgroundColor: colors.primary },
+    goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    goalChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    goalChipTextActive: { color: '#fff' },
+    goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
+    postButton: {
+      alignSelf: 'flex-end',
+      backgroundColor: colors.primary,
+      borderRadius: radii.pill,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    postButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+    list: { gap: 12 },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 16,
+      gap: 8,
+      ...shadow,
+    },
+    questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
+    question: { fontSize: 15, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
+    meta: { fontSize: 12, color: colors.textSecondary },
+    thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },
+    replyRow: { gap: 2 },
+    replyAuthor: { fontSize: 12, fontWeight: '700', color: colors.textPrimary },
+    replyBody: { fontSize: 13, color: colors.textSecondary },
+    replyInputRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
+    replyInput: {
+      flex: 1,
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      color: colors.textPrimary,
+      fontSize: 13,
+    },
+    replySend: {
+      backgroundColor: colors.primary,
+      borderRadius: radii.input,
+      paddingHorizontal: 12,
+      justifyContent: 'center',
+    },
+    replySendText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+    gamesSection: { marginTop: 24 },
+  });
+}

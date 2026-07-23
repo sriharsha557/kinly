@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,7 +20,7 @@ import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { cardShell, colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -61,11 +61,13 @@ const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIcon, okay: Neu
 function EventPhoto({ path }: { path: string }) {
   const { data: url, isLoading } = useSignedCheckinPhotoUrl(path);
   const [viewing, setViewing] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading || !url) {
     return (
       <View style={[styles.photoThumb, styles.photoThumbLoading]}>
-        <LoadingSpinner size={8} color={colors.textSecondary} />
+        <LoadingSpinner size={8} color={theme.colors.textSecondary} />
       </View>
     );
   }
@@ -171,6 +173,8 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 
   function handleNudgeOptions(nudgeId: string, authorId: string, authorName: string) {
@@ -313,6 +317,8 @@ export default function TodayScreen() {
   } = useEvents(circleId ?? undefined);
   const events = data?.pages.flat();
   const tabBarClearance = useTabBarClearance();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   let lastLabel = '';
 
@@ -321,7 +327,7 @@ export default function TodayScreen() {
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
         refreshControl={
-          <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+          <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
         }
       >
         <View style={styles.greetingRow}>
@@ -386,67 +392,69 @@ export default function TodayScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16 },
-  greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  greeting: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
-  date: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
-  list: { gap: 10 },
-  dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
-  loadMoreButton: {
-    alignSelf: 'center',
-    marginTop: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: radii.pill,
-    backgroundColor: colors.inputBg,
-  },
-  loadMoreLabel: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  eventCard: {
-    ...cardShell,
-    padding: 14,
-    paddingLeft: 12,
-    gap: 10,
-  },
-  eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  eventBody: { flex: 1, gap: 2 },
-  eventText: { fontSize: 14, fontWeight: '600', color: colors.shellTitle },
-  eventTime: { fontSize: 11, color: colors.textSecondary },
-  nudgeRow: { flexDirection: 'row', gap: 6 },
-  nudgeButton: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nudgeButtonText: { fontSize: 16 },
-  waterButton: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  waterButtonText: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  nudgeList: { gap: 4 },
-  photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
-  photoThumbLoading: { backgroundColor: 'rgba(255,255,255,0.5)', alignItems: 'center', justifyContent: 'center' },
-  photoOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', alignItems: 'center', justifyContent: 'center' },
-  photoFull: { width: '100%', height: '80%' },
-  nudgeMessage: { fontSize: 13, color: colors.textPrimary },
-  nudgeSender: { fontWeight: '700' },
-  emptyCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 24,
-    alignItems: 'center',
-    gap: 6,
-    ...shadow,
-  },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
-  emptyBody: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
-});
+function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    page: { padding: 16 },
+    greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    greeting: { fontSize: 22, fontWeight: '800', color: colors.textPrimary },
+    date: { fontSize: 13, color: colors.textSecondary, marginBottom: 16 },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
+    list: { gap: 10 },
+    dayHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+    loadMoreButton: {
+      alignSelf: 'center',
+      marginTop: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: radii.pill,
+      backgroundColor: colors.inputBg,
+    },
+    loadMoreLabel: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    eventCard: {
+      ...cardShell,
+      padding: 14,
+      paddingLeft: 12,
+      gap: 10,
+    },
+    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    eventBody: { flex: 1, gap: 2 },
+    eventText: { fontSize: 14, fontWeight: '600', color: colors.shellTitle },
+    eventTime: { fontSize: 11, color: colors.textSecondary },
+    nudgeRow: { flexDirection: 'row', gap: 6 },
+    nudgeButton: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    nudgeButtonText: { fontSize: 16 },
+    waterButton: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingVertical: 8,
+      alignItems: 'center',
+    },
+    waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    waterButtonText: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    nudgeList: { gap: 4 },
+    photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
+    photoThumbLoading: { backgroundColor: 'rgba(255,255,255,0.5)', alignItems: 'center', justifyContent: 'center' },
+    photoOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', alignItems: 'center', justifyContent: 'center' },
+    photoFull: { width: '100%', height: '80%' },
+    nudgeMessage: { fontSize: 13, color: colors.textPrimary },
+    nudgeSender: { fontWeight: '700' },
+    emptyCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 24,
+      alignItems: 'center',
+      gap: 6,
+      ...shadow,
+    },
+    emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
+    emptyBody: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+  });
+}

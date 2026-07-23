@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
 import { AvatarPickerModal } from '../components/AvatarPickerModal';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { InterestCategory } from '../types/models';
 
 export default function EditProfileScreen() {
@@ -24,6 +24,8 @@ export default function EditProfileScreen() {
   const [interests, setInterests] = useState<InterestCategory[]>(user?.interests ?? []);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [pickingPreset, setPickingPreset] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function toggleInterest(key: InterestCategory) {
     setInterests((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -57,7 +59,7 @@ export default function EditProfileScreen() {
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatarImage} />
           ) : (
-            <Logo size={88} color="#FFFFFF" background={colors.primary} />
+            <Logo size={88} color="#FFFFFF" background={theme.colors.primary} />
           )}
           <View style={styles.avatarActions}>
             <TouchableOpacity onPress={handlePickAvatar} disabled={uploadingAvatar}>
@@ -100,14 +102,16 @@ export default function EditProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20, paddingBottom: 60, alignItems: 'center' },
-  avatarWrap: { alignItems: 'center', gap: 8, marginBottom: 24 },
-  avatarImage: { width: 88, height: 88, borderRadius: 44 },
-  avatarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  avatarActionsDivider: { color: colors.textSecondary },
-  avatarHint: { fontSize: 13, color: colors.primary, fontWeight: '600' },
-  form: { width: '100%', gap: 14 },
-  sectionLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 60, alignItems: 'center' },
+    avatarWrap: { alignItems: 'center', gap: 8, marginBottom: 24 },
+    avatarImage: { width: 88, height: 88, borderRadius: 44 },
+    avatarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    avatarActionsDivider: { color: colors.textSecondary },
+    avatarHint: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+    form: { width: '100%', gap: 14 },
+    sectionLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
+  });
+}

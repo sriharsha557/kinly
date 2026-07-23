@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 // Groups lower-frequency features behind a tap so the primary cards on a
 // screen aren't competing for the same visual weight as everything else.
@@ -20,6 +20,8 @@ export function DisclosureSection({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <Animated.View layout={LinearTransition.springify()} style={styles.wrap}>
@@ -39,20 +41,22 @@ export function DisclosureSection({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { marginBottom: 16 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    ...shadow,
-  },
-  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  label: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
-  chevron: { fontSize: 11, color: colors.textSecondary },
-  body: { marginTop: 12, gap: 0 },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    wrap: { marginBottom: 16 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      ...shadow,
+    },
+    labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    label: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
+    chevron: { fontSize: 11, color: colors.textSecondary },
+    body: { marginTop: 12, gap: 0 },
+  });
+}

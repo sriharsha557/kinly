@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useMyLetters, useOpenLetter, useWriteLetter } from '../hooks/useFutureSelf';
 import { PillButton } from './PillButton';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { FutureLetter } from '../types/models';
 import MailIcon from '../../assets/icons/feed/mail.svg';
 import LockIcon from '../../assets/icons/feed/lock.svg';
@@ -11,6 +11,8 @@ import CelebrateIcon from '../../assets/icons/feed/celebrate.svg';
 function WriteLetterModal({ userId, onClose }: { userId: string; onClose: () => void }) {
   const [content, setContent] = useState('');
   const writeLetter = useWriteLetter(userId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleSend() {
     if (!content.trim()) return;
@@ -29,7 +31,7 @@ function WriteLetterModal({ userId, onClose }: { userId: string; onClose: () => 
             value={content}
             onChangeText={setContent}
             placeholder="Write your letter..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
             multiline
             numberOfLines={6}
           />
@@ -52,6 +54,8 @@ function WriteLetterModal({ userId, onClose }: { userId: string; onClose: () => 
 function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string }) {
   const openLetter = useOpenLetter(userId);
   const [revealed, setRevealed] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isUnlocked = letter.unlock_date <= new Date().toISOString().slice(0, 10);
 
   if (!isUnlocked) {
@@ -89,6 +93,8 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
 export function FutureSelfCard({ userId }: { userId: string }) {
   const { data: letters } = useMyLetters(userId);
   const [writing, setWriting] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.card}>
@@ -117,47 +123,49 @@ export function FutureSelfCard({ userId }: { userId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 16,
-    paddingLeft: 14,
-    marginTop: 12,
-    gap: 10,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
-  newLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  empty: { fontSize: 12, color: colors.textSecondary },
-  letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
-  letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  letterMeta: { fontSize: 11, color: colors.textSecondary },
-  letterReady: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  letterContent: { fontSize: 13, color: colors.textPrimary, lineHeight: 18 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 10,
-  },
-  modalTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
-  modalHint: { fontSize: 12, color: colors.textSecondary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 14,
-    minHeight: 120,
-    textAlignVertical: 'top',
-  },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 16,
+      paddingLeft: 14,
+      marginTop: 12,
+      gap: 10,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+    newLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    empty: { fontSize: 12, color: colors.textSecondary },
+    letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
+    letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    letterMeta: { fontSize: 11, color: colors.textSecondary },
+    letterReady: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    letterContent: { fontSize: 13, color: colors.textPrimary, lineHeight: 18 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 10,
+    },
+    modalTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
+    modalHint: { fontSize: 12, color: colors.textSecondary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 14,
+      minHeight: 120,
+      textAlignVertical: 'top',
+    },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

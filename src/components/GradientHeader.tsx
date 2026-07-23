@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { gradients } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 export function GradientHeader({
   children,
@@ -9,6 +9,7 @@ export function GradientHeader({
   children: React.ReactNode;
   style?: ViewStyle;
 }) {
+  const { gradients } = useTheme();
   return (
     <LinearGradient
       colors={gradients.brand}

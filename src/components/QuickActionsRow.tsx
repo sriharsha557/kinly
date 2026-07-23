@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { FC } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -5,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
@@ -22,6 +23,8 @@ const ACTIONS: { label: string; icon: FC<SvgProps>; tab: keyof MainTabParamList 
 
 export function QuickActionsRow() {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.row}>
@@ -37,15 +40,17 @@ export function QuickActionsRow() {
   );
 }
 
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  action: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.input,
-    paddingVertical: 14,
-    alignItems: 'center',
-    gap: 6,
-    ...shadow,
-  },
-  label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    row: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    action: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.input,
+      paddingVertical: 14,
+      alignItems: 'center',
+      gap: 6,
+      ...shadow,
+    },
+    label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
+  });
+}

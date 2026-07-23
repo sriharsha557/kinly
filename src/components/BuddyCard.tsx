@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useMyBuddy, useSetBuddy, useCheckInOnBuddy } from '../hooks/useBuddy';
@@ -7,7 +7,7 @@ import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
 import { PillButton } from './PillButton';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
 
 // The exact single-day grace window water_streak() itself enforces
@@ -30,6 +30,8 @@ function PickBuddyModal({
 }) {
   const { data: members } = useCircleMembers(circleId);
   const setBuddy = useSetBuddy(circleId, userId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const others = (members ?? []).filter((m) => m.user_id !== userId && m.status === 'active');
 
   async function handlePick(buddyId: string) {
@@ -65,6 +67,8 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
   const checkIn = useCheckInOnBuddy(circleId);
   const waterStreak = useWaterStreak(circleId);
   const [picking, setPicking] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const buddyGarden = garden?.members.find((m) => m.userId === buddy?.buddy_id);
   const isInactive = buddyGarden?.stage === 'wilted';
@@ -131,37 +135,39 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-  status: { fontSize: 13, color: colors.shellSecondary, marginTop: 2 },
-  changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
-  empty: { fontSize: 13, color: colors.shellSecondary, marginTop: 6 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 8,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
-  memberRow: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
+    status: { fontSize: 13, color: colors.shellSecondary, marginTop: 2 },
+    changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
+    empty: { fontSize: 13, color: colors.shellSecondary, marginTop: 6 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 8,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
+    memberRow: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+    },
+    memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+  });
+}

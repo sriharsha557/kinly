@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 
@@ -20,6 +20,8 @@ function AddVisionModal({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const addItem = useAddVisionItem(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handlePickImage() {
     setUploading(true);
@@ -47,7 +49,7 @@ function AddVisionModal({
             value={title}
             onChangeText={setTitle}
             placeholder="e.g. Launch my first startup"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={theme.colors.textSecondary}
           />
           <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage} disabled={uploading}>
             {imageUrl ? (
@@ -75,6 +77,8 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
   const { data: items } = useVisionItems(circleId);
   const deleteItem = useDeleteVisionItem(circleId);
   const [adding, setAdding] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function handleLongPress(id: string, isMine: boolean) {
     if (!isMine) return;
@@ -119,60 +123,62 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  itemCard: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    maxWidth: '48%',
-  },
-  itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
-  itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
-  itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
-  empty: { fontSize: 13, color: colors.shellSecondary },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  imagePicker: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  imagePickerText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-  imagePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  imagePreview: { width: '100%', height: '100%' },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    itemCard: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      maxWidth: '48%',
+    },
+    itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
+    itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
+    itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
+    empty: { fontSize: 13, color: colors.shellSecondary },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 12,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    imagePicker: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      height: 100,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    imagePickerText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+    imagePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    imagePreview: { width: '100%', height: '100%' },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

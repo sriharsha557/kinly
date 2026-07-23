@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAnswerCircleCard, useCircleCard } from '../hooks/useCircleCard';
 import { PillButton } from './PillButton';
-import { gradients, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 
 export function DailyCircleCard({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: answers, prompt, date } = useCircleCard(circleId);
   const answerMutation = useAnswerCircleCard(circleId);
   const [draft, setDraft] = useState('');
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const myAnswer = answers?.find((a) => a.user_id === userId);
   const hasAnswered = !!myAnswer;
@@ -21,7 +23,7 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
   }
 
   return (
-    <LinearGradient colors={gradients.brand} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+    <LinearGradient colors={theme.gradients.brand} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <View style={styles.titleRow}>
         <ChatIcon width={20} height={20} />
         <Text style={styles.title}>Circle Card</Text>
@@ -59,28 +61,30 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
   );
 }
 
-const styles = StyleSheet.create({
-  card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '700', color: '#fff' },
-  prompt: { fontSize: 16, fontWeight: '700', color: '#fff', lineHeight: 22 },
-  answerRow: { gap: 8 },
-  input: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: '#fff',
-    fontSize: 14,
-    minHeight: 60,
-    textAlignVertical: 'top',
-  },
-  answers: { gap: 8 },
-  answerBubble: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: radii.input,
-    padding: 10,
-  },
-  answerAuthor: { fontSize: 11, fontWeight: '700', color: colors.background },
-  answerText: { fontSize: 13, color: '#fff', marginTop: 2 },
-});
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { fontSize: 15, fontWeight: '700', color: '#fff' },
+    prompt: { fontSize: 16, fontWeight: '700', color: '#fff', lineHeight: 22 },
+    answerRow: { gap: 8 },
+    input: {
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: '#fff',
+      fontSize: 14,
+      minHeight: 60,
+      textAlignVertical: 'top',
+    },
+    answers: { gap: 8 },
+    answerBubble: {
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      borderRadius: radii.input,
+      padding: 10,
+    },
+    answerAuthor: { fontSize: 11, fontWeight: '700', color: colors.background },
+    answerText: { fontSize: 13, color: '#fff', marginTop: 2 },
+  });
+}

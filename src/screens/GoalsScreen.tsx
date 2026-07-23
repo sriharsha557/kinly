@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -29,7 +29,7 @@ import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { cardShell, categoryColors, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -39,6 +39,8 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
   const [title, setTitle] = useState(goal.title);
   const [target, setTarget] = useState(String(goal.target));
   const updateGoal = useUpdateGoal();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleSave() {
     const targetValue = Number(target);
@@ -85,6 +87,8 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const isComplete = goal.progress >= goal.target;
   const isStepGoal = goal.goal_source === 'health_steps';
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function handleOptions() {
     Alert.alert(goal.title, undefined, [
@@ -193,6 +197,9 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const [category, setCategory] = useState<InterestCategory | null>(null);
   const [trackSteps, setTrackSteps] = useState(false);
   const createGoal = useCreateGoal();
+  const theme = useTheme();
+  const { colors, categoryColors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleAdd() {
     const targetValue = Number(target);
@@ -271,6 +278,8 @@ export default function GoalsScreen() {
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: goals, isLoading, isFetching, refetch } = useGoals(circleId ?? undefined);
   const tabBarClearance = useTabBarClearance();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { celebration: stepCelebration, dismissCelebration } = useSyncStepGoals(
     circleId ?? undefined,
     userId,
@@ -308,7 +317,7 @@ export default function GoalsScreen() {
           contentContainerStyle={[styles.list, { paddingBottom: tabBarClearance }]}
           ListEmptyComponent={<Text style={styles.empty}>No goals yet — add your first one above.</Text>}
           refreshControl={
-            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={colors.primary} />
+            <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
           }
         />
       )}
@@ -316,87 +325,89 @@ export default function GoalsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: colors.background },
-  title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-  addGoalWrap: { marginBottom: 16, gap: 8 },
-  form: { flexDirection: 'row', gap: 8 },
-  categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  categoryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 34,
-    borderRadius: radii.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  categoryChipLabel: { fontSize: 13, fontWeight: '600' },
-  stepsToggleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-  stepsToggleLabel: { fontSize: 12, color: colors.textSecondary, flex: 1 },
-  input: {
-    flex: 1,
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: colors.textPrimary,
-  },
-  targetInput: { flex: 0.4 },
-  addButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.input,
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-  },
-  addButtonText: { color: '#fff', fontWeight: '700' },
-  list: { gap: 12 },
-  card: {
-    ...cardShell,
-    padding: 16,
-    paddingLeft: 14,
-    gap: 10,
-  },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
-  optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardMeta: { fontSize: 12, color: colors.textSecondary },
-  doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
-  syncedLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-  logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  logButton: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  logButtonText: { fontSize: 12, fontWeight: '700', color: colors.primary },
-  empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 12,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, padding: 16, backgroundColor: colors.background },
+    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
+    addGoalWrap: { marginBottom: 16, gap: 8 },
+    form: { flexDirection: 'row', gap: 8 },
+    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    categoryChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      minHeight: 34,
+      borderRadius: radii.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    categoryChipLabel: { fontSize: 13, fontWeight: '600' },
+    stepsToggleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
+    stepsToggleLabel: { fontSize: 12, color: colors.textSecondary, flex: 1 },
+    input: {
+      flex: 1,
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      color: colors.textPrimary,
+    },
+    targetInput: { flex: 0.4 },
+    addButton: {
+      backgroundColor: colors.primary,
+      borderRadius: radii.input,
+      paddingHorizontal: 16,
+      justifyContent: 'center',
+    },
+    addButtonText: { color: '#fff', fontWeight: '700' },
+    list: { gap: 12 },
+    card: {
+      ...cardShell,
+      padding: 16,
+      paddingLeft: 14,
+      gap: 10,
+    },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
+    optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    cardMeta: { fontSize: 12, color: colors.textSecondary },
+    doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
+    syncedLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    logButton: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+    },
+    logButtonText: { fontSize: 12, fontWeight: '700', color: colors.primary },
+    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 12,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PillButton } from './PillButton';
 import { diceBearAvatarUrl, randomAvatarSeeds } from '../lib/avatarPresets';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 export function AvatarPickerModal({
   onSelect,
@@ -12,6 +12,8 @@ export function AvatarPickerModal({
   onClose: () => void;
 }) {
   const [seeds, setSeeds] = useState(() => randomAvatarSeeds());
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
@@ -49,29 +51,31 @@ export function AvatarPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    alignItems: 'center',
-    ...shadow,
-  },
-  title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 14 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
-  avatarWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    overflow: 'hidden',
-    backgroundColor: colors.inputBg,
-  },
-  avatarImage: { width: 64, height: 64 },
-  cancel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      alignItems: 'center',
+      ...shadow,
+    },
+    title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 14 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
+    avatarWrap: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      overflow: 'hidden',
+      backgroundColor: colors.inputBg,
+    },
+    avatarImage: { width: 64, height: 64 },
+    cancel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+  });
+}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -8,7 +8,7 @@ import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useGardenState } from '../hooks/useGarden';
-import { gradients, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { SproutIcon } from './icons/MonoIcons';
 import type { MainTabParamList } from '../navigation/types';
 import SproutSoil from '../../assets/illustrations/kinly-ill-sprout-soil.svg';
@@ -38,6 +38,8 @@ function heroArt(health: number, hasMembers: boolean): FC<SvgProps> {
 export function GardenTeaser({ circleId }: { circleId: string }) {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const { data } = useGardenState(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const health = data?.health ?? 0;
   const hasMembers = (data?.members.length ?? 0) > 0;
@@ -52,7 +54,7 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
 
   return (
     <Animated.View entering={FadeInDown.duration(400)}>
-      <LinearGradient colors={gradients.growth} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+      <LinearGradient colors={theme.gradients.growth} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
         <View style={styles.heroArt}>
           <HeroArt width={68} height={68} />
         </View>
@@ -73,25 +75,27 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { borderRadius: radii.card, padding: 20, marginBottom: 16, gap: 6 },
-  heroArt: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 14, fontWeight: '700', color: '#fff' },
-  percent: { fontSize: 40, fontWeight: '800', color: '#fff', marginTop: 2 },
-  barTrack: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  barFill: { height: '100%', backgroundColor: '#fff', borderRadius: 4 },
-  copy: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 10, lineHeight: 18, maxWidth: '80%' },
-  linkWrap: { alignSelf: 'flex-start', marginTop: 10 },
-  link: { fontSize: 13, fontWeight: '700', color: '#fff' },
-});
+function createStyles({ radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: { borderRadius: radii.card, padding: 20, marginBottom: 16, gap: 6 },
+    heroArt: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+    },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 14, fontWeight: '700', color: '#fff' },
+    percent: { fontSize: 40, fontWeight: '800', color: '#fff', marginTop: 2 },
+    barTrack: {
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: 'rgba(255,255,255,0.3)',
+      overflow: 'hidden',
+      marginTop: 4,
+    },
+    barFill: { height: '100%', backgroundColor: '#fff', borderRadius: 4 },
+    copy: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 10, lineHeight: 18, maxWidth: '80%' },
+    linkWrap: { alignSelf: 'flex-start', marginTop: 10 },
+    link: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  });
+}

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +16,7 @@ import { CircleAICard } from '../components/CircleAICard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { DisclosureSection } from '../components/DisclosureSection';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { RootStackParamList } from '../navigation/types';
 import SettingsIcon from '../../assets/brand/settings.svg';
 
@@ -35,6 +35,8 @@ function Reveal({ index, children }: { index: number; children: ReactNode }) {
 function CircleSwitcher({ activeCircleId, onSwitch }: { activeCircleId: string; onSwitch: (id: string) => void }) {
   const userId = useAuthStore((state) => state.user?.id);
   const { data: circles } = useMyCircles(userId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const myCircles = (circles ?? []).filter((c) => c.membershipStatus === 'active');
 
   if (myCircles.length < 2) return null;
@@ -68,6 +70,8 @@ export default function CircleScreen() {
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const scrollRef = useRef<ScrollView>(null);
   const tabBarClearance = useTabBarClearance();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,22 +121,24 @@ export default function CircleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 16 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
-  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  settingsLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-  switcherRow: { gap: 8, marginBottom: 16 },
-  switcherChip: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    maxWidth: 160,
-  },
-  switcherChipActive: { backgroundColor: colors.primary },
-  switcherChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
-  switcherChipTextActive: { color: '#FFFFFF' },
-});
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    page: { padding: 16 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
+    settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    settingsLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    switcherRow: { gap: 8, marginBottom: 16 },
+    switcherChip: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 16,
+      paddingVertical: 9,
+      maxWidth: 160,
+    },
+    switcherChipActive: { backgroundColor: colors.primary },
+    switcherChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
+    switcherChipTextActive: { color: '#FFFFFF' },
+  });
+}

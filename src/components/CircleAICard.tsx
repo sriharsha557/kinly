@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
 import { INTEREST_OPTIONS } from './InterestPicker';
 import { IdeasIcon } from './icons/PillarIcons';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import IdeaBulb from '../../assets/illustrations/kinly-ill-idea-bulb.svg';
 
 export function CircleAICard({
@@ -20,6 +20,9 @@ export function CircleAICard({
   const { data } = useCircleAI(circleId);
   const createChallenge = useCreateChallenge(circleId);
   const [started, setStarted] = useState(false);
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (!data || !data.message) return null;
 
@@ -76,32 +79,34 @@ export function CircleAICard({
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-    gap: 10,
-  },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  pill: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.pill,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  pillText: { fontSize: 11, fontWeight: '600', color: colors.textPrimary },
-  suggestion: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.input,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
-  suggestionDone: { backgroundColor: colors.success },
-  suggestionText: { fontSize: 13, fontWeight: '700', color: '#fff', textAlign: 'center' },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+      gap: 10,
+    },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    pill: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    pillText: { fontSize: 11, fontWeight: '600', color: colors.textPrimary },
+    suggestion: {
+      backgroundColor: colors.primary,
+      borderRadius: radii.input,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+    },
+    suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+    suggestionDone: { backgroundColor: colors.success },
+    suggestionText: { fontSize: 13, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  });
+}

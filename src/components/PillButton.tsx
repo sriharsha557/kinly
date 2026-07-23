@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, ViewStyle } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
 import { LoadingSpinner } from './LoadingSpinner';
-import { colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 interface PillButtonProps {
   label: string;
@@ -13,6 +14,8 @@ interface PillButtonProps {
 }
 
 export function PillButton({ label, onPress, loading, disabled, variant = 'solid', style }: PillButtonProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isOutline = variant === 'outline';
   return (
     <AnimatedPressable
@@ -21,7 +24,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
       disabled={disabled || loading}
     >
       {loading ? (
-        <LoadingSpinner size={9} color={isOutline ? colors.primary : '#fff'} />
+        <LoadingSpinner size={9} color={isOutline ? theme.colors.primary : '#fff'} />
       ) : (
         <Text style={isOutline ? styles.outlineText : styles.solidText}>{label}</Text>
       )}
@@ -29,15 +32,17 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
   );
 }
 
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: radii.pill,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  solid: { backgroundColor: colors.primary },
-  solidText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
-  outlineText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
-});
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    base: {
+      borderRadius: radii.pill,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    solid: { backgroundColor: colors.primary },
+    solidText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
+    outlineText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
+  });
+}

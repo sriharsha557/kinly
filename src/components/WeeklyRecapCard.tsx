@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useWeeklyRecap } from '../hooks/useWeeklyRecap';
 import { useCircleDetail } from '../hooks/useCircles';
-import { cardShell, colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { RobotIcon, SproutIcon } from './icons/MonoIcons';
 import { HealthIcon } from './icons/PillarIcons';
 
@@ -35,6 +36,8 @@ function buildShareText(circleName: string, data: ReturnType<typeof useWeeklyRec
 export function WeeklyRecapCard({ circleId }: { circleId: string }) {
   const { data, isLoading } = useWeeklyRecap(circleId);
   const { data: circle } = useCircleDetail(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading || !data) return null;
 
@@ -50,7 +53,7 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
     <View style={styles.card}>
       <View style={styles.titleRow}>
         <View style={styles.titleTextRow}>
-          <RobotIcon size={18} color={colors.primary} />
+          <RobotIcon size={18} color={theme.colors.primary} />
           <Text style={styles.title}>This Week in Your Circle</Text>
         </View>
         <TouchableOpacity onPress={handleShare} accessibilityRole="button" accessibilityLabel="Share weekly scorecard">
@@ -81,12 +84,12 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
       <View style={styles.footerRow}>
         {data.mostWateredFriendName && (
           <View style={styles.footerLine}>
-            <HealthIcon size={13} color={colors.primary} />
+            <HealthIcon size={13} color={theme.colors.primary} />
             <Text style={styles.footerText}>Most watered: {data.mostWateredFriendName}</Text>
           </View>
         )}
         <View style={styles.footerLine}>
-          <SproutIcon size={13} color={colors.primary} />
+          <SproutIcon size={13} color={theme.colors.primary} />
           <Text style={styles.footerText}>
             {delta ? `${delta} ` : ''}
             {data.healthNow}% health
@@ -97,18 +100,20 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: { ...cardShell, padding: 16, paddingLeft: 14, marginBottom: 20, gap: 10 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  shareLink: { fontSize: 13, fontWeight: '700', color: colors.primary, textDecorationLine: 'underline' },
-  highlight: { fontSize: 13, color: colors.shellSecondary, lineHeight: 18 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
-  stat: { alignItems: 'center' },
-  statValue: { fontSize: 20, fontWeight: '800', color: colors.shellTitle },
-  statLabel: { fontSize: 10, color: colors.shellSecondary },
-  footerRow: { gap: 4, marginTop: 2 },
-  footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  footerText: { fontSize: 12, color: colors.shellSecondary, fontWeight: '600' },
-});
+function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: { ...cardShell, padding: 16, paddingLeft: 14, marginBottom: 20, gap: 10 },
+    titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    shareLink: { fontSize: 13, fontWeight: '700', color: colors.primary, textDecorationLine: 'underline' },
+    highlight: { fontSize: 13, color: colors.shellSecondary, lineHeight: 18 },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+    stat: { alignItems: 'center' },
+    statValue: { fontSize: 20, fontWeight: '800', color: colors.shellTitle },
+    statLabel: { fontSize: 10, color: colors.shellSecondary },
+    footerRow: { gap: 4, marginTop: 2 },
+    footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    footerText: { fontSize: 12, color: colors.shellSecondary, fontWeight: '600' },
+  });
+}

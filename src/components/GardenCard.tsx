@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useGardenState } from '../hooks/useGarden';
 import { GardenStageArt } from './GardenStageArt';
-import { cardShell, colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import SproutIcon from '../../assets/icons/feed/sprout.svg';
 
 function healthMessage(health: number): string {
@@ -13,6 +14,8 @@ function healthMessage(health: number): string {
 
 export function GardenCard({ circleId }: { circleId: string }) {
   const { data, isLoading } = useGardenState(circleId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading || !data || data.members.length === 0) return null;
 
@@ -41,20 +44,22 @@ export function GardenCard({ circleId }: { circleId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  health: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  message: { fontSize: 13, color: colors.shellSecondary, marginTop: 2, marginBottom: 12 },
-  row: { gap: 16 },
-  plant: { alignItems: 'center', width: 56 },
-  name: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, marginTop: 2 },
-  streak: { fontSize: 10, color: colors.textSecondary },
-});
+function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    health: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    message: { fontSize: 13, color: colors.shellSecondary, marginTop: 2, marginBottom: 12 },
+    row: { gap: 16 },
+    plant: { alignItems: 'center', width: 56 },
+    name: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, marginTop: 2 },
+    streak: { fontSize: 10, color: colors.textSecondary },
+  });
+}

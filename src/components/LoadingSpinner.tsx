@@ -8,7 +8,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 const LEG_DURATION = 380;
 
@@ -50,12 +50,13 @@ function useShufflePosition(offset: number, startPhase: number) {
   return useAnimatedStyle(() => ({ left: left.value, top: top.value }));
 }
 
-export function LoadingSpinner({ size = 10, color = colors.primary }: { size?: number; color?: string }) {
+export function LoadingSpinner({ size = 10, color }: { size?: number; color?: string }) {
+  const { colors } = useTheme();
   const offset = size + 2;
   const square0 = useShufflePosition(offset, 0);
   const square1 = useShufflePosition(offset, 1);
   const square2 = useShufflePosition(offset, 2);
-  const squareStyle = { width: size, height: size, borderRadius: 2, backgroundColor: color };
+  const squareStyle = { width: size, height: size, borderRadius: 2, backgroundColor: color ?? colors.primary };
 
   return (
     <View style={{ width: offset + size, height: offset + size }}>

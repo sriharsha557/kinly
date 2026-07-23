@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutRight, LinearTransition, ZoomIn } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -6,7 +6,7 @@ import { useGoals } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { useCircleDetail } from '../hooks/useCircles';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -25,6 +25,8 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const [loggingId, setLoggingId] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const today = todayIso();
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
@@ -111,32 +113,34 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 16,
-    marginBottom: 16,
-    gap: 10,
-    ...shadow,
-  },
-  title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
-  empty: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-  done: { fontSize: 13, fontWeight: '600', color: colors.success },
-  list: { gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '800' },
-  checkboxLoading: { fontSize: 12, color: colors.primary },
-  rowText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
-  rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 16,
+      marginBottom: 16,
+      gap: 10,
+      ...shadow,
+    },
+    title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+    empty: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    done: { fontSize: 13, fontWeight: '600', color: colors.success },
+    list: { gap: 8 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
+    checkmark: { color: '#fff', fontSize: 13, fontWeight: '800' },
+    checkboxLoading: { fontSize: 12, color: colors.primary },
+    rowText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
+    rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
+  });
+}

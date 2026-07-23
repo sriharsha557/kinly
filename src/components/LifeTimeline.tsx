@@ -1,9 +1,10 @@
+import { useMemo } from 'react';
 import type { FC } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { SvgProps } from 'react-native-svg';
 import { useLifeTimeline, type TimelineEntry } from '../hooks/useLifeTimeline';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 
@@ -47,6 +48,8 @@ function groupByMonth(entries: TimelineEntry[]): MonthGroup[] {
 
 export function LifeTimeline({ userId }: { userId: string }) {
   const { data: entries, isLoading } = useLifeTimeline(userId);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading) return null;
 
@@ -89,36 +92,38 @@ export function LifeTimeline({ userId }: { userId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { gap: 20 },
-  group: { gap: 10 },
-  monthHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
-  row: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    ...shadow,
-  },
-  iconBubble: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.inputBg,
-  },
-  rowBody: { flex: 1, gap: 2 },
-  entryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-  entryDate: { fontSize: 11, color: colors.textSecondary },
-  emptyCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    alignItems: 'center',
-    ...shadow,
-  },
-  emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center' },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { gap: 20 },
+    group: { gap: 10 },
+    monthHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
+    row: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      ...shadow,
+    },
+    iconBubble: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.inputBg,
+    },
+    rowBody: { flex: 1, gap: 2 },
+    entryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
+    entryDate: { fontSize: 11, color: colors.textSecondary },
+    emptyCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      alignItems: 'center',
+      ...shadow,
+    },
+    emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center' },
+  });
+}

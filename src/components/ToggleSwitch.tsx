@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -11,7 +11,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 const SIZE = 28;
 
@@ -34,6 +34,8 @@ const SPARKS = [
 ];
 
 function Spark({ tx, ty, burst }: { tx: number; ty: number; burst: SharedValue<number> }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const style = useAnimatedStyle(() => ({
     opacity: 1 - burst.value,
     transform: [
@@ -50,6 +52,9 @@ function Spark({ tx, ty, burst }: { tx: number; ty: number; burst: SharedValue<n
 // (heart checkbox, recolored orange). Outline heart when off, filled +
 // stroked orange when on; color alone (not fill) carries the on/off state.
 export function ToggleSwitch({ value, onValueChange }: { value: boolean; onValueChange: (next: boolean) => void }) {
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const progress = useSharedValue(value ? 1 : 0);
   const scale = useSharedValue(1);
   const burst = useSharedValue(0);
@@ -104,15 +109,17 @@ export function ToggleSwitch({ value, onValueChange }: { value: boolean; onValue
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
-  spark: {
-    position: 'absolute',
-    top: SIZE / 2 - 1.5,
-    left: SIZE / 2 - 1.5,
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: colors.primary,
-  },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    wrap: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
+    spark: {
+      position: 'absolute',
+      top: SIZE / 2 - 1.5,
+      left: SIZE / 2 - 1.5,
+      width: 3,
+      height: 3,
+      borderRadius: 1.5,
+      backgroundColor: colors.primary,
+    },
+  });
+}

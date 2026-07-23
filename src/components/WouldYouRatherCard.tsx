@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useCreatePoll, useLatestPoll, useVotePoll } from '../hooks/useWouldYouRather';
 import { PillButton } from './PillButton';
-import { cardShell, colors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { RelationshipsIcon } from './icons/PillarIcons';
 
 function NewPollModal({
@@ -17,6 +17,9 @@ function NewPollModal({
   const [optionA, setOptionA] = useState('');
   const [optionB, setOptionB] = useState('');
   const createPoll = useCreatePoll(circleId);
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleCreate() {
     if (!optionA.trim() || !optionB.trim()) return;
@@ -52,6 +55,9 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
   const { data: poll } = useLatestPoll(circleId, userId);
   const votePoll = useVotePoll(circleId);
   const [creating, setCreating] = useState(false);
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const total = (poll?.votesA ?? 0) + (poll?.votesB ?? 0);
   const pctA = total > 0 ? Math.round(((poll?.votesA ?? 0) / total) * 100) : 0;
@@ -97,54 +103,56 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    ...cardShell,
-    padding: 20,
-    paddingLeft: 18,
-    marginBottom: 20,
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-  newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-  empty: { fontSize: 13, color: colors.shellSecondary },
-  hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 2 },
-  options: { gap: 8 },
-  option: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  optionActive: { borderWidth: 1.5, borderColor: colors.primary },
-  optionText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-  optionPct: { fontSize: 13, fontWeight: '800', color: colors.primary },
-  orDivider: { textAlign: 'center', fontSize: 11, color: colors.textSecondary },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 20,
-    gap: 10,
-  },
-  modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-  modalInput: {
-    backgroundColor: colors.inputBg,
-    borderRadius: radii.input,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: colors.textPrimary,
-    fontSize: 15,
-  },
-  orText: { textAlign: 'center', color: colors.textSecondary },
-  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    card: {
+      ...cardShell,
+      padding: 20,
+      paddingLeft: 18,
+      marginBottom: 20,
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
+    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
+    empty: { fontSize: 13, color: colors.shellSecondary },
+    hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 2 },
+    options: { gap: 8 },
+    option: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    optionActive: { borderWidth: 1.5, borderColor: colors.primary },
+    optionText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    optionPct: { fontSize: 13, fontWeight: '800', color: colors.primary },
+    orDivider: { textAlign: 'center', fontSize: 11, color: colors.textSecondary },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 20,
+      gap: 10,
+    },
+    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalInput: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radii.input,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.textPrimary,
+      fontSize: 15,
+    },
+    orText: { textAlign: 'center', color: colors.textSecondary },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

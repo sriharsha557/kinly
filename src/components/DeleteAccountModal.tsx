@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { AppTextInput } from './AppTextInput';
 import { PillButton } from './PillButton';
 import { deleteAccount } from '../lib/auth';
-import { colors, radii, shadow } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -12,6 +12,8 @@ export function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   const [confirmText, setConfirmText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleDelete() {
     setError(null);
@@ -52,7 +54,7 @@ export function DeleteAccountModal({ onClose }: { onClose: () => void }) {
               onPress={handleDelete}
               loading={submitting}
               disabled={confirmText.trim() !== CONFIRM_WORD}
-              style={{ flex: 1, backgroundColor: colors.danger }}
+              style={{ flex: 1, backgroundColor: theme.colors.danger }}
             />
           </View>
         </Animated.View>
@@ -61,22 +63,24 @@ export function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.card,
-    padding: 24,
-    gap: 14,
-    ...shadow,
-  },
-  title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
-  body: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-  error: { color: colors.danger, fontSize: 13 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
-});
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      padding: 24,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.card,
+      padding: 24,
+      gap: 14,
+      ...shadow,
+    },
+    title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
+    body: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+    error: { color: colors.danger, fontSize: 13 },
+    actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  });
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updatePassword } from '../lib/auth';
@@ -6,7 +6,7 @@ import { useAuthStore } from '../state/useAuthStore';
 import { GradientHeader } from '../components/GradientHeader';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 // Same brand mark used in OnboardingScreen's header - Logo.tsx's old
 // "friendly face" primitive was still showing up here too.
@@ -19,6 +19,8 @@ export default function ResetPasswordScreen() {
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const mismatch = confirm.length > 0 && password !== confirm;
 
@@ -87,11 +89,13 @@ export default function ResetPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  body: { padding: 24, paddingTop: 28 },
-  form: { gap: 14 },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
-  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, textAlign: 'center' },
-  error: { color: colors.danger, textAlign: 'center' },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    body: { padding: 24, paddingTop: 28 },
+    form: { gap: 14 },
+    title: { fontSize: 24, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
+    subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, textAlign: 'center' },
+    error: { color: colors.danger, textAlign: 'center' },
+  });
+}

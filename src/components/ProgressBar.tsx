@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 
 export function ProgressBar({ progress, target }: { progress: number; target: number }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const pct = target > 0 ? Math.min(1, progress / target) * 100 : 0;
   const width = useSharedValue(pct);
 
@@ -20,16 +22,18 @@ export function ProgressBar({ progress, target }: { progress: number; target: nu
   );
 }
 
-const styles = StyleSheet.create({
-  track: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.inputBg,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 4,
-  },
-});
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    track: {
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.inputBg,
+      overflow: 'hidden',
+    },
+    fill: {
+      height: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: 4,
+    },
+  });
+}

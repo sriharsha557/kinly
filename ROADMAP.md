@@ -66,8 +66,7 @@ Phase 1 scope — steps only, no paid aggregator yet:
 
 ## Open loops
 
-- [ ] Finalize the app name — still undecided between "Kinly" and "Cirqo." Blocks the domain purchase below and any App Store Connect / Play Console listing work.
-- [ ] Buy a domain + set up a support email once the name is finalized, for the static marketing page (currently at `sriharsha557.github.io/kinly/`) and in-app/App-Store support contact.
+- [ ] Finalize the app name — still undecided between "Kinly" and "Cirqo." Blocks App Store Connect / Play Console listing work (no longer blocks a domain purchase — see below).
+- [x] Domain purchase — decided not needed. Precedent: Pact (a close competitor) hosts its privacy policy on Notion ([abhimanyouknow.notion.site/...](https://abhimanyouknow.notion.site/Privacy-Policy-22f4f48a703c801790e4ceb7df0a78c7)) and uses a plain Gmail address (`contact.pactapp@gmail.com`) for support — no custom domain either. Kinly's existing setup already matches this: `privacy.html`/`terms.html`/`dmca.html` on GitHub Pages (`sriharsha557.github.io/kinly/`) plus `sriharsha87@gmail.com` as the support contact (already used in `ARCHITECTURE.md`'s privacy-policy note and the pitch deck's footer). A support email no longer needs to wait on the naming decision either, since a Gmail address doesn't need to match the app name.
 - [ ] The "two circles" UI element from a screenshot below the milestone modal (filled orange + outlined circle) — never identified. Needs a follow-up screenshot with the modal dismissed, or a description of what tapping it does.
-- [ ] Decide whether `.claude/skills/` and `.agents/skills/higgsfield-*` should be committed to git or stay local-only.
-- [ ] Decide intended use for `@higgsfield/cli` (image/video generation) — installed, unrelated to Kinly's current stack unless tied to a specific content use case.
+- [ ] The "two circles" UI element from a screenshot below the milestone modal (filled orange + outlined circle) — never identified. Needs a follow-up screenshot with the modal dismissed, or a description of what tapping it does.

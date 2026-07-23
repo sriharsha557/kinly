@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
-import { colors, categoryColors, radii } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon } from './icons/PillarIcons';
 import { CheckIcon } from './icons/MonoIcons';
 import type { InterestCategory } from '../types/models';
@@ -25,6 +26,9 @@ export function InterestPicker({
   selected: InterestCategory[];
   onToggle: (key: InterestCategory) => void;
 }) {
+  const theme = useTheme();
+  const { colors, categoryColors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={styles.chipGrid}>
       {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
@@ -48,16 +52,18 @@ export function InterestPicker({
   );
 }
 
-const styles = StyleSheet.create({
-  chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 46,
-    borderRadius: radii.pill,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  chipLabel: { fontSize: 15, fontWeight: '600' },
-});
+function createStyles({ radii }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      minHeight: 46,
+      borderRadius: radii.pill,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    chipLabel: { fontSize: 15, fontWeight: '600' },
+  });
+}

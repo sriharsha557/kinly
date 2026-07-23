@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +18,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
-import { cardShell, colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeProvider';
 import type { MainTabParamList, RootStackParamList } from '../navigation/types';
 import type { Achievement } from '../types/models';
 
@@ -42,6 +42,9 @@ export default function ProfileScreen() {
   const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const tabBarClearance = useTabBarClearance();
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -174,25 +177,27 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: 20 },
-  header: { alignItems: 'center', gap: 4, marginBottom: 24 },
-  avatarImage: { width: 72, height: 72, borderRadius: 36 },
-  bio: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
-  name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-  circleName: { fontSize: 14, color: colors.textSecondary },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
-  badgeList: { gap: 10 },
-  badge: {
-    ...cardShell,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    paddingLeft: 14,
-  },
-  badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-  empty: { color: colors.textSecondary },
-  privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
-  deleteLink: { fontSize: 13, fontWeight: '600', color: colors.danger },
-});
+function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20 },
+    header: { alignItems: 'center', gap: 4, marginBottom: 24 },
+    avatarImage: { width: 72, height: 72, borderRadius: 36 },
+    bio: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
+    name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
+    circleName: { fontSize: 14, color: colors.textSecondary },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
+    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
+    badgeList: { gap: 10 },
+    badge: {
+      ...cardShell,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      paddingLeft: 14,
+    },
+    badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    empty: { color: colors.textSecondary },
+    privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
+    deleteLink: { fontSize: 13, fontWeight: '600', color: colors.danger },
+  });
+}
