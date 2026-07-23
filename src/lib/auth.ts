@@ -1,5 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { getQueryParams } from 'expo-auth-session/build/QueryParams';
 import { supabase } from './supabase';
 import { newPasswordSchema, resetRequestSchema, safeParse, signInSchema, signUpSchema } from './authValidation';
@@ -28,6 +29,40 @@ export async function signInWithGoogle() {
 
   const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
   if (sessionError) throw sessionError;
+}
+
+// Required the moment any other third-party login exists (App Store
+// Guideline 4.8) - Google sign-in above is exactly that trigger. Uses
+// Supabase's native signInWithIdToken path (the identity token Apple's own
+// SDK returns), not the web-redirect OAuth flow signInWithGoogle() uses -
+// Apple's native modal is the whole point, not a browser hop.
+export async function signInWithApple() {
+  let credential: AppleAuthentication.AppleAuthenticationCredential;
+  try {
+    credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+  } catch (err) {
+    // Matches how a cancelled Google/photo-picker flow is treated elsewhere
+    // in this file - a user backing out isn't a failure worth surfacing.
+    if (err instanceof Error && 'code' in err && (err as { code?: string }).code === 'ERR_REQUEST_CANCELED') {
+      return;
+    }
+    throw err;
+  }
+
+  if (!credential.identityToken) {
+    throw new Error('Apple sign-in did not return an identity token');
+  }
+
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'apple',
+    token: credential.identityToken,
+  });
+  if (error) throw error;
 }
 
 export async function signUp(email: string, password: string, name: string) {

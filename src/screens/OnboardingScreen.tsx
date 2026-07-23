@@ -11,7 +11,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { requestPasswordReset, signIn, signInWithGoogle, signUp } from '../lib/auth';
+import { requestPasswordReset, signIn, signInWithApple, signInWithGoogle, signUp } from '../lib/auth';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateCircle, useJoinCircle, useMyCircles } from '../hooks/useCircles';
 import { useSetInterests } from '../hooks/useInterests';
@@ -39,6 +40,7 @@ function AuthStep() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [appleSubmitting, setAppleSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
@@ -88,6 +90,19 @@ function AuthStep() {
       setError(err instanceof Error ? err.message : 'Google sign-in failed');
     } finally {
       setGoogleSubmitting(false);
+    }
+  }
+
+  async function handleAppleSignIn() {
+    if (appleSubmitting) return;
+    setError(null);
+    setAppleSubmitting(true);
+    try {
+      await signInWithApple();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Apple sign-in failed');
+    } finally {
+      setAppleSubmitting(false);
     }
   }
 
@@ -199,6 +214,20 @@ function AuthStep() {
         onPress={handleGoogleSignIn}
         loading={googleSubmitting}
       />
+
+      {/* Apple's own HIG requires their branded button component here, not
+          a custom-styled one - see App Store Guideline 4.8: mandatory the
+          moment another third-party login (Google, above) exists. iOS only;
+          the native module is a no-op on Android. */}
+      {Platform.OS === 'ios' && (
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+          cornerRadius={999}
+          style={styles.appleButton}
+          onPress={handleAppleSignIn}
+        />
+      )}
 
       <TouchableOpacity onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
         <Text style={styles.link}>
@@ -428,6 +457,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
     legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
     orDivider: { textAlign: 'center', color: colors.textSecondary },
+    appleButton: { height: 50, marginTop: -2 },
     soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
     error: { color: colors.danger, textAlign: 'center' },
     stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },

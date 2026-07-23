@@ -31,7 +31,7 @@ The v1 six-tile grid (Goals done, Active goals, Current streak, Completion rate,
 ## iOS launch
 
 Blockers (Apple will reject without these):
-- [ ] Sign in with Apple — required because `signInWithOAuth({ provider: 'google' })` already exists in `src/lib/auth.ts` (Guideline 4.8: any third-party login requires an Apple option too).
+- [x] Sign in with Apple — client code shipped (`signInWithApple()` in `src/lib/auth.ts`, Apple's branded button in `OnboardingScreen`, iOS-gated). **Not yet testable**: needs the "Sign In with Apple" capability enabled on a real Apple Developer App ID, plus Supabase's Apple provider configured (Services ID/Team ID/Key ID/private key) — both blocked on Apple Developer Program enrollment below.
 - [ ] Apple Developer Program enrollment + EAS iOS credentials/provisioning — no iOS build pipeline exists yet (project is Android-only).
 - [x] Content report/block mechanism for circle chat/comments — Guideline 1.2 UGC moderation requirement. See ARCHITECTURE.md "UGC safety (report + block)."
 - [ ] HealthKit privacy-usage-string + data-handling review (once step tracking below ships) — stricter review than a normal app; health data can't be used beyond the stated purpose.
