@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
+export type StreakSaveReason = 'travel' | 'sick' | 'family' | 'work' | 'rest' | 'other';
+
 export function useWaterStreak(circleId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (goalId: string) => {
-      const { error } = await supabase.rpc('water_streak', { p_goal_id: goalId });
+    mutationFn: async ({ goalId, reason }: { goalId: string; reason?: StreakSaveReason }) => {
+      const { error } = await supabase.rpc('water_streak', { p_goal_id: goalId, p_reason: reason ?? null });
       if (error) throw error;
     },
     onSuccess: () => {

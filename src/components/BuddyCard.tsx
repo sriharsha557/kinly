@@ -76,7 +76,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
     if (!waterableGoal) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      await waterStreak.mutateAsync(waterableGoal.id);
+      await waterStreak.mutateAsync({ goalId: waterableGoal.id });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
       Alert.alert('Could not water this streak', err instanceof Error ? err.message : 'Please try again.');

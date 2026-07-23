@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
-import { useWaterStreak } from '../hooks/useStreakSaves';
+import { useWaterStreak, type StreakSaveReason } from '../hooks/useStreakSaves';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
 import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
@@ -94,6 +94,18 @@ function eventIcon(event: EventWithProfile): FC<SvgProps> {
   return EVENT_ICON[event.type];
 }
 
+// dayLabel feeds describeEvent's "took a ___ day" feed copy - kept separate
+// from the Alert button label since "Something else" can't be mechanically
+// turned into "a something else day."
+const STREAK_SAVE_REASONS: { value: StreakSaveReason; label: string; dayLabel: string }[] = [
+  { value: 'travel', label: '✈️ Travel', dayLabel: 'travel' },
+  { value: 'sick', label: '🤒 Sick', dayLabel: 'sick' },
+  { value: 'family', label: '👶 Family', dayLabel: 'family' },
+  { value: 'work', label: '💼 Work', dayLabel: 'work' },
+  { value: 'rest', label: '😴 Rest day', dayLabel: 'rest' },
+  { value: 'other', label: 'Something else', dayLabel: 'rough' },
+];
+
 const NUDGE_KINDS: { kind: NudgeKind; Icon: FC<SvgProps>; label: string }[] = [
   { kind: 'cheer', Icon: CheerIcon, label: 'Cheer' },
   { kind: 'water', Icon: WaterIcon, label: 'Remind to drink water' },
@@ -123,8 +135,11 @@ function describeEvent(event: EventWithProfile): string {
       if (mood === 'okay') return `${name} is having an okay day`;
       return `${name} is having a great day`;
     }
-    case 'streak_saved':
-      return `${name} watered ${payload.to_user_name ?? "a friend's"} streak`;
+    case 'streak_saved': {
+      const toName = (payload.to_user_name as string | undefined) ?? 'a friend';
+      const dayLabel = STREAK_SAVE_REASONS.find((r) => r.value === payload.reason)?.dayLabel;
+      return dayLabel ? `${toName} took a ${dayLabel} day` : `${name} watered ${toName}'s streak`;
+    }
     case 'progress_photo':
       return `${name} logged progress on "${payload.title ?? 'a goal'}"`;
     default:
@@ -186,15 +201,27 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const waterableGoalId =
     event.type === 'reminder' && event.user_id !== userId ? (payload.goal_id as string | undefined) : undefined;
 
-  async function handleWater() {
+  async function confirmWater(reason?: StreakSaveReason) {
     if (!waterableGoalId) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      await waterStreak.mutateAsync(waterableGoalId);
+      await waterStreak.mutateAsync({ goalId: waterableGoalId, reason });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
       Alert.alert('Could not water this streak', err instanceof Error ? err.message : 'Please try again.');
     }
+  }
+
+  // Optional, never blocking - "Skip" waters the streak exactly like before
+  // this existed. Naming a reason just gives the circle a kinder story than
+  // a bare "watered their streak" ("Harsha took a travel day" vs nothing).
+  function handleWater() {
+    if (!waterableGoalId) return;
+    Alert.alert('Why were they away?', "Optional - your circle will see this instead of a plain missed day.", [
+      ...STREAK_SAVE_REASONS.map(({ value, label }) => ({ text: label, onPress: () => confirmWater(value) })),
+      { text: 'Skip', onPress: () => confirmWater(undefined) },
+      { text: 'Cancel', style: 'cancel' as const },
+    ]);
   }
 
   const isCelebration = event.type === 'streak' || event.type === 'goal_completed';
