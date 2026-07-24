@@ -3,8 +3,14 @@ import * as Linking from 'expo-linking';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { getQueryParams } from 'expo-auth-session/build/QueryParams';
 import { supabase } from './supabase';
+import { queryClient } from './queryClient';
+import { asyncStoragePersister } from './persister';
+import { unregisterPushNotifications } from './pushNotifications';
+import { useAuthStore } from '../state/useAuthStore';
 import { newPasswordSchema, resetRequestSchema, safeParse, signInSchema, signUpSchema } from './authValidation';
 import { logValidationFailure, toSafeAuthMessage } from './authErrors';
+
+const AUTH_CALLBACK_TTL_MS = 30 * 60 * 1000;
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -80,6 +86,13 @@ export async function signUp(email: string, password: string, name: string) {
     options: { data: { name: parsed.data.name }, emailRedirectTo: Linking.createURL('auth-callback') },
   });
   if (error) throw new Error(toSafeAuthMessage(error, 'signUp'));
+  // No session means email confirmation is required - the confirmation link
+  // will come back through completeEmailConfirmation() below, which only
+  // trusts it while this flag is set. See useAuthStore's pendingAuthCallback
+  // doc comment for why this exists.
+  if (!data.session) {
+    useAuthStore.getState().setPendingAuthCallback({ kind: 'confirm', expiresAt: Date.now() + AUTH_CALLBACK_TTL_MS });
+  }
   return data;
 }
 
@@ -112,7 +125,25 @@ export function consumeExpectedSignOut(): boolean {
   return was;
 }
 
+// Shared by signOut() and deleteAccount() - clearing the query cache and
+// unregistering this device's push token before the actual signOut() call
+// stops a shared device from rendering/receiving the previous account's
+// data (cached goals/mood check-ins, push notifications) for whoever signs
+// in next. Needs the current user id, so it must run before Supabase's own
+// signOut() clears the session.
+async function cleanUpLocalAccountState() {
+  const userId = useAuthStore.getState().user?.id;
+  if (userId) await unregisterPushNotifications(userId);
+  queryClient.clear();
+  // clear() only empties the in-memory cache - the on-disk copy isn't
+  // overwritten until the next persist cycle. removeClient() wipes it
+  // immediately, so a shared device can't rehydrate the previous account's
+  // data from AsyncStorage before that next cycle runs.
+  await asyncStoragePersister.removeClient();
+}
+
 export async function signOut() {
+  await cleanUpLocalAccountState();
   markExpectedSignOut();
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -128,6 +159,9 @@ export async function requestPasswordReset(email: string) {
   // success; a thrown error here is a real failure (rate limit, network),
   // not evidence either way, so it still gets the same neutral copy.
   if (error) throw new Error(toSafeAuthMessage(error, 'passwordReset'));
+  // See useAuthStore's pendingAuthCallback doc comment - completePasswordRecovery
+  // below only trusts a reset-password deep link while this is set.
+  useAuthStore.getState().setPendingAuthCallback({ kind: 'reset', expiresAt: Date.now() + AUTH_CALLBACK_TTL_MS });
 }
 
 export async function updatePassword(newPassword: string) {
@@ -143,7 +177,20 @@ export async function updatePassword(newPassword: string) {
 // instead of a browser redirect). Handing the tokens to setSession() makes
 // supabase-js emit a PASSWORD_RECOVERY auth event, which useBootstrapSession
 // listens for to switch the app into "set a new password" mode.
+//
+// SECURITY: kinly:// is a public URL scheme - any app or link on the device
+// can invoke it, with tokens of the attacker's choosing (e.g. their own,
+// valid, freely-obtained-by-signing-up tokens). Without the pendingAuthCallback
+// check below, tapping such a link would silently sign this device into the
+// attacker's account with no visible login step ("login CSRF"). Only trust
+// the link's tokens if this device itself just called requestPasswordReset().
 export async function completePasswordRecovery(url: string) {
+  const pending = useAuthStore.getState().pendingAuthCallback;
+  if (!pending || pending.kind !== 'reset' || pending.expiresAt < Date.now()) {
+    throw new Error('This reset link has expired or was not requested on this device - request a new one.');
+  }
+  useAuthStore.getState().setPendingAuthCallback(null);
+
   const { params, errorCode } = getQueryParams(url);
   if (errorCode) throw new Error(errorCode);
 
@@ -162,7 +209,17 @@ export async function completePasswordRecovery(url: string) {
 // this only ever does real work for the email-confirmation case; if it
 // fires for something else with no tokens present, there's simply nothing
 // to do.
+//
+// SECURITY: same login-CSRF risk as completePasswordRecovery above, and the
+// same fix - only trust this link's tokens if this device itself just
+// called signUp() and is awaiting confirmation. A missing/expired flag is
+// treated the same as "nothing to do" (not an error) to match how this
+// function already tolerates firing for the Google-sign-in-shared-URL case.
 export async function completeEmailConfirmation(url: string) {
+  const pending = useAuthStore.getState().pendingAuthCallback;
+  if (!pending || pending.kind !== 'confirm' || pending.expiresAt < Date.now()) return;
+  useAuthStore.getState().setPendingAuthCallback(null);
+
   const { params, errorCode } = getQueryParams(url);
   if (errorCode) throw new Error(errorCode);
 
@@ -198,6 +255,7 @@ export async function deleteAccount() {
     }
     throw new Error(message);
   }
+  await cleanUpLocalAccountState();
   markExpectedSignOut();
   await supabase.auth.signOut();
 }
