@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   Modal,
   ScrollView,
   Share,
@@ -24,6 +23,7 @@ import {
   useUpdateMemberRole,
 } from '../hooks/useCircles';
 import { PillButton } from '../components/PillButton';
+import { ActionSheet } from '../components/ActionSheet';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
@@ -151,6 +151,7 @@ export default function CircleSettingsScreen() {
   const toggleMute = useToggleMute(circleId ?? undefined, userId);
 
   const [showJoinCreate, setShowJoinCreate] = useState(false);
+  const [confirmingLeave, setConfirmingLeave] = useState(false);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -169,24 +170,11 @@ export default function CircleSettingsScreen() {
     await Share.share({ message: inviteMessage(circle.name, circle.invite_code) });
   }
 
-  function handleLeave() {
+  async function handleConfirmLeave() {
     if (!circleId) return;
-    const willTransferOwnership = myRole === 'owner' && activeMembers.length > 1;
-    const message = willTransferOwnership
-      ? "Ownership will transfer to another member. You'll need a new invite to rejoin."
-      : "You'll need a new invite to rejoin.";
-
-    Alert.alert('Leave this circle?', message, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Leave',
-        style: 'destructive',
-        onPress: async () => {
-          await leaveCircle.mutateAsync(circleId);
-          setActiveCircleId(null);
-        },
-      },
-    ]);
+    setConfirmingLeave(false);
+    await leaveCircle.mutateAsync(circleId);
+    setActiveCircleId(null);
   }
 
   if (circleLoading || membersLoading) {
@@ -321,7 +309,7 @@ export default function CircleSettingsScreen() {
         <PillButton
           label="Leave this circle"
           variant="outline"
-          onPress={handleLeave}
+          onPress={() => setConfirmingLeave(true)}
           loading={leaveCircle.isPending}
           style={{ marginTop: 10, borderColor: theme.colors.danger }}
         />
@@ -335,6 +323,18 @@ export default function CircleSettingsScreen() {
             setActiveCircleId(newCircleId);
             setShowJoinCreate(false);
           }}
+        />
+      )}
+      {confirmingLeave && (
+        <ActionSheet
+          title="Leave this circle?"
+          message={
+            myRole === 'owner' && activeMembers.length > 1
+              ? "Ownership will transfer to another member. You'll need a new invite to rejoin."
+              : "You'll need a new invite to rejoin."
+          }
+          options={[{ label: 'Leave', destructive: true, onPress: handleConfirmLeave }]}
+          onCancel={() => setConfirmingLeave(false)}
         />
       )}
     </SafeAreaView>

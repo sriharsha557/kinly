@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
@@ -25,6 +24,7 @@ import {
 import { useGoals } from '../hooks/useGoals';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
+import { ActionSheet } from '../components/ActionSheet';
 import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
@@ -113,13 +113,7 @@ function AskCard({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const isMine = post.user_id === userId;
-
-  function handleDelete() {
-    Alert.alert('Delete this post?', 'This will also delete its replies.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deletePost.mutate(post.id) },
-    ]);
-  }
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function handleOptions() {
     const authorName = post.profiles?.name ?? 'Someone';
@@ -137,7 +131,7 @@ function AskCard({
           <Text style={styles.question}>{post.question}</Text>
           {isMine ? (
             <TouchableOpacity
-              onPress={handleDelete}
+              onPress={() => setConfirmingDelete(true)}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
@@ -169,6 +163,23 @@ function AskCard({
         </View>
       </TouchableOpacity>
       {expanded && <ReplyThread askPostId={post.id} circleId={circleId} userId={userId} />}
+      {confirmingDelete && (
+        <ActionSheet
+          title="Delete this post?"
+          message="This will also delete its replies."
+          options={[
+            {
+              label: 'Delete',
+              destructive: true,
+              onPress: () => {
+                setConfirmingDelete(false);
+                deletePost.mutate(post.id);
+              },
+            },
+          ]}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
     </View>
   );
 }

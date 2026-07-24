@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
+import { ActionSheet } from './ActionSheet';
 import { useTheme } from '../theme/ThemeProvider';
 import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
@@ -77,15 +78,13 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
   const { data: items } = useVisionItems(circleId);
   const deleteItem = useDeleteVisionItem(circleId);
   const [adding, setAdding] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   function handleLongPress(id: string, isMine: boolean) {
     if (!isMine) return;
-    Alert.alert('Remove this?', undefined, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => deleteItem.mutate(id) },
-    ]);
+    setRemovingId(id);
   }
 
   return (
@@ -119,6 +118,22 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
       )}
 
       {adding && <AddVisionModal circleId={circleId} userId={userId} onClose={() => setAdding(false)} />}
+      {removingId && (
+        <ActionSheet
+          title="Remove this?"
+          options={[
+            {
+              label: 'Remove',
+              destructive: true,
+              onPress: () => {
+                deleteItem.mutate(removingId);
+                setRemovingId(null);
+              },
+            },
+          ]}
+          onCancel={() => setRemovingId(null)}
+        />
+      )}
     </View>
   );
 }

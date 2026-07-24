@@ -1,0 +1,97 @@
+import { useMemo } from 'react';
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '../theme/ThemeProvider';
+
+export interface ActionSheetOption {
+  label: string;
+  onPress: () => void;
+  destructive?: boolean;
+}
+
+// React Native's Alert.alert() renders as a native OS dialog - it can't be
+// themed, so every "options"/"confirm" menu using it looked like a plain
+// system popup dropped into an otherwise fully-branded app. This is the
+// themed replacement, same bottom-sheet shape MoodCheckinCard's
+// MoodPickerModal already established for a "title + list of choices" sheet.
+export function ActionSheet({
+  title,
+  message,
+  options,
+  onCancel,
+  cancelLabel = 'Cancel',
+}: {
+  title: string;
+  message?: string;
+  options: ActionSheetOption[];
+  onCancel: () => void;
+  cancelLabel?: string;
+}) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  return (
+    <Modal transparent animationType="slide" onRequestClose={onCancel}>
+      <View style={styles.overlay}>
+        <TouchableOpacity style={styles.overlayDismiss} activeOpacity={1} onPress={onCancel} />
+        <View style={styles.sheet}>
+          <View style={styles.sheetHandle} />
+          <Text style={styles.title}>{title}</Text>
+          {message && <Text style={styles.message}>{message}</Text>}
+          <View style={styles.options}>
+            {options.map((option) => (
+              <TouchableOpacity
+                key={option.label}
+                style={styles.option}
+                onPress={option.onPress}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.optionText, option.destructive && styles.optionTextDestructive]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <TouchableOpacity style={[styles.option, styles.cancelOption]} onPress={onCancel} accessibilityRole="button">
+            <Text style={styles.cancelText}>{cancelLabel}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+    overlayDismiss: { ...StyleSheet.absoluteFillObject },
+    sheet: {
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      padding: 24,
+      paddingBottom: 36,
+      gap: 4,
+      ...shadow,
+    },
+    sheetHandle: {
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: '#E4DFD1',
+      alignSelf: 'center',
+      marginBottom: 16,
+    },
+    title: { fontSize: 17, fontWeight: '700', color: colors.shellTitle, textAlign: 'center' },
+    message: { fontSize: 13, color: colors.shellSecondary, textAlign: 'center', marginTop: 4 },
+    options: { marginTop: 16, gap: 4 },
+    option: {
+      borderRadius: radii.input,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    optionText: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
+    optionTextDestructive: { color: colors.danger },
+    cancelOption: { marginTop: 10, backgroundColor: colors.inputBg },
+    cancelText: { fontSize: 16, fontWeight: '600', color: colors.textSecondary },
+  });
+}

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Modal,
   Platform,
@@ -24,6 +23,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
+import { ActionSheet } from '../components/ActionSheet';
 import { INTEREST_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
@@ -85,30 +85,12 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
   const { data: hasWaterMark } = useHasWaterMark(goal.id);
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const isComplete = goal.progress >= goal.target;
   const isStepGoal = goal.goal_source === 'health_steps';
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-
-  function handleOptions() {
-    Alert.alert(goal.title, undefined, [
-      { text: 'Edit', onPress: () => setEditing(true) },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          Alert.alert('Delete this goal?', 'This cannot be undone.', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Delete',
-              style: 'destructive',
-              onPress: () => deleteGoal.mutate({ goalId: goal.id, circleId }),
-            },
-          ]),
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }
 
   async function handleLogProgress() {
     const celebration = await logGoal(goal);
@@ -138,7 +120,7 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
             </View>
           )}
           <TouchableOpacity
-            onPress={handleOptions}
+            onPress={() => setMenuOpen(true)}
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel={`Options for ${goal.title}`}
@@ -177,6 +159,46 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
         )}
       </View>
       {editing && <EditGoalModal goal={goal} circleId={circleId} onClose={() => setEditing(false)} />}
+      {menuOpen && (
+        <ActionSheet
+          title={goal.title}
+          options={[
+            {
+              label: 'Edit',
+              onPress: () => {
+                setMenuOpen(false);
+                setEditing(true);
+              },
+            },
+            {
+              label: 'Delete',
+              destructive: true,
+              onPress: () => {
+                setMenuOpen(false);
+                setConfirmingDelete(true);
+              },
+            },
+          ]}
+          onCancel={() => setMenuOpen(false)}
+        />
+      )}
+      {confirmingDelete && (
+        <ActionSheet
+          title="Delete this goal?"
+          message="This cannot be undone."
+          options={[
+            {
+              label: 'Delete',
+              destructive: true,
+              onPress: () => {
+                setConfirmingDelete(false);
+                deleteGoal.mutate({ goalId: goal.id, circleId });
+              },
+            },
+          ]}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
       {celebration && (
         <MilestoneCardModal
           title={celebration.title}
