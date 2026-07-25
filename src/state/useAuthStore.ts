@@ -30,6 +30,10 @@ interface AuthState {
   // shows once, before a device's first sign-in - not on every cold start
   // like the launch video, and not again for a returning signed-out user.
   hasSeenTutorial: boolean;
+  // Persisted so the branded launch video (LaunchVideoScreen) also only
+  // plays once per device, on its very first open, rather than on every
+  // cold start.
+  hasSeenLaunchVideo: boolean;
   setUser: (user: User | null) => void;
   setActiveCircleId: (circleId: string | null) => void;
   setSessionLoading: (loading: boolean) => void;
@@ -37,6 +41,7 @@ interface AuthState {
   setPendingInviteCode: (code: string | null) => void;
   setPendingAuthCallback: (value: { kind: 'reset' | 'confirm'; expiresAt: number } | null) => void;
   setHasSeenTutorial: (seen: boolean) => void;
+  setHasSeenLaunchVideo: (seen: boolean) => void;
 }
 
 // activeCircleId used to live in memory only, so it reset to null on every
@@ -58,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
       pendingInviteCode: null,
       pendingAuthCallback: null,
       hasSeenTutorial: false,
+      hasSeenLaunchVideo: false,
       setUser: (user) => set({ user }),
       setActiveCircleId: (activeCircleId) => set({ activeCircleId }),
       setSessionLoading: (sessionLoading) => set({ sessionLoading }),
@@ -65,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       setPendingInviteCode: (pendingInviteCode) => set({ pendingInviteCode }),
       setPendingAuthCallback: (pendingAuthCallback) => set({ pendingAuthCallback }),
       setHasSeenTutorial: (hasSeenTutorial) => set({ hasSeenTutorial }),
+      setHasSeenLaunchVideo: (hasSeenLaunchVideo) => set({ hasSeenLaunchVideo }),
     }),
     {
       name: 'kinly-auth-store',
@@ -73,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
         activeCircleId: state.activeCircleId,
         pendingAuthCallback: state.pendingAuthCallback,
         hasSeenTutorial: state.hasSeenTutorial,
+        hasSeenLaunchVideo: state.hasSeenLaunchVideo,
       }),
       onRehydrateStorage: () => () => {
         useAuthStore.setState({ hasHydrated: true });

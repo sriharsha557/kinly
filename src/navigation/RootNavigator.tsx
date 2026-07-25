@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import { LogoSplashScreen } from '../components/LogoSplashScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -35,22 +34,35 @@ export default function RootNavigator() {
   const passwordRecoveryMode = useAuthStore((state) => state.passwordRecoveryMode);
   const hasSeenTutorial = useAuthStore((state) => state.hasSeenTutorial);
   const setHasSeenTutorial = useAuthStore((state) => state.setHasSeenTutorial);
+  const hasSeenLaunchVideo = useAuthStore((state) => state.hasSeenLaunchVideo);
+  const setHasSeenLaunchVideo = useAuthStore((state) => state.setHasSeenLaunchVideo);
   const { data: myCircles, isLoading: circlesLoading } = useMyCircles(user?.id, PENDING_POLL_INTERVAL_MS);
   // Session bootstrap runs in the background while this plays, so the app
   // already knows where to route by the time the video finishes.
-  const [showLaunchVideo, setShowLaunchVideo] = useState(true);
-  const handleLaunchVideoFinish = useCallback(() => setShowLaunchVideo(false), []);
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const handleLaunchVideoFinish = useCallback(() => {
+    setHasSeenLaunchVideo(true);
+    setVideoPlaying(false);
+  }, [setHasSeenLaunchVideo]);
 
-  if (showLaunchVideo) {
+  // hasHydrated has to resolve before we know whether the video already
+  // played on this device - the same persisted store it lives in. That's a
+  // single fast AsyncStorage read, so this is at most one blank frame,
+  // covered by the same logo screen shown for every other loading gap below.
+  if (!hasHydrated) {
+    return <LogoSplashScreen />;
+  }
+
+  // Plays once ever, on this device's very first open (see useAuthStore's
+  // hasSeenLaunchVideo doc comment) - every cold start after that shows the
+  // lightweight LogoSplashScreen instead, for exactly as long as loading
+  // below actually takes.
+  if (!hasSeenLaunchVideo && videoPlaying) {
     return <LaunchVideoScreen onFinish={handleLaunchVideoFinish} />;
   }
 
-  if (sessionLoading || !hasHydrated) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingSpinner size={14} />
-      </View>
-    );
+  if (sessionLoading) {
+    return <LogoSplashScreen />;
   }
 
   if (passwordRecoveryMode) {
@@ -70,11 +82,7 @@ export default function RootNavigator() {
   // resolves - avoid flashing Main (or the pending screen) before that,
   // only while we're actually about to route into a circle.
   if (readyForMain && circlesLoading) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <LoadingSpinner size={14} />
-      </View>
-    );
+    return <LogoSplashScreen />;
   }
 
   const activeCircle = readyForMain ? myCircles?.find((c) => c.id === activeCircleId) : undefined;
