@@ -26,12 +26,17 @@ interface AuthState {
   // device's user actually requested." Persisted (not just in-memory) since
   // the emailed link is often tapped well after the app was last open.
   pendingAuthCallback: { kind: 'reset' | 'confirm'; expiresAt: number } | null;
+  // Persisted so the "how Kinly works" carousel (TutorialScreen) only ever
+  // shows once, before a device's first sign-in - not on every cold start
+  // like the launch video, and not again for a returning signed-out user.
+  hasSeenTutorial: boolean;
   setUser: (user: User | null) => void;
   setActiveCircleId: (circleId: string | null) => void;
   setSessionLoading: (loading: boolean) => void;
   setPasswordRecoveryMode: (recovering: boolean) => void;
   setPendingInviteCode: (code: string | null) => void;
   setPendingAuthCallback: (value: { kind: 'reset' | 'confirm'; expiresAt: number } | null) => void;
+  setHasSeenTutorial: (seen: boolean) => void;
 }
 
 // activeCircleId used to live in memory only, so it reset to null on every
@@ -52,17 +57,23 @@ export const useAuthStore = create<AuthState>()(
       hasHydrated: false,
       pendingInviteCode: null,
       pendingAuthCallback: null,
+      hasSeenTutorial: false,
       setUser: (user) => set({ user }),
       setActiveCircleId: (activeCircleId) => set({ activeCircleId }),
       setSessionLoading: (sessionLoading) => set({ sessionLoading }),
       setPasswordRecoveryMode: (passwordRecoveryMode) => set({ passwordRecoveryMode }),
       setPendingInviteCode: (pendingInviteCode) => set({ pendingInviteCode }),
       setPendingAuthCallback: (pendingAuthCallback) => set({ pendingAuthCallback }),
+      setHasSeenTutorial: (hasSeenTutorial) => set({ hasSeenTutorial }),
     }),
     {
       name: 'kinly-auth-store',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ activeCircleId: state.activeCircleId, pendingAuthCallback: state.pendingAuthCallback }),
+      partialize: (state) => ({
+        activeCircleId: state.activeCircleId,
+        pendingAuthCallback: state.pendingAuthCallback,
+        hasSeenTutorial: state.hasSeenTutorial,
+      }),
       onRehydrateStorage: () => () => {
         useAuthStore.setState({ hasHydrated: true });
       },

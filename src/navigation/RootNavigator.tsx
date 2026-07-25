@@ -8,6 +8,7 @@ import CircleSettingsScreen from '../screens/CircleSettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import { LaunchVideoScreen } from '../screens/LaunchVideoScreen';
+import { TutorialScreen } from '../screens/TutorialScreen';
 import PendingApprovalScreen from '../screens/PendingApprovalScreen';
 import MainTabs from './MainTabs';
 import { useAuthStore } from '../state/useAuthStore';
@@ -32,6 +33,8 @@ export default function RootNavigator() {
   const sessionLoading = useAuthStore((state) => state.sessionLoading);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const passwordRecoveryMode = useAuthStore((state) => state.passwordRecoveryMode);
+  const hasSeenTutorial = useAuthStore((state) => state.hasSeenTutorial);
+  const setHasSeenTutorial = useAuthStore((state) => state.setHasSeenTutorial);
   const { data: myCircles, isLoading: circlesLoading } = useMyCircles(user?.id, PENDING_POLL_INTERVAL_MS);
   // Session bootstrap runs in the background while this plays, so the app
   // already knows where to route by the time the video finishes.
@@ -52,6 +55,13 @@ export default function RootNavigator() {
 
   if (passwordRecoveryMode) {
     return <ResetPasswordScreen />;
+  }
+
+  // Only ever shown once, before this device's first sign-in - a returning
+  // signed-out user (or anyone who's already been through it) skips
+  // straight to Onboarding's AuthStep.
+  if (!user && !hasSeenTutorial) {
+    return <TutorialScreen onFinish={() => setHasSeenTutorial(true)} />;
   }
 
   const readyForMain = !!user && !!activeCircleId;
