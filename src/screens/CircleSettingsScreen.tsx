@@ -67,6 +67,7 @@ function JoinOrCreateModal({
   const [circleName, setCircleName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [requestSent, setRequestSent] = useState(false);
   const createCircle = useCreateCircle();
   const joinCircle = useJoinCircle();
   const theme = useTheme();
@@ -76,6 +77,8 @@ function JoinOrCreateModal({
     setError(null);
     try {
       const circle = await createCircle.mutateAsync(circleName.trim());
+      // Creating a circle makes you its owner immediately - switching to it
+      // is correct here, unlike joining below.
       onSwitched(circle.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not create circle');
@@ -85,11 +88,33 @@ function JoinOrCreateModal({
   async function handleJoin() {
     setError(null);
     try {
-      const circle = await joinCircle.mutateAsync(inviteCode.trim());
-      onSwitched(circle.id);
+      await joinCircle.mutateAsync(inviteCode.trim());
+      // join_circle_by_invite_code always lands the joiner as 'pending' -
+      // there's no immediate-active path. Switching activeCircleId here
+      // (like handleCreate does) would force someone who already has other
+      // circles into the blocking "waiting for approval" screen the moment
+      // they submit a request, when they just want to keep browsing. The
+      // request is already recorded server-side either way.
+      setRequestSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not join circle');
     }
+  }
+
+  if (requestSent) {
+    return (
+      <Modal transparent animationType="fade" onRequestClose={onClose}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Request sent</Text>
+            <Text style={styles.askOwnerText}>
+              {"The circle owner needs to approve it - you'll be notified once you're in."}
+            </Text>
+            <PillButton label="Done" onPress={onClose} style={{ marginTop: 4 }} />
+          </View>
+        </View>
+      </Modal>
+    );
   }
 
   return (
