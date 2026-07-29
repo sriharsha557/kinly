@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kinly feature graphic — screenshot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0; padding:0; box-sizing:border-box;}
+  html,body{width:1024px; height:500px; overflow:hidden;}
+  body{
+    background:#FBF7F2;
+    font-family:'Public Sans', sans-serif;
+    position:relative;
+  }
+  .orange-blob{
+    position:absolute;
+    width:640px; height:640px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #FB8B3C, #F97316);
+    right:-140px; top:30px;
+  }
+  .text{
+    position:absolute;
+    left:84px; top:0; bottom:0;
+    width:480px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .lockup{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:30px;
+  }
+  .lockup svg{width:52px; height:52px;}
+  .wordmark{
+    font-family:'Newsreader', Georgia, serif;
+    font-weight:500;
+    font-size:44px;
+    color:#22281F;
+    line-height:1;
+  }
+  h1{
+    font-family:'Newsreader', Georgia, serif;
+    font-weight:500;
+    font-size:50px;
+    color:#22281F;
+    letter-spacing:-0.01em;
+    line-height:1.12;
+  }
+  h1 em{font-style:italic; color:#D9600A;}
+  .sub{
+    margin-top:18px;
+    font-size:20px;
+    font-weight:500;
+    color:#565C4C;
+    max-width:26ch;
+  }
+  .phone{
+    position:absolute;
+    right:118px; top:64px;
+    width:240px;
+    border-radius:32px;
+    border:10px solid #22281F;
+    box-shadow:0 30px 60px -20px rgba(34,40,31,0.45);
+    overflow:hidden;
+    background:#FBF7F2;
+    transform:rotate(-4deg);
+  }
+  .phone img{display:block; width:100%;}
+</style>
+</head>
+<body>
+  <div class="orange-blob"></div>
+
+  <div class="text">
+    <div class="lockup">
+      <svg viewBox="0 0 200 200">
+        <circle cx="72" cy="70" r="11" fill="#F97316"/>
+        <circle cx="128" cy="70" r="11" fill="#F97316"/>
+        <path d="M55,108 C55,145 82,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
+        <path d="M145,108 C145,145 118,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
+        <circle cx="100" cy="150" r="7" fill="#F97316"/>
+      </svg>
+      <span class="wordmark">kinly</span>
+    </div>
+    <h1>Grow <em>together</em>, not alone.</h1>
+    <p class="sub">Private goal circles for you and your friends. Check in daily, keep streaks alive.</p>
+  </div>
+
+  <div class="phone">
+    <img src="../assets/screenshots/today.png" alt="">
+  </div>
+</body>
+</html>

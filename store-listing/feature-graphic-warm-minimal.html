@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kinly feature graphic — warm minimal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0; padding:0; box-sizing:border-box;}
+  html,body{width:1024px; height:500px; overflow:hidden;}
+  body{
+    background:#FBF7F2;
+    font-family:'Public Sans', sans-serif;
+    position:relative;
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+  }
+  .blob-1{width:560px; height:560px; background:#F6EDE2; top:-280px; right:-160px;}
+  .blob-2{width:380px; height:380px; background:#F3E9DB; bottom:-240px; left:-120px;}
+
+  .content{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:0;
+  }
+  .lockup{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:26px;
+  }
+  .lockup svg{width:84px; height:84px;}
+  .wordmark{
+    font-family:'Newsreader', Georgia, serif;
+    font-weight:500;
+    font-size:72px;
+    color:#22281F;
+    letter-spacing:-0.01em;
+    line-height:1;
+  }
+  h1{
+    font-family:'Newsreader', Georgia, serif;
+    font-weight:500;
+    font-size:46px;
+    color:#22281F;
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  h1 em{font-style:italic; color:#F97316;}
+  .sub{
+    margin-top:16px;
+    font-size:21px;
+    font-weight:500;
+    color:#565C4C;
+  }
+  .sprout{position:absolute;}
+</style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- decorative sprouts, brand moss/orange, kept outside the text safe zone -->
+  <svg class="sprout" style="left:78px; top:96px; width:64px;" viewBox="0 0 100 100">
+    <path d="M50 88 C50 60 50 48 50 40" stroke="#3B5D45" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M50 56 C34 52 26 40 28 26 C44 28 52 40 50 56 Z" fill="#7FA383"/>
+    <path d="M50 46 C64 42 72 32 70 18 C56 20 48 32 50 46 Z" fill="#3B5D45"/>
+  </svg>
+  <svg class="sprout" style="right:84px; bottom:78px; width:56px;" viewBox="0 0 100 100">
+    <path d="M50 88 C50 60 50 48 50 40" stroke="#D9600A" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M50 56 C34 52 26 40 28 26 C44 28 52 40 50 56 Z" fill="#F97316"/>
+    <path d="M50 46 C64 42 72 32 70 18 C56 20 48 32 50 46 Z" fill="#D9600A"/>
+  </svg>
+
+  <div class="content">
+    <div class="lockup">
+      <svg viewBox="0 0 200 200">
+        <circle cx="72" cy="70" r="11" fill="#F97316"/>
+        <circle cx="128" cy="70" r="11" fill="#F97316"/>
+        <path d="M55,108 C55,145 82,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
+        <path d="M145,108 C145,145 118,163 100,150" fill="none" stroke="#F97316" stroke-width="16" stroke-linecap="round"/>
+        <circle cx="100" cy="150" r="7" fill="#F97316"/>
+      </svg>
+      <span class="wordmark">kinly</span>
+    </div>
+    <h1>Goals stick when <em>friends</em> are watching.</h1>
+    <p class="sub">Private circles of 2–10 friends. Check in, keep streaks, grow together.</p>
+  </div>
+</body>
+</html>
