@@ -35,6 +35,7 @@ Blockers (Apple will reject without these):
 - [ ] Apple Developer Program enrollment + EAS iOS credentials/provisioning — no iOS build pipeline exists yet (project is Android-only).
 - [x] Content report/block mechanism for circle chat/comments — Guideline 1.2 UGC moderation requirement. See ARCHITECTURE.md "UGC safety (report + block)."
 - [ ] HealthKit privacy-usage-string + data-handling review (once step tracking below ships) — stricter review than a normal app; health data can't be used beyond the stated purpose.
+- [ ] `PrivacyInfo.xcprivacy` manifest — required for apps using "required reason" APIs (things like `UserDefaults`, file timestamps, disk space checks, which RN/Expo core touches); missing risks rejection or later removal. Not yet created. Also verify third-party SDKs (Supabase, Sentry, Google/Apple auth) ship their own manifests where required — can't fully confirm without a real iOS build.
 
 Needed, not blockers:
 - [ ] APNs push notification setup (separate credential from Android's FCM).
@@ -42,6 +43,7 @@ Needed, not blockers:
 - [ ] iOS app icon (1024×1024, no alpha), device screenshots, age rating, description.
 - [ ] iPad layout decision — support it, or explicitly restrict to iPhone-only in build settings.
 - [ ] TestFlight beta review pass.
+- [ ] Demo/reviewer account with realistic data (a populated circle, goals, activity) prepared for App Review Notes, so Apple's reviewer can see the full app without needing an invite from a real user.
 
 ## iOS interaction polish
 
@@ -66,7 +68,9 @@ Phase 1 scope — steps only, no paid aggregator yet:
 
 ## Open loops
 
-- [ ] Finalize the app name — still undecided between "Kinly" and "Cirqo." Blocks App Store Connect / Play Console listing work (no longer blocks a domain purchase — see below).
-- [x] Domain purchase — decided not needed. Precedent: Pact (a close competitor) hosts its privacy policy on Notion ([abhimanyouknow.notion.site/...](https://abhimanyouknow.notion.site/Privacy-Policy-22f4f48a703c801790e4ceb7df0a78c7)) and uses a plain Gmail address (`contact.pactapp@gmail.com`) for support — no custom domain either. Kinly's existing setup already matches this: `privacy.html`/`terms.html`/`dmca.html` on GitHub Pages (`sriharsha557.github.io/kinly/`) plus `sriharsha87@gmail.com` as the support contact (already used in `ARCHITECTURE.md`'s privacy-policy note and the pitch deck's footer). A support email no longer needs to wait on the naming decision either, since a Gmail address doesn't need to match the app name.
-- [ ] The "two circles" UI element from a screenshot below the milestone modal (filled orange + outlined circle) — never identified. Needs a follow-up screenshot with the modal dismissed, or a description of what tapping it does.
+- [x] Finalize the app name — **decided: "Kinly."** Cirqo and CirKin are dropped. No code/asset changes needed — the app was already built under this name throughout (`app.json`'s `name`/`slug`, `com.kinly.app` package/bundle ID, all brand assets, the support email, the Instagram handle). This unblocks App Store Connect / Play Console listing work below.
+  - [ ] Still worth a trademark search (USPTO TESS + general App Store/web search) for "Kinly" before submitting a store listing — cheap to check now, expensive to discover after launching.
+- [x] Domain purchase — decided not needed. Precedent: Pact (a close competitor) hosts its privacy policy on Notion ([abhimanyouknow.notion.site/...](https://abhimanyouknow.notion.site/Privacy-Policy-22f4f48a703c801790e4ceb7df0a78c7)) and uses a plain Gmail address (`contact.pactapp@gmail.com`) for support — no custom domain either. Kinly's existing setup already matches this: `privacy.html`/`terms.html`/`dmca.html` on GitHub Pages (`sriharsha557.github.io/kinly/`). A support email no longer needs to wait on the naming decision either, since a Gmail address doesn't need to match the app name.
+- [x] Dedicated support email — `kinlyappsupport@gmail.com` created for support tickets/queries, replacing the personal `sriharsha87@gmail.com` previously used as a placeholder. Updated in `privacy.html`, `terms.html`, and `dmca.html`'s contact sections.
+- [x] Instagram — [@growkinly](https://www.instagram.com/growkinly/), added to `index.html`'s footer alongside the GitHub link. Matches the final "Kinly" name.
 - [ ] The "two circles" UI element from a screenshot below the milestone modal (filled orange + outlined circle) — never identified. Needs a follow-up screenshot with the modal dismissed, or a description of what tapping it does.
