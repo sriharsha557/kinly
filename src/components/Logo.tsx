@@ -6,10 +6,11 @@ interface LogoProps {
   background?: string;
 }
 
-// The Kinly mark: a friendly face - two eyes and a smile. Sourced from
-// assets/brand/logo.svg (same glyph used for the app icon), reproduced here
-// as vectors so it stays crisp at any size and can be recolored per surface
-// (white on a gradient header, brand color on a light background, etc).
+// A friendly face - two eyes and a smile. This is the retired original Kinly
+// mark, kept only as the Profile/Edit Profile avatar placeholder; the current
+// brand logo (two people linking arms) lives in assets/brand/logo-master.png.
+// Inline vectors so it stays crisp at any size and can be recolored per
+// surface (white on a gradient header, brand color on a light background).
 export function Logo({ size = 48, color = '#FFFFFF', background }: LogoProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 200 200">
