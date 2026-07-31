@@ -4,6 +4,7 @@ import { useLogEvent } from './useEvents';
 import { useCreateAchievement } from './useAchievements';
 import { supabase } from '../lib/supabase';
 import { inviteMessage } from '../lib/share';
+import { growthStageCrossed } from '../lib/gardenGrowth';
 import type { Circle, Goal } from '../types/models';
 
 export const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
@@ -97,6 +98,35 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
         title: `${updated.streak_count}-day streak on "${goal.title}"`,
       });
       celebration = { title: `${updated.streak_count}-day streak!`, subtitle: goal.title };
+    }
+    // A stage advance is a circle-visible moment, but stage follows the
+    // member's max streak across all their goals - so beating this goal's
+    // own record only advances the garden if this goal is the one setting
+    // the pace. The query only runs when this goal's streak actually grew,
+    // which is the rare case.
+    if (updated.streak_count > previousStreak) {
+      const { data: otherGoals } = await supabase
+        .from('goals')
+        .select('streak_count')
+        .eq('user_id', userId)
+        .eq('circle_id', circleId)
+        .neq('id', goal.id);
+      const otherMax = (otherGoals ?? []).reduce(
+        (max, g) => Math.max(max, (g.streak_count as number) ?? 0),
+        0,
+      );
+      const stage = growthStageCrossed(
+        Math.max(otherMax, previousStreak),
+        Math.max(otherMax, updated.streak_count),
+      );
+      if (stage) {
+        await logEvent.mutateAsync({
+          circleId,
+          userId,
+          type: 'garden_grew',
+          payload: { stage, streak_count: updated.streak_count },
+        });
+      }
     }
     // Deliberately checked last so it doesn't override a real completion/
     // streak celebration on the rare chance both land on the same log (e.g.
