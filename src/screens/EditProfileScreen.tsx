@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../state/useAuthStore';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { pickAndUploadAvatar } from '../lib/avatarUpload';
-import { Logo } from '../components/Logo';
+import { AvatarPlaceholder } from '../components/AvatarPlaceholder';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
@@ -59,7 +59,7 @@ export default function EditProfileScreen() {
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatarImage} />
           ) : (
-            <Logo size={88} color={theme.colors.onAccent} background={theme.colors.primary} />
+            <AvatarPlaceholder size={88} />
           )}
           <View style={styles.avatarActions}>
             <TouchableOpacity onPress={handlePickAvatar} disabled={uploadingAvatar}>

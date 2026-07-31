@@ -9,7 +9,7 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useProfileStats } from '../hooks/useProfileStats';
 import { signOut } from '../lib/auth';
-import { Logo } from '../components/Logo';
+import { AvatarPlaceholder } from '../components/AvatarPlaceholder';
 import { StatTile } from '../components/StatTile';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PillButton } from '../components/PillButton';
@@ -63,7 +63,7 @@ export default function ProfileScreen() {
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
             ) : (
-              <Logo size={72} color={colors.onAccent} background={colors.primary} />
+              <AvatarPlaceholder size={72} />
             )}
           </TouchableOpacity>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
