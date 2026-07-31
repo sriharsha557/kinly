@@ -53,7 +53,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\"",
+    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\" \"supabase/functions/**/*.test.ts\"",
     "test:functions": "node --env-file=.env scripts/test-edge-functions.mjs",
     "lint": "expo lint"
   },
