@@ -39,6 +39,10 @@ import StudyIcon from '../../assets/icons/nudges/study.svg';
 import ClockIcon from '../../assets/icons/feed/clock.svg';
 import ChatIcon from '../../assets/icons/feed/chat.svg';
 import RocketIcon from '../../assets/icons/feed/rocket.svg';
+import StartIcon from '../../assets/icons/feed/sprout.svg';
+import CelebrateIcon from '../../assets/icons/feed/celebrate.svg';
+import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
+import WaveIcon from '../../assets/icons/feed/wave.svg';
 
 // All event types now render on the same flat white card shell - color no
 // longer differentiates event type, the icon does (see ARCHITECTURE.md's
@@ -53,6 +57,10 @@ const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
   mood_checkin: NeutralIcon,
   streak_saved: WaterIcon,
   progress_photo: CameraIcon,
+  goal_started: StartIcon,
+  achievement_unlocked: CelebrateIcon,
+  garden_grew: GalaxyIcon,
+  buddy_checkin: WaveIcon,
 };
 
 // Mood faces come from the prop-driven MonoIcons set so they tint with the
@@ -157,6 +165,18 @@ function describeEvent(event: EventWithProfile): string {
     }
     case 'progress_photo':
       return `${name} logged progress on "${payload.title ?? 'a goal'}"`;
+    case 'goal_started':
+      return `${name} started "${payload.title ?? 'a goal'}"`;
+    case 'achievement_unlocked':
+      return `${name} unlocked "${payload.title ?? 'an achievement'}"`;
+    case 'garden_grew': {
+      const stage = payload.stage as string | undefined;
+      const stageLabel =
+        stage === 'bloom' ? 'is blooming' : stage === 'tree' ? 'grew into a tree' : 'sprouted';
+      return `${name}'s garden ${stageLabel}`;
+    }
+    case 'buddy_checkin':
+      return `${name}'s buddy checked in on them`;
     default:
       return `${name} had an update`;
   }

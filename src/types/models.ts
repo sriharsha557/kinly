@@ -57,7 +57,15 @@ export type EventType =
   | 'challenge_completed'
   | 'mood_checkin'
   | 'streak_saved'
-  | 'progress_photo';
+  | 'progress_photo'
+  // Moments vocabulary added by migration 0039. All four are feed-only -
+  // none of them pushes (docs/superpowers/specs/2026-07-31-notifications-
+  // design.md). achievement_unlocked has no emitter yet, by design: every
+  // achievement the app creates already emits one of the types above.
+  | 'goal_started'
+  | 'achievement_unlocked'
+  | 'garden_grew'
+  | 'buddy_checkin';
 
 export interface Event {
   id: string;
