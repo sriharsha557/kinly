@@ -125,7 +125,7 @@ export default function MainTabs() {
       <Tab.Screen
         name="Connection"
         component={ConnectionScreen}
-        options={{ title: 'Connection Moments', tabBarLabel: 'Moments' }}
+        options={{ title: 'Together', tabBarLabel: 'Together' }}
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

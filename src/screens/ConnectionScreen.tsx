@@ -218,7 +218,7 @@ export default function ConnectionScreen() {
             <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
           }
         >
-          <Text style={styles.title}>Connection Moments</Text>
+          <Text style={styles.title}>Together</Text>
           <View style={styles.titleHint}>
             <ConceptHint id="connection-moments" text="A daily prompt your circle answers together." />
           </View>
