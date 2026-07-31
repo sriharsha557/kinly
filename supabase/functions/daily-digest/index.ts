@@ -18,6 +18,15 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { composeDigest, type DigestEvent } from './digest.ts';
 
+// The 13:30 UTC boundary is correctness-critical, not cosmetic: the window
+// computed below is anchored to it, and if the pg_cron schedule and these
+// constants ever disagree, the window silently misaligns with the actual
+// run. They must match the schedule set in migration 0040_daily_digest_cron.sql
+// (a forward reference - that migration doesn't exist yet, it's written in
+// the next task). Changing one without the other misaligns the window.
+const DIGEST_HOUR_UTC = 13;
+const DIGEST_MINUTE_UTC = 30;
+
 Deno.serve(async (_req) => {
   try {
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -29,8 +38,18 @@ Deno.serve(async (_req) => {
     // digests, and it makes "Everyone checked in today" cover a window
     // that routinely spans two calendar days. Anchoring makes consecutive
     // runs' windows tile exactly, so a late run is harmless.
+    //
+    // The window is half-open [anchor - 24h, anchor): the lower bound
+    // (`since`, below) and the upper bound (`anchor` itself, applied as
+    // `.lt('created_at', ...)` on the events query) together are what make
+    // consecutive runs' windows abut exactly with no gap and no overlap.
+    // Without the upper bound, events created between the anchor instant
+    // and the actual run instant would land in both today's and tomorrow's
+    // window and get digested twice.
     const now = new Date();
-    const anchor = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 13, 30, 0, 0));
+    const anchor = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), DIGEST_HOUR_UTC, DIGEST_MINUTE_UTC, 0, 0),
+    );
     if (anchor.getTime() > now.getTime()) {
       anchor.setUTCDate(anchor.getUTCDate() - 1);
     }
@@ -53,10 +72,11 @@ Deno.serve(async (_req) => {
           .select('type, user_id, payload, profiles(name)')
           .eq('circle_id', circle.id)
           .gte('created_at', since)
+          .lt('created_at', anchor.toISOString())
           .order('created_at', { ascending: false });
         if (eventsError) {
           console.log('daily-digest events query failed', circle.id, eventsError.message);
-          skipped++;
+          failed++;
           continue;
         }
 
@@ -81,7 +101,7 @@ Deno.serve(async (_req) => {
           .is('deleted_at', null);
         if (membersError) {
           console.log('daily-digest members query failed', circle.id, membersError.message);
-          skipped++;
+          failed++;
           continue;
         }
         const memberIds = (members ?? []).map((m) => m.user_id as string);
@@ -107,7 +127,7 @@ Deno.serve(async (_req) => {
           // tier_digest would get the push anyway, silently overriding an
           // explicit user setting.
           console.log('daily-digest mutes query failed', circle.id, mutesError.message);
-          skipped++;
+          failed++;
           continue;
         }
         const muted = new Set((mutes ?? []).map((m) => m.user_id as string));

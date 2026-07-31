@@ -199,12 +199,18 @@ Deno.serve(async (req) => {
       const { data: circle } = await supabase.from('circles').select('name').eq('id', circleId).single();
       const { data: joiner } = await supabase.from('profiles').select('name').eq('id', record.user_id as string).single();
 
+      // Same departed-member bug as the events-branch active-members query
+      // above: leaving a circle only sets deleted_at, never status, and the
+      // service-role key bypasses the RLS that would otherwise hide these
+      // rows. Without this filter, an owner/admin who left keeps getting
+      // "New join request" pushes forever.
       const { data: approvers } = await supabase
         .from('circle_members')
         .select('user_id')
         .eq('circle_id', circleId)
         .eq('status', 'active')
-        .in('role', ['owner', 'admin']);
+        .in('role', ['owner', 'admin'])
+        .is('deleted_at', null);
       deliveries.push({
         recipients: (approvers ?? []).map((m) => m.user_id as string),
         title: 'New join request',

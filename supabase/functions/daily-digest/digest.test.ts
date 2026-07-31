@@ -71,3 +71,12 @@ test('garden growth reads in the stage the member reached', () => {
   const lines = composeDigest([ev('garden_grew', 'Meera', { stage: 'bloom' })], 5);
   assert.deepEqual(lines, ["Meera's garden is blooming"]);
 });
+
+test('a streak event with no streak_count produces no digest at all', () => {
+  assert.equal(composeDigest([ev('streak', 'A', {})], 5), null);
+});
+
+test('a streak event with streak_count 1 still renders normally', () => {
+  const lines = composeDigest([ev('streak', 'A', { streak_count: 1 })], 5);
+  assert.deepEqual(lines, ['A reached a 1-day streak']);
+});
