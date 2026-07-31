@@ -170,14 +170,44 @@ Deno.serve(async (req) => {
     if (recipients.length === 0) return new Response('no recipients');
 
     const { data: tokens } = await supabase.from('push_tokens').select('token').in('user_id', recipients);
-    const messages = (tokens ?? []).map((t) => ({ to: t.token as string, sound: 'default', title, body }));
+    const messages = (tokens ?? []).map((t) => ({
+      to: t.token as string,
+      sound: 'default',
+      title,
+      body,
+      priority: 'high',
+      channelId: 'default',
+    }));
 
-    if (messages.length > 0) {
-      await fetch('https://exp.host/--/api/v2/push/send', {
+    // Expo's push API accepts at most 100 messages per request. Circles cap
+    // at 10 members but a user can hold multiple device tokens, so chunk
+    // defensively rather than assume.
+    for (let i = 0; i < messages.length; i += 100) {
+      const chunk = messages.slice(i, i + 100);
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
         headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify(messages),
+        body: JSON.stringify(chunk),
       });
+      const result = (await response.json()) as {
+        data?: { id?: string; status: string; message?: string; details?: { error?: string } }[];
+        errors?: unknown;
+      };
+
+      // Ticket IDs land in the function's logs (Dashboard -> Edge Functions
+      // -> notify-circle -> Logs) so a "did it even send?" question has an
+      // answer. Receipts proper need a ~15-min-later poll, which a
+      // request-scoped function can't do - but delivery failures that
+      // matter (dead tokens) also surface right here in the ticket, so
+      // prune those immediately instead.
+      console.log('expo push tickets', JSON.stringify(result.data ?? result.errors));
+      const deadTokens = chunk
+        .filter((_, idx) => result.data?.[idx]?.details?.error === 'DeviceNotRegistered')
+        .map((m) => m.to);
+      if (deadTokens.length > 0) {
+        await supabase.from('push_tokens').delete().in('token', deadTokens);
+        console.log('pruned dead push tokens', deadTokens.length);
+      }
     }
 
     return new Response('ok');
