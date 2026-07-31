@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import type { FC } from 'react';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
 import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon } from './icons/PillarIcons';
 import { CheckIcon } from './icons/MonoIcons';
@@ -27,25 +28,27 @@ export function InterestPicker({
   onToggle: (key: InterestCategory) => void;
 }) {
   const theme = useTheme();
-  const { colors, categoryColors } = theme;
+  const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
+  // One-accent rule: resting chips are neutral with monochrome icons; the
+  // user's accent marks selection.
   return (
     <View style={styles.chipGrid}>
       {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
         const active = selected.includes(key);
-        const category = categoryColors[key];
         return (
-          <TouchableOpacity
+          <AnimatedPressable
             key={key}
-            style={[styles.chip, { backgroundColor: active ? category.solid : colors.inputBg }]}
+            style={[styles.chip, { backgroundColor: active ? colors.primary : colors.surfaceSubtle }]}
             onPress={() => onToggle(key)}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: active }}
+            accessibilityLabel={label}
           >
-            <Icon size={18} color={active ? colors.onAccent : category.solid} />
+            <Icon size={18} color={active ? colors.onAccent : colors.textSecondary} />
             <Text style={[styles.chipLabel, { color: active ? colors.onAccent : colors.textPrimary }]}>{label}</Text>
             {active && <CheckIcon size={15} color={colors.onAccent} />}
-          </TouchableOpacity>
+          </AnimatedPressable>
         );
       })}
     </View>

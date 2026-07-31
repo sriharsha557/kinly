@@ -69,7 +69,10 @@ export default function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
-        tabBarShowLabel: false,
+        // Labels aid discoverability (icon-only nav forces guessing) and
+        // give the active accent a second, readable signal.
+        tabBarShowLabel: true,
+        tabBarLabelStyle: styles.tabBarLabel,
         tabBarStyle: [
           styles.tabBar,
           { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
@@ -83,7 +86,11 @@ export default function MainTabs() {
       <Tab.Screen name="Today" component={TodayScreen} />
       <Tab.Screen name="Circle" component={CircleScreen} />
       <Tab.Screen name="Goals" component={GoalsScreen} />
-      <Tab.Screen name="Connection" component={ConnectionScreen} options={{ title: 'Connection Moments' }} />
+      <Tab.Screen
+        name="Connection"
+        component={ConnectionScreen}
+        options={{ title: 'Connection Moments', tabBarLabel: 'Moments' }}
+      />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -98,13 +105,18 @@ function createStyles({ colors }: Theme) {
       bottom: 0,
       backgroundColor: colors.surface,
       borderTopWidth: 1,
-      borderTopColor: colors.inputBg,
+      borderTopColor: colors.border,
       elevation: 0,
     },
     tabBarItem: {
       height: TAB_BAR_HEIGHT,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
+    },
+    tabBarLabel: {
+      fontSize: 11,
+      fontWeight: '600' as const,
+      marginTop: 2,
     },
   };
 }

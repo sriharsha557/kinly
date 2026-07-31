@@ -24,10 +24,12 @@ export function ProgressBar({ progress, target }: { progress: number; target: nu
 
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
+    // Neutral track so the accent fill is the only colored element - the
+    // accent-tinted track made low progress read as a full colored bar.
     track: {
       height: 8,
       borderRadius: 4,
-      backgroundColor: colors.inputBg,
+      backgroundColor: colors.surfaceSubtle,
       overflow: 'hidden',
     },
     fill: {

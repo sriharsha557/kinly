@@ -19,7 +19,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { ActionSheet, type ActionSheetOption } from './ActionSheet';
-import { ConceptHint } from './ConceptHint';
 import { GardenStageArt } from './GardenStageArt';
 import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
@@ -51,11 +50,15 @@ const WEATHER: Record<CircleGardenState, typeof SunIcon | null> = {
   dormant: null,
 };
 
-function statusCopy(state: CircleGardenState, droopiestName: string | null): string {
-  if (state === 'thriving') return 'Everyone is thriving today.';
-  if (state === 'growing') return 'Your garden is growing steadily.';
+// checkedInToday guards the celebratory copy: health is streak-based, so a
+// circle can be "100% thriving" before anyone has checked in today - and
+// claiming "everyone is thriving" next to "0/1 checked in" reads as a bug.
+function statusCopy(state: CircleGardenState, droopiestName: string | null, checkedInToday: number): string {
   if (state === 'needsCare') return droopiestName ? `${droopiestName} could use some water.` : 'A few plants need water.';
-  return 'Log a goal to plant your first seed.';
+  if (state === 'dormant') return 'Log a goal to plant your first seed.';
+  if (checkedInToday === 0) return 'Check in to keep your garden growing.';
+  if (state === 'thriving') return 'Everyone is thriving today.';
+  return 'Your garden is growing steadily.';
 }
 
 // The same single-day grace window water_streak() enforces server-side -
@@ -230,9 +233,16 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
       style={[styles.hero, variant === 'tend' && styles.heroTend]}
     >
       {Weather && (
-        <View style={styles.weather}>
+        // Keyed by state so a change in circle health (growing → thriving)
+        // re-mounts the icon with a spring pop - the sun coming out is the
+        // reward moment for a full circle of check-ins.
+        <Animated.View
+          key={state}
+          style={styles.weather}
+          entering={reducedMotion ? undefined : ZoomIn.springify().damping(12)}
+        >
           <Weather width={44} height={44} />
-        </View>
+        </Animated.View>
       )}
 
       {members.length === 0 ? (
@@ -247,14 +257,20 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
           scrollEnabled={members.length > 6}
         >
           {members.map((member, index) => (
-            <Plant
+            // Staggered entrance so the garden "grows in" row by row on
+            // first render instead of appearing all at once.
+            <Animated.View
               key={member.userId}
-              member={member}
-              isSelf={member.userId === userId}
-              artSize={artSize}
-              swayIndex={reducedMotion ? 0 : index}
-              onPress={variant === 'tend' ? () => setTending(member) : undefined}
-            />
+              entering={reducedMotion ? undefined : FadeInDown.duration(350).delay(index * 70)}
+            >
+              <Plant
+                member={member}
+                isSelf={member.userId === userId}
+                artSize={artSize}
+                swayIndex={reducedMotion ? 0 : index}
+                onPress={variant === 'tend' ? () => setTending(member) : undefined}
+              />
+            </Animated.View>
           ))}
         </ScrollView>
       )}
@@ -263,18 +279,10 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
 
       <View style={styles.footer}>
         <Text style={styles.title}>Circle Garden</Text>
-        <ConceptHint id="circle-garden" text="Every check-in grows your shared garden." />
         <Text style={styles.status}>
-          {statusCopy(state, droopiest && state === 'needsCare' ? droopiest.name : null)}
+          {statusCopy(state, droopiest && state === 'needsCare' ? droopiest.name : null, checkedInToday)}
         </Text>
-        {members.length > 0 && (
-          <Text style={styles.statusMeta}>
-            {statusParts.join(' · ')}
-            {'  '}
-            <Text style={styles.healthCaption}>{health}% thriving</Text>
-          </Text>
-        )}
-        <ConceptHint id="thriving" text={'"Thriving" means everyone in your circle checked in today.'} />
+        {members.length > 0 && <Text style={styles.statusMeta}>{statusParts.join(' · ')}</Text>}
       </View>
     </LinearGradient>
   );
@@ -348,15 +356,24 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
     },
     plantNameSelf: { fontWeight: '800', color: colors.primary },
     plantStreak: { ...type.caption, color: colors.textSecondary, fontVariant: ['tabular-nums'] },
-    soil: { height: 14, backgroundColor: garden.soil, opacity: 0.55, marginTop: spacing.sm },
+    // A soft ground shadow instead of the old edge-to-edge 14px brown bar,
+    // which split the card into disconnected slabs.
+    soil: {
+      height: 6,
+      backgroundColor: garden.soil,
+      opacity: 0.25,
+      marginTop: spacing.sm,
+      marginHorizontal: spacing.xl,
+      borderRadius: 3,
+    },
     footer: {
       backgroundColor: colors.surface,
       padding: spacing.xl,
+      paddingTop: spacing.lg,
       gap: spacing.xs,
     },
     title: { ...type.subheading, fontWeight: '700', color: colors.textPrimary },
     status: { ...type.body, color: colors.textPrimary },
     statusMeta: { ...type.secondary, fontWeight: '600', color: colors.textSecondary },
-    healthCaption: { ...type.caption, fontWeight: '600', color: colors.textSecondary },
   });
 }

@@ -26,33 +26,36 @@ interface AccentRamp {
   subtle: Record<ResolvedScheme, string>;
 }
 
+// Muted, wellness-calibrated ramps (2026-07 color pass): the originals were
+// saturated UI-kit hues (#F97316/#16A34A/#6366F1) that read loud against the
+// warm neutral base. Same three identities, dialed down.
 export const accents: Record<AccentId, AccentRamp> = {
   ember: {
-    primary: '#F97316',
-    primarySoft: '#FB923C',
-    secondary: '#FDBA74',
-    pressed: '#C2410C',
-    celebration: '#FF7A50',
+    primary: '#C97B4A',
+    primarySoft: '#D69268',
+    secondary: '#E9C4A8',
+    pressed: '#A05E35',
+    celebration: '#D98B5F',
     onAccent: '#FFFFFF',
-    subtle: { light: '#FDECDD', dark: '#3B2513' },
+    subtle: { light: '#F5E9DE', dark: '#3A2A1C' },
   },
   garden: {
-    primary: '#16A34A',
-    primarySoft: '#22C55E',
-    secondary: '#86EFAC',
-    pressed: '#15803D',
-    celebration: '#34D399',
+    primary: '#5A8A6A',
+    primarySoft: '#74A183',
+    secondary: '#AECBB8',
+    pressed: '#466F55',
+    celebration: '#6FA57F',
     onAccent: '#FFFFFF',
-    subtle: { light: '#DCFCE7', dark: '#14301F' },
+    subtle: { light: '#E6EFE8', dark: '#1B2C21' },
   },
   dusk: {
-    primary: '#6366F1',
-    primarySoft: '#818CF8',
-    secondary: '#C7D2FE',
-    pressed: '#4F46E5',
-    celebration: '#8B5CF6',
+    primary: '#6B6FC9',
+    primarySoft: '#8A8DD8',
+    secondary: '#C0C2E9',
+    pressed: '#53569E',
+    celebration: '#7E82D4',
     onAccent: '#FFFFFF',
-    subtle: { light: '#E0E7FF', dark: '#26264A' },
+    subtle: { light: '#E9EAF7', dark: '#26264A' },
   },
 };
 
@@ -66,6 +69,10 @@ export const ACCENT_OPTIONS: { id: AccentId; label: string }[] = [
 interface NeutralRamp {
   background: string;
   surface: string;
+  // Accent-free quiet fill for chips, inactive pills, and progress tracks -
+  // distinct from the accent-tinted `subtle` ramp so resting UI stays
+  // neutral no matter which accent is active.
+  surfaceSubtle: string;
   textPrimary: string;
   textSecondary: string;
   border: string;
@@ -82,80 +89,88 @@ interface NeutralRamp {
   shadowColor: string;
 }
 
+// Warm gray neutrals (2026-07 color pass): the previous ramp was overtly
+// brown (#2B1B10/#7A5C42), which made every icon and secondary label read
+// as a fourth "color" next to the accent. These stay warm but neutral, so
+// only the accent carries hue.
 const neutrals: Record<ResolvedScheme, NeutralRamp> = {
   light: {
-    background: '#FBF7F2',
+    background: '#FAF7F2',
     surface: '#FFFFFF',
-    textPrimary: '#2B1B10',
-    // Darkened from #9C7A5E, which only hit ~3.7:1 against the app's light
-    // backgrounds - below WCAG AA's 4.5:1. This shade hits ~5.7-6.1:1 while
-    // staying in the same warm brown family.
-    textSecondary: '#7A5C42',
-    border: '#E4DFD1',
+    surfaceSubtle: '#F3EFE8',
+    textPrimary: '#2A2724',
+    // ~5.2:1 on background, ~5.7:1 on surface - keeps WCAG AA while
+    // dropping the brown cast.
+    textSecondary: '#6E6861',
+    border: '#E8E2D9',
     pillBg: 'rgba(255,255,255,0.6)',
     // The warm-ink pair used specifically on the card-shell white background
     // (see ARCHITECTURE.md's "Card shell" note), tuned a touch lighter than
     // textPrimary/textSecondary for that context.
     shellBg: '#FFFEFA',
-    shellTitle: '#22281F',
-    shellSecondary: '#7A7A6E',
+    shellTitle: '#2A2724',
+    shellSecondary: '#6E6861',
     overlay: 'rgba(0,0,0,0.4)',
     overlayStrong: 'rgba(0,0,0,0.9)',
-    // Deliberately distinct from ember's primary - "success" is a generic
-    // status color, not the health category, even though both read orange.
-    success: '#D9600A',
-    warning: '#F59E0B',
-    // Red stays red regardless of accent: error/danger must stand apart to
-    // keep its urgency legible.
-    danger: '#EF4444',
-    amber: '#F59E0B',
-    shadowColor: '#2B1B10',
+    // Muted garden green - success is a generic status color, deliberately
+    // calmer than the old saturated orange it replaced.
+    success: '#4C8C5C',
+    warning: '#C4913C',
+    // Softened red-clay danger: still unmistakably "error", without the
+    // alarm-red saturation of #EF4444.
+    danger: '#C24E42',
+    amber: '#C4913C',
+    shadowColor: '#2A2724',
   },
-  // Warm dark - desaturated browns rather than inverted values, so the
-  // brand's warmth survives the flip. Text pairs checked against surface:
-  // textPrimary ~13:1, textSecondary ~6:1.
+  // Warm dark - desaturated, not inverted, so the brand's warmth survives
+  // the flip. Text pairs checked against surface: textPrimary ~13:1,
+  // textSecondary ~6:1.
   dark: {
-    background: '#1C140D',
-    surface: '#271D13',
-    textPrimary: '#F5EDE3',
-    textSecondary: '#C9AE93',
-    border: '#43331F',
-    pillBg: 'rgba(39,29,19,0.6)',
-    shellBg: '#2B2117',
-    shellTitle: '#EDE7DC',
-    shellSecondary: '#B3A996',
+    background: '#191512',
+    surface: '#241F1A',
+    surfaceSubtle: '#2E2822',
+    textPrimary: '#F2EDE7',
+    textSecondary: '#A89F94',
+    border: '#3A332C',
+    pillBg: 'rgba(36,31,26,0.6)',
+    shellBg: '#262019',
+    shellTitle: '#EDE8E1',
+    shellSecondary: '#A89F94',
     overlay: 'rgba(0,0,0,0.6)',
     overlayStrong: 'rgba(0,0,0,0.92)',
-    success: '#F08A3C',
-    warning: '#FBBF24',
-    danger: '#F87171',
-    amber: '#FBBF24',
+    success: '#7FB08C',
+    warning: '#D9A75A',
+    danger: '#D97B6C',
+    amber: '#D9A75A',
     shadowColor: '#000000',
   },
 };
 
-// Per-pillar accent colors. Learning is the one pillar that keeps blue;
-// everything else is a warm shade so icons carry the primary distinction
-// between categories. These stay pinned to the brand hues rather than the
-// user's accent - category identity shouldn't change when the accent does.
+// Per-pillar colors, now deliberately monochrome (2026-07 color pass): five
+// differently-hued pillar icons on one screen were the single biggest source
+// of "too many colors". Category identity comes from the icon shape and
+// label; selection state comes from the user's accent. The record shape is
+// kept per-category so a future art pass can re-differentiate without
+// touching consumers.
+const CATEGORY_KEYS = ['health', 'wealth', 'ideas', 'learning', 'relationships'] as const;
+
+const categoryTint: Record<ResolvedScheme, { bg: string; text: string; solid: string }> = {
+  light: { bg: '#F3EFE8', text: '#6E6861', solid: '#8A8177' },
+  dark: { bg: '#2E2822', text: '#A89F94', solid: '#A89F94' },
+};
+
 const categoryColorsByScheme: Record<
   ResolvedScheme,
-  Record<'health' | 'wealth' | 'ideas' | 'learning' | 'relationships', { bg: string; text: string; solid: string }>
+  Record<(typeof CATEGORY_KEYS)[number], { bg: string; text: string; solid: string }>
 > = {
-  light: {
-    health: { bg: '#FDECDD', text: '#C2410C', solid: '#F97316' },
-    wealth: { bg: '#FEF3C7', text: '#92400E', solid: '#FBBF24' },
-    ideas: { bg: '#FBE4D5', text: '#9A3412', solid: '#C2410C' },
-    learning: { bg: '#DBEAFE', text: '#1D4ED8', solid: '#60A5FA' },
-    relationships: { bg: '#FFE1D6', text: '#C2410C', solid: '#E8623D' },
-  },
-  dark: {
-    health: { bg: '#3B2513', text: '#FDBA74', solid: '#F97316' },
-    wealth: { bg: '#3A2B08', text: '#FCD34D', solid: '#FBBF24' },
-    ideas: { bg: '#38200F', text: '#FDA674', solid: '#E05B24' },
-    learning: { bg: '#1E2A47', text: '#93C5FD', solid: '#60A5FA' },
-    relationships: { bg: '#3D1F15', text: '#FCA98F', solid: '#E8623D' },
-  },
+  light: Object.fromEntries(CATEGORY_KEYS.map((k) => [k, categoryTint.light])) as Record<
+    (typeof CATEGORY_KEYS)[number],
+    { bg: string; text: string; solid: string }
+  >,
+  dark: Object.fromEntries(CATEGORY_KEYS.map((k) => [k, categoryTint.dark])) as Record<
+    (typeof CATEGORY_KEYS)[number],
+    { bg: string; text: string; solid: string }
+  >,
 };
 
 export const radii = {
@@ -209,9 +224,9 @@ const gardenByScheme: Record<
   { leaf: string; leafDeep: string; soil: string; bloomWarm: string; bloomGold: string; wilt: string }
 > = {
   light: {
-    leaf: '#4CAF6D',
-    leafDeep: '#2F7D4F',
-    soil: '#8A6A4F',
+    leaf: '#5FA57C',
+    leafDeep: '#3E7D58',
+    soil: '#A08B77',
     bloomWarm: '#FF8FA3',
     bloomGold: '#FFD166',
     wilt: '#A8A08F',
@@ -252,6 +267,7 @@ export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
 
       background: n.background,
       surface: n.surface,
+      surfaceSubtle: n.surfaceSubtle,
       textPrimary: n.textPrimary,
       textSecondary: n.textSecondary,
       border: n.border,
@@ -286,14 +302,14 @@ export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
     },
     // The flat card-shell treatment (see ARCHITECTURE.md's "Card shell"
     // note). Only the border/color/radius properties that never vary are
-    // here; padding/margin/gap stay per-component.
+    // here; padding/margin/gap stay per-component. The accent left-strip
+    // was dropped in the 2026-07 color pass - every card carried a colored
+    // edge, which multiplied the accent across the whole screen.
     cardShell: {
       backgroundColor: n.shellBg,
-      borderWidth: 0.5,
+      borderWidth: 1,
       borderColor: n.border,
       borderRadius: 20,
-      borderLeftWidth: 3,
-      borderLeftColor: accent.primary,
     },
   };
 }

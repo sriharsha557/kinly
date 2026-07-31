@@ -70,17 +70,13 @@ function CustomizeGoalModal({
 function SuggestionCard({ suggestion, onPress }: { suggestion: GoalSuggestion; onPress: () => void }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const category = theme.categoryColors[suggestion.category];
   const Icon = INTEREST_OPTIONS.find((o) => o.key === suggestion.category)?.Icon;
 
   return (
-    <TouchableOpacity
-      style={[styles.suggestionCard, { borderLeftColor: category.solid }]}
-      onPress={onPress}
-    >
-      {Icon && <Icon size={16} color={category.solid} />}
+    <TouchableOpacity style={styles.suggestionCard} onPress={onPress}>
+      {Icon && <Icon size={16} color={theme.colors.textSecondary} />}
       <Text style={styles.suggestionText}>{suggestion.title}</Text>
-      <Text style={[styles.suggestionAdd, { color: category.solid }]}>+ Add</Text>
+      <Text style={[styles.suggestionAdd, { color: theme.colors.primary }]}>+ Add</Text>
     </TouchableOpacity>
   );
 }
@@ -127,7 +123,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     suggestionCard: {
       ...cardShell,
       padding: 14,
-      paddingLeft: 12,
       width: 160,
       justifyContent: 'space-between',
       gap: 10,

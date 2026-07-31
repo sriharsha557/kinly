@@ -10,16 +10,12 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import type { SvgProps } from 'react-native-svg';
 import { PillButton } from './PillButton';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { useTheme } from '../theme/ThemeProvider';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
-import HappyIconRaw from '../../assets/icons/mood/happy.svg';
-import NeutralIconRaw from '../../assets/icons/mood/neutral.svg';
-import SadIconRaw from '../../assets/icons/mood/sad.svg';
 
 interface MoodIconProps {
   size?: number;
@@ -32,11 +28,10 @@ const MOOD_OPTIONS: { value: MoodValue; Icon: FC<MoodIconProps>; label: string }
   { value: 'tough', Icon: SadIcon, label: 'Having a Tough Day' },
 ];
 
-// The circle-grid view below (everyone's mood at a glance) stays on the raw
-// hardcoded-orange imports - those bubbles are always on a light inputBg/
-// background fill, so contrast is fine and there's no active/inactive
-// state to flip between.
-const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIconRaw, okay: NeutralIconRaw, tough: SadIconRaw };
+// The circle-grid view below (everyone's mood at a glance) uses the same
+// prop-driven icons as the picker - the raw hardcoded-orange imports it
+// used before were the last place a fixed orange survived a theme change.
+const MOOD_ICON: Record<MoodValue, FC<MoodIconProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
 
 // Second, optional layer shown after the required one-tap mood - a fixed,
 // predefined set per mood for now. Text-only, deliberately no emoji/icons:
@@ -274,7 +269,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
                   <View key={member.user_id} style={styles.memberChip}>
                     <View style={[styles.moodBubble, checkin ? styles.moodBubbleFilled : styles.moodBubbleEmpty]}>
                       {MoodIcon ? (
-                        <MoodIcon width={22} height={22} />
+                        <MoodIcon size={22} color={theme.colors.primary} />
                       ) : (
                         <Text style={styles.moodBubbleText}>{(member.profiles?.name ?? '?').charAt(0).toUpperCase()}</Text>
                       )}

@@ -235,7 +235,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const [trackSteps, setTrackSteps] = useState(false);
   const createGoal = useCreateGoal();
   const theme = useTheme();
-  const { colors, categoryColors } = theme;
+  const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleAdd() {
@@ -281,22 +281,23 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
+      {/* One-accent rule: resting chips are neutral with monochrome icons;
+          only the selected chip takes the user's accent. */}
       <View style={styles.categoryRow}>
         {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
           const active = category === key;
-          const cat = categoryColors[key];
           return (
-            <TouchableOpacity
+            <AnimatedPressable
               key={key}
-              style={[styles.categoryChip, { backgroundColor: active ? cat.solid : colors.inputBg }]}
+              style={[styles.categoryChip, { backgroundColor: active ? colors.primary : colors.surfaceSubtle }]}
               onPress={() => setCategory(active ? null : key)}
               accessibilityRole="radio"
               accessibilityState={{ checked: active }}
               accessibilityLabel={label}
             >
-              <Icon size={15} color={active ? colors.onAccent : cat.solid} />
+              <Icon size={15} color={active ? colors.onAccent : colors.textSecondary} />
               <Text style={[styles.categoryChipLabel, { color: active ? colors.onAccent : colors.textPrimary }]}>{label}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           );
         })}
       </View>
@@ -416,7 +417,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     card: {
       ...cardShell,
       padding: 16,
-      paddingLeft: 14,
       gap: 10,
     },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -438,7 +438,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       minHeight: 48,
       justifyContent: 'center',
     },
-    logButtonText: { fontSize: 14, fontWeight: '700', color: colors.primary },
+    logButtonText: { fontSize: 14, fontWeight: '700', color: colors.primaryPressed },
     empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
     modalOverlay: {
       flex: 1,

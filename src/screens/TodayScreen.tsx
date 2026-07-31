@@ -20,6 +20,7 @@ import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono } from '../components/icons/MonoIcons';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
@@ -27,9 +28,7 @@ import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
-import HappyIcon from '../../assets/icons/mood/happy.svg';
 import NeutralIcon from '../../assets/icons/mood/neutral.svg';
-import SadIcon from '../../assets/icons/mood/sad.svg';
 import CheerIcon from '../../assets/icons/nudges/cheer.svg';
 import WalkIcon from '../../assets/icons/nudges/walk.svg';
 import WorkoutIcon from '../../assets/icons/nudges/workout.svg';
@@ -54,7 +53,14 @@ const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
   progress_photo: CameraIcon,
 };
 
-const MOOD_ICON: Record<MoodValue, FC<SvgProps>> = { great: HappyIcon, okay: NeutralIcon, tough: SadIcon };
+// Mood faces come from the prop-driven MonoIcons set so they tint with the
+// theme; the rest of EVENT_ICON is still static assets awaiting the wider
+// illustration pass (design/PRINCIPLES.md "Open work").
+const MOOD_MONO: Record<MoodValue, FC<{ size?: number; color: string }>> = {
+  great: HappyMono,
+  okay: NeutralMono,
+  tough: SadMono,
+};
 
 // Thumbnail + tap-to-view-full-screen for an event's optional check-in
 // photo (checkin-photos is a private bucket, so this always resolves a
@@ -88,13 +94,17 @@ function EventPhoto({ path }: { path: string }) {
 }
 
 // mood_checkin is the one event type whose icon isn't static per-type - the
-// actual mood (😊/😐/😞) is far more expressive than a placeholder.
-function eventIcon(event: EventWithProfile): FC<SvgProps> {
+// actual mood is far more expressive than a placeholder. It renders through
+// the theme-tinted set, so this dispatches on prop shape rather than
+// returning one component type.
+function EventIcon({ event, color }: { event: EventWithProfile; color: string }) {
   if (event.type === 'mood_checkin') {
     const mood = (event.payload as Record<string, unknown>).mood as MoodValue;
-    return MOOD_ICON[mood] ?? EVENT_ICON.mood_checkin;
+    const Mono = MOOD_MONO[mood];
+    if (Mono) return <Mono size={22} color={color} />;
   }
-  return EVENT_ICON[event.type];
+  const Icon = EVENT_ICON[event.type];
+  return <Icon width={22} height={22} />;
 }
 
 // dayLabel feeds describeEvent's "took a ___ day" feed copy - kept separate
@@ -168,7 +178,6 @@ function dayLabel(iso: string): string {
 }
 
 function EventRow({ event, circleId, userId }: { event: EventWithProfile; circleId: string; userId: string }) {
-  const Icon = eventIcon(event);
   const sendNudge = useSendNudge(circleId);
   const waterStreak = useWaterStreak(circleId);
   const reportContent = useReportContent();
@@ -247,7 +256,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
         accessibilityRole="button"
         accessibilityLabel={`${describeEvent(event)}. ${expanded ? 'Hide' : 'Show'} reactions`}
       >
-        <Icon width={22} height={22} />
+        <EventIcon event={event} color={theme.colors.primary} />
         <View style={styles.eventBody}>
           <Text style={styles.eventText}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
@@ -350,12 +359,13 @@ export default function TodayScreen() {
         </View>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
-        {/* Hierarchy per design/REDESIGN.md §4: the living garden leads,
-            mood check-in is the primary action beneath it, the mission is
-            secondary, and shortcuts + feed are tertiary. */}
+        {/* Hierarchy (2026-07 pass, supersedes design/REDESIGN.md §4's
+            mood-first order): garden state leads, today's mission is the
+            next action, mood check-in follows, shortcuts + feed are
+            tertiary - each section sets up the one below it. */}
         {circleId && <GardenHero circleId={circleId} variant="overview" />}
-        {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
+        {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         <QuickActionsRow />
 
         <Text style={styles.sectionTitle}>Circle Activity</Text>

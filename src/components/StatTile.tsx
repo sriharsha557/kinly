@@ -10,6 +10,11 @@ interface Delta {
 interface StatTileProps {
   background: string;
   textColor: string;
+  // Quieter color for the label row so the value carries the hierarchy;
+  // falls back to textColor (single-color tiles, e.g. the accent CTA).
+  labelColor?: string;
+  // Hairline border for tiles sitting on surface-colored backgrounds.
+  outlined?: boolean;
   label?: string;
   value?: string | number;
   deltas?: Delta[];
@@ -21,11 +26,12 @@ interface StatTileProps {
   size?: 'half' | 'third';
 }
 
-export function StatTile({ background, textColor, label, value, deltas, ctaLabel, onPress, size = 'half' }: StatTileProps) {
+export function StatTile({ background, textColor, labelColor, outlined, label, value, deltas, ctaLabel, onPress, size = 'half' }: StatTileProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const Wrapper = onPress ? TouchableOpacity : View;
   const sizeStyle = size === 'third' ? styles.tileThird : styles.tileHalf;
+  const headerColor = labelColor ?? textColor;
 
   if (ctaLabel) {
     return (
@@ -37,13 +43,16 @@ export function StatTile({ background, textColor, label, value, deltas, ctaLabel
   }
 
   return (
-    <Wrapper style={[styles.tile, sizeStyle, { backgroundColor: background }]} onPress={onPress}>
+    <Wrapper
+      style={[styles.tile, sizeStyle, outlined && styles.tileOutlined, { backgroundColor: background }]}
+      onPress={onPress}
+    >
       <View style={styles.header}>
-        <Text style={[styles.label, size === 'third' && styles.labelThird, { color: textColor }]}>{label}</Text>
+        <Text style={[styles.label, size === 'third' && styles.labelThird, { color: headerColor }]}>{label}</Text>
         {/* Only ever shown when the tile actually does something on tap -
             it used to render unconditionally, promising a drill-down that
             three of the four tiles never had. */}
-        {onPress && <Text style={[styles.arrow, { color: textColor }]}>↗</Text>}
+        {onPress && <Text style={[styles.arrow, { color: headerColor }]}>↗</Text>}
       </View>
       <Text style={[styles.value, size === 'third' && styles.valueThird, { color: textColor }]}>{value}</Text>
       {deltas && deltas.length > 0 && (
@@ -66,13 +75,14 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       borderRadius: radii.tile,
       justifyContent: 'space-between',
     },
+    tileOutlined: { borderWidth: 1, borderColor: colors.border },
     tileHalf: { flexBasis: '48%', padding: 16, minHeight: 140 },
     tileThird: { flexBasis: '31%', padding: 12, minHeight: 116 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     label: { fontSize: 14, fontWeight: '600' },
     labelThird: { fontSize: 12 },
     arrow: { fontSize: 16 },
-    value: { fontSize: 32, fontWeight: '800' },
+    value: { fontSize: 32, fontWeight: '700' },
     valueThird: { fontSize: 24 },
     deltaRow: { flexDirection: 'row', gap: 6 },
     pill: {

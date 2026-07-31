@@ -82,43 +82,56 @@ export default function ProfileScreen() {
             <LoadingSpinner size={12} />
           </View>
         ) : (
+          // Quiet surface tiles: value in ink, label muted, so the numbers
+          // carry the hierarchy. Settings stays the single accent-filled
+          // tile - one primary action per screen.
           <View style={styles.grid}>
             <StatTile
               size="third"
-              background={colors.inputBg}
-              textColor={colors.primary}
+              outlined
+              background={colors.surface}
+              textColor={colors.textPrimary}
+              labelColor={colors.textSecondary}
               label="Goals done"
               value={`${stats?.goalsCompleted ?? 0}/${stats?.goalsTotal ?? 0}`}
               onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
               size="third"
-              background={colors.inputBg}
-              textColor={colors.primary}
+              outlined
+              background={colors.surface}
+              textColor={colors.textPrimary}
+              labelColor={colors.textSecondary}
               label="Active goals"
               value={stats?.activeGoals ?? 0}
               onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
               size="third"
-              background={colors.inputBg}
-              textColor={colors.primary}
+              outlined
+              background={colors.surface}
+              textColor={colors.textPrimary}
+              labelColor={colors.textSecondary}
               label="Current streak"
               value={stats?.currentStreak ?? 0}
               onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
               size="third"
-              background={colors.inputBg}
-              textColor={colors.primary}
+              outlined
+              background={colors.surface}
+              textColor={colors.textPrimary}
+              labelColor={colors.textSecondary}
               label="Completion rate"
               value={`${stats?.completionRate ?? 0}%`}
               onPress={() => navigation.navigate('Goals')}
             />
             <StatTile
               size="third"
-              background={colors.inputBg}
-              textColor={colors.primary}
+              outlined
+              background={colors.surface}
+              textColor={colors.textPrimary}
+              labelColor={colors.textSecondary}
               label="Circle members"
               value={memberCount}
               onPress={() => navigation.navigate('Circle')}
@@ -210,13 +223,11 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
       ...cardShell,
       paddingVertical: 14,
       paddingHorizontal: 16,
-      paddingLeft: 14,
     },
     badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
     appearanceCard: {
       ...cardShell,
       padding: 16,
-      paddingLeft: 14,
     },
     empty: { color: colors.textSecondary },
     privacyLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },

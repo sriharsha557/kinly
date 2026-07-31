@@ -97,7 +97,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: radii.pill,
-      backgroundColor: colors.inputBg,
+      backgroundColor: colors.surfaceSubtle,
     },
     modeChipActive: { backgroundColor: colors.primary },
     modeChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },

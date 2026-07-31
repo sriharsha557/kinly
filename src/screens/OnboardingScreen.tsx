@@ -507,7 +507,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
     error: { color: colors.danger, textAlign: 'center' },
     stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
-    stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.inputBg },
+    stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     stepDotActive: { backgroundColor: colors.primary, width: 20 },
   });
 }
