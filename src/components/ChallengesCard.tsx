@@ -9,6 +9,7 @@ import {
 import { useLogEvent } from '../hooks/useEvents';
 import { useCreateAchievement } from '../hooks/useAchievements';
 import { useCircleDetail } from '../hooks/useCircles';
+import { ConceptHint } from './ConceptHint';
 import { ProgressBar } from './ProgressBar';
 import { PillButton } from './PillButton';
 import { MilestoneCardModal } from './MilestoneCardModal';
@@ -168,6 +169,9 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
           <Text style={styles.newLink}>+ New</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.hintWrap}>
+        <ConceptHint id="challenges" text="A shared monthly goal your whole circle works toward together." />
+      </View>
 
       {challenges && challenges.length > 0 ? (
         <View style={{ gap: 12 }}>
@@ -224,6 +228,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       marginBottom: 20,
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    hintWrap: { marginTop: -10, marginBottom: 12 },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
     newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },

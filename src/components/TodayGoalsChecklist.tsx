@@ -5,11 +5,19 @@ import { AnimatedPressable } from './AnimatedPressable';
 import { useGoals } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { MilestoneCardModal } from './MilestoneCardModal';
-import { useCircleDetail } from '../hooks/useCircles';
+import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+// Frames each pending action socially instead of as a bare to-do: "your
+// friends already showed up" is the motivator, not the unchecked box.
+function collectiveContext(friendsDoneToday: number, friendCount: number): string | null {
+  if (friendCount === 0) return null;
+  if (friendsDoneToday === 0) return 'Be the first in your circle today';
+  return `${friendsDoneToday} of ${friendCount} friends already did`;
 }
 
 // A row is checked off in two beats: justChecked flips the checkbox to a
@@ -20,6 +28,7 @@ const CHECKED_VISIBLE_MS = 550;
 export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; userId: string }) {
   const { data: goals, isLoading } = useGoals(circleId);
   const { data: circle } = useCircleDetail(circleId);
+  const { data: members } = useCircleMembers(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [loggingId, setLoggingId] = useState<string | null>(null);
@@ -37,6 +46,20 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
       g.last_logged_date !== today &&
       !checkedIds.has(g.id),
   );
+
+  // Collective context for the mission rows: how many of the others in this
+  // circle have logged anything today. useGoals returns the whole circle's
+  // goals, so this needs no extra fetch.
+  const friendIds = new Set((members ?? []).filter((m) => m.user_id !== userId && m.status === 'active').map((m) => m.user_id));
+  const friendsDoneToday = new Set(
+    (goals ?? []).filter((g) => friendIds.has(g.user_id) && g.last_logged_date === today).map((g) => g.user_id),
+  ).size;
+  const context = collectiveContext(friendsDoneToday, friendIds.size);
+
+  // "X of Y completed" for today's mission - what's already logged today
+  // plus what's still waiting.
+  const doneToday = myGoals.filter((g) => g.last_logged_date === today || checkedIds.has(g.id)).length;
+  const missionTotal = doneToday + pending.length;
 
   async function handleLog(goalId: string) {
     const goal = myGoals.find((g) => g.id === goalId);
@@ -58,7 +81,14 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{"Today's Progress"}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{"Today's Mission"}</Text>
+        {missionTotal > 0 && (
+          <Text style={styles.progressCount}>
+            {doneToday} of {missionTotal} completed
+          </Text>
+        )}
+      </View>
 
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
@@ -91,7 +121,10 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
                       isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>
                     )}
                   </View>
-                  <Text style={[styles.rowText, checked && styles.rowTextChecked]}>{goal.title}</Text>
+                  <View style={styles.rowBody}>
+                    <Text style={[styles.rowText, checked && styles.rowTextChecked]}>Log “{goal.title}”</Text>
+                    {context && !checked && <Text style={styles.rowContext}>{context}</Text>}
+                  </View>
                 </AnimatedPressable>
               </Animated.View>
             );
@@ -123,7 +156,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 10,
       ...shadow,
     },
+    titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
+    progressCount: { fontSize: 12, fontWeight: '700', color: colors.primary },
     empty: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     done: { fontSize: 13, fontWeight: '600', color: colors.success },
     list: { gap: 8 },
@@ -140,7 +175,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
     checkmark: { color: colors.onAccent, fontSize: 13, fontWeight: '800' },
     checkboxLoading: { fontSize: 12, color: colors.primary },
-    rowText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
+    rowBody: { flex: 1, gap: 1 },
+    rowText: { fontSize: 14, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
+    rowContext: { fontSize: 12, color: colors.textSecondary },
   });
 }

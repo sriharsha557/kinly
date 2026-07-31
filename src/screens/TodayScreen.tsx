@@ -13,6 +13,7 @@ import { showModerationSheet } from '../lib/moderation';
 import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
+import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
 import { GardenTeaser } from '../components/GardenTeaser';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
@@ -324,6 +325,7 @@ export default function TodayScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {circleId && <CircleWelcomeModal />}
       <ScrollView
         contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
         refreshControl={
@@ -338,9 +340,12 @@ export default function TodayScreen() {
         </View>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
-        {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
-        {circleId && <GardenTeaser circleId={circleId} />}
+        {/* Hierarchy is deliberate (see the UI-clarity pass): today's
+            mission and the circle's collective status lead; personal mood,
+            shortcuts and the feed are secondary. */}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
+        {circleId && <GardenTeaser circleId={circleId} />}
+        {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         <QuickActionsRow />
 
         <Text style={styles.sectionTitle}>Circle Activity</Text>
