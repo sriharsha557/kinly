@@ -47,3 +47,4 @@ yarn-error.*
 
 # raw icon/illustration staging area (curated copies live in assets/illustrations/)
 /kinly-illustrations
+google-services.json
