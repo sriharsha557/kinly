@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
+import { useMomentsUnread, useMarkMomentsRead } from '../hooks/useMomentsUnread';
 import { useWaterStreak, type StreakSaveReason } from '../hooks/useStreakSaves';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
@@ -336,6 +338,23 @@ export default function TodayScreen() {
     isFetchingNextPage,
   } = useEvents(circleId ?? undefined);
   const events = data?.pages.flat();
+  const { lastReadAt } = useMomentsUnread(circleId ?? undefined, userId);
+  const markRead = useMarkMomentsRead(circleId ?? undefined, userId);
+
+  // Arriving at the screen counts as reading, per the spec - not scrolling.
+  // The stamp captured on focus is held in lastReadAtOnEntry so the "New"
+  // divider stays put while you read, instead of vanishing the instant the
+  // stamp updates.
+  const [lastReadAtOnEntry, setLastReadAtOnEntry] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      setLastReadAtOnEntry(lastReadAt);
+      markRead.mutate();
+      // markRead is a stable React Query mutation object; including it would
+      // re-fire the effect on every render.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lastReadAt]),
+  );
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -370,7 +389,7 @@ export default function TodayScreen() {
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         <QuickActionsRow />
 
-        <Text style={styles.sectionTitle}>Circle Activity</Text>
+        <Text style={styles.sectionTitle}>Moments</Text>
         {isLoading ? (
           <View>
             <EventRowSkeleton />
@@ -379,12 +398,22 @@ export default function TodayScreen() {
           </View>
         ) : events && events.length > 0 ? (
           <View style={styles.list}>
-            {events.map((event) => {
+            {events.map((event, index) => {
               const label = dayLabel(event.created_at);
               const showHeader = label !== lastLabel;
               lastLabel = label;
+              const isUnread =
+                event.user_id !== userId &&
+                (lastReadAtOnEntry === null || event.created_at > lastReadAtOnEntry);
+              const previous = index > 0 ? events[index - 1] : null;
+              const previousUnread =
+                previous !== null &&
+                previous.user_id !== userId &&
+                (lastReadAtOnEntry === null || previous.created_at > lastReadAtOnEntry);
+              const showNewDivider = isUnread && !previousUnread;
               return (
                 <View key={event.id}>
+                  {showNewDivider && <Text style={styles.newDivider}>New</Text>}
                   {showHeader && <Text style={styles.dayHeader}>{label}</Text>}
                   {userId && circleId && <EventRow event={event} circleId={circleId} userId={userId} />}
                 </View>
@@ -429,6 +458,15 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
     list: { gap: 10 },
     dayHeader: { fontSize: 14, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+    newDivider: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.primary,
+      marginTop: 12,
+      marginBottom: 2,
+    },
     loadMoreButton: {
       alignSelf: 'center',
       marginTop: 8,
