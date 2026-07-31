@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { LogoSplashScreen } from '../components/LogoSplashScreen';
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { useTheme } from '../theme/ThemeProvider';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import CircleSettingsScreen from '../screens/CircleSettingsScreen';
@@ -26,6 +27,26 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   useBootstrapSession();
   useAuthDeepLink();
+  const theme = useTheme();
+  // React Navigation paints its own container/header/card backgrounds
+  // between screen renders - without this, dark mode flashes white on
+  // every transition and the native headers stay light.
+  const navTheme = useMemo(
+    () => ({
+      ...DefaultTheme,
+      dark: theme.scheme === 'dark',
+      colors: {
+        ...DefaultTheme.colors,
+        primary: theme.colors.primary,
+        background: theme.colors.background,
+        card: theme.colors.surface,
+        text: theme.colors.textPrimary,
+        border: theme.colors.border,
+        notification: theme.colors.danger,
+      },
+    }),
+    [theme],
+  );
   const user = useAuthStore((state) => state.user);
   usePushRegistration(user?.id);
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
@@ -91,7 +112,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {readyForMain ? (
           <>

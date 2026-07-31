@@ -164,7 +164,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     empty: { fontSize: 13, color: colors.shellSecondary },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: colors.overlay,
       justifyContent: 'center',
       padding: 24,
     },

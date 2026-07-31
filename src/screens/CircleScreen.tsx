@@ -139,6 +139,6 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
     },
     switcherChipActive: { backgroundColor: colors.primary },
     switcherChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
-    switcherChipTextActive: { color: '#FFFFFF' },
+    switcherChipTextActive: { color: colors.onAccent },
   });
 }

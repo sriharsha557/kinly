@@ -133,7 +133,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     orDivider: { textAlign: 'center', fontSize: 11, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: colors.overlay,
       justifyContent: 'center',
       padding: 24,
     },

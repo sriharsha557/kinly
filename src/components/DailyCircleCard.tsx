@@ -37,7 +37,7 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
             value={draft}
             onChangeText={setDraft}
             placeholder="Your answer..."
-            placeholderTextColor="rgba(255,255,255,0.6)"
+            placeholderTextColor={theme.colors.onAccentFaint}
             multiline
           />
           <PillButton
@@ -65,26 +65,26 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '700', color: '#fff' },
-    prompt: { fontSize: 16, fontWeight: '700', color: '#fff', lineHeight: 22 },
+    title: { fontSize: 15, fontWeight: '700', color: colors.onAccent },
+    prompt: { fontSize: 16, fontWeight: '700', color: colors.onAccent, lineHeight: 22 },
     answerRow: { gap: 8 },
     input: {
-      backgroundColor: 'rgba(255,255,255,0.15)',
+      backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: 12,
-      color: '#fff',
+      color: colors.onAccent,
       fontSize: 14,
       minHeight: 60,
       textAlignVertical: 'top',
     },
     answers: { gap: 8 },
     answerBubble: {
-      backgroundColor: 'rgba(255,255,255,0.15)',
+      backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
       padding: 10,
     },
     answerAuthor: { fontSize: 11, fontWeight: '700', color: colors.background },
-    answerText: { fontSize: 13, color: '#fff', marginTop: 2 },
+    answerText: { fontSize: 13, color: colors.onAccent, marginTop: 2 },
   });
 }

@@ -97,7 +97,7 @@ function MoodOptionCard({
 
   const cardStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(progress.value, [0, 1], [colors.surface, colors.primary]),
-    borderColor: interpolateColor(progress.value, [0, 1], ['#E4DFD1', colors.primary]),
+    borderColor: interpolateColor(progress.value, [0, 1], [colors.border, colors.primary]),
     transform: [{ scale: tap.value }],
   }));
 
@@ -109,7 +109,7 @@ function MoodOptionCard({
     <TouchableOpacity activeOpacity={0.9} disabled={disabled} onPress={handlePress}>
       <Animated.View style={[styles.moodOption, cardStyle]}>
         <Animated.View style={iconWrapStyle}>
-          <Icon size={30} color={active ? '#FFFFFF' : colors.primary} />
+          <Icon size={30} color={active ? colors.onAccent : colors.primary} />
         </Animated.View>
         <Text style={[styles.moodOptionLabel, active && styles.moodOptionLabelActive]}>{label}</Text>
       </Animated.View>
@@ -338,7 +338,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
     memberName: { fontSize: 11, fontWeight: '600', color: colors.shellSecondary, marginTop: 4 },
 
-    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+    overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' },
     overlayDismiss: { ...StyleSheet.absoluteFillObject },
     sheet: {
       backgroundColor: colors.background,
@@ -353,7 +353,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       width: 40,
       height: 4,
       borderRadius: 2,
-      backgroundColor: '#E4DFD1',
+      backgroundColor: colors.border,
       alignSelf: 'center',
       marginBottom: 16,
     },
@@ -362,7 +362,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     moodStack: { gap: 12, marginTop: 18 },
     moodOption: {
       borderWidth: 1.5,
-      borderColor: '#E4DFD1',
+      borderColor: colors.border,
       borderRadius: 20,
       paddingVertical: 20,
       alignItems: 'center',
@@ -370,18 +370,18 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       ...shadow,
     },
     moodOptionLabel: { fontSize: 16, fontWeight: '600', color: colors.shellTitle },
-    moodOptionLabelActive: { color: '#FFFFFF' },
+    moodOptionLabelActive: { color: colors.onAccent },
     tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     tagChip: {
       backgroundColor: colors.surface,
       borderWidth: 1,
-      borderColor: '#E4DFD1',
+      borderColor: colors.border,
       borderRadius: radii.pill,
       paddingHorizontal: 14,
       paddingVertical: 9,
     },
     tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
     tagChipText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
-    tagChipTextActive: { color: '#FFFFFF' },
+    tagChipTextActive: { color: colors.onAccent },
   });
 }

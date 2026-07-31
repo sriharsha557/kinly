@@ -158,10 +158,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     rsvpChipActive: { backgroundColor: colors.primary },
     rsvpChipText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
-    rsvpChipTextActive: { color: '#fff' },
+    rsvpChipTextActive: { color: colors.onAccent },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: colors.overlay,
       justifyContent: 'center',
       padding: 24,
     },

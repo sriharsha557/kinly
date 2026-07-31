@@ -83,10 +83,10 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    title: { fontSize: 22, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
+    title: { fontSize: 22, fontWeight: '800', color: colors.onAccent, marginTop: 12, textAlign: 'center' },
     subtitle: {
       fontSize: 14,
-      color: 'rgba(255,255,255,0.9)',
+      color: colors.onAccentMuted,
       marginTop: 8,
       textAlign: 'center',
       paddingHorizontal: 12,

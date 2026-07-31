@@ -17,6 +17,9 @@ import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
+import { ThemePicker } from '../components/ThemePicker';
+import { useThemeStore } from '../state/useThemeStore';
+import { setThemePrefs } from '../lib/themePrefs';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import type { MainTabParamList, RootStackParamList } from '../navigation/types';
@@ -42,6 +45,8 @@ export default function ProfileScreen() {
   const [viewingAchievement, setViewingAchievement] = useState<Achievement | null>(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const tabBarClearance = useTabBarClearance();
+  const themeAccent = useThemeStore((state) => state.accent);
+  const themeMode = useThemeStore((state) => state.mode);
   const theme = useTheme();
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -58,7 +63,7 @@ export default function ProfileScreen() {
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
             ) : (
-              <Logo size={72} color="#FFFFFF" background={colors.primary} />
+              <Logo size={72} color={colors.onAccent} background={colors.primary} />
             )}
           </TouchableOpacity>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
@@ -121,7 +126,7 @@ export default function ProfileScreen() {
             <StatTile
               size="third"
               background={colors.primary}
-              textColor="#fff"
+              textColor={colors.onAccent}
               ctaLabel="Settings"
               onPress={() => navigation.navigate('CircleSettings')}
             />
@@ -144,6 +149,18 @@ export default function ProfileScreen() {
         ) : (
           <Text style={styles.empty}>No achievements yet — complete a goal to earn your first badge.</Text>
         )}
+
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        {/* setThemePrefs applies to the live theme store first, so the whole
+            app restyles on tap - the profile-row sync happens behind it. */}
+        <View style={styles.appearanceCard}>
+          <ThemePicker
+            accent={themeAccent}
+            mode={themeMode}
+            onChangeAccent={(accent) => setThemePrefs({ accent })}
+            onChangeMode={(mode) => setThemePrefs({ mode })}
+          />
+        </View>
 
         <Text style={styles.sectionTitle}>Your Story</Text>
         {user && <LifeTimeline userId={user.id} />}
@@ -196,6 +213,11 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
       paddingLeft: 14,
     },
     badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    appearanceCard: {
+      ...cardShell,
+      padding: 16,
+      paddingLeft: 14,
+    },
     empty: { color: colors.textSecondary },
     privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
     deleteLink: { fontSize: 13, fontWeight: '600', color: colors.danger },

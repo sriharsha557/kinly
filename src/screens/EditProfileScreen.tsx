@@ -59,7 +59,7 @@ export default function EditProfileScreen() {
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatarImage} />
           ) : (
-            <Logo size={88} color="#FFFFFF" background={theme.colors.primary} />
+            <Logo size={88} color={theme.colors.onAccent} background={theme.colors.primary} />
           )}
           <View style={styles.avatarActions}>
             <TouchableOpacity onPress={handlePickAvatar} disabled={uploadingAvatar}>

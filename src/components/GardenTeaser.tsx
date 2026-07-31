@@ -59,7 +59,7 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
           <HeroArt width={68} height={68} />
         </View>
         <View style={styles.titleRow}>
-          <SproutIcon size={16} color="#fff" />
+          <SproutIcon size={16} color={theme.colors.onAccent} />
           <Text style={styles.title}>Your Circle</Text>
         </View>
         <Text style={styles.percent}>{health}%</Text>
@@ -75,7 +75,7 @@ export function GardenTeaser({ circleId }: { circleId: string }) {
   );
 }
 
-function createStyles({ radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: { borderRadius: radii.card, padding: 20, marginBottom: 16, gap: 6 },
     heroArt: {
@@ -84,18 +84,18 @@ function createStyles({ radii }: ReturnType<typeof useTheme>) {
       right: 10,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 14, fontWeight: '700', color: '#fff' },
-    percent: { fontSize: 40, fontWeight: '800', color: '#fff', marginTop: 2 },
+    title: { fontSize: 14, fontWeight: '700', color: colors.onAccent },
+    percent: { fontSize: 40, fontWeight: '800', color: colors.onAccent, marginTop: 2 },
     barTrack: {
       height: 8,
       borderRadius: 4,
-      backgroundColor: 'rgba(255,255,255,0.3)',
+      backgroundColor: colors.onAccentTint,
       overflow: 'hidden',
       marginTop: 4,
     },
-    barFill: { height: '100%', backgroundColor: '#fff', borderRadius: 4 },
-    copy: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 10, lineHeight: 18, maxWidth: '80%' },
+    barFill: { height: '100%', backgroundColor: colors.onAccent, borderRadius: 4 },
+    copy: { fontSize: 13, color: colors.onAccentMuted, marginTop: 10, lineHeight: 18, maxWidth: '80%' },
     linkWrap: { alignSelf: 'flex-start', marginTop: 10 },
-    link: { fontSize: 13, fontWeight: '700', color: '#fff' },
+    link: { fontSize: 13, fontWeight: '700', color: colors.onAccent },
   });
 }
