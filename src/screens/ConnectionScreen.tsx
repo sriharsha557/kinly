@@ -25,6 +25,7 @@ import { useGoals } from '../hooks/useGoals';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
 import { ActionSheet } from '../components/ActionSheet';
+import { ConceptHint } from '../components/ConceptHint';
 import { DailyCircleCard } from '../components/DailyCircleCard';
 import { WouldYouRatherCard } from '../components/WouldYouRatherCard';
 import { GuessWhoCard } from '../components/GuessWhoCard';
@@ -218,6 +219,9 @@ export default function ConnectionScreen() {
           }
         >
           <Text style={styles.title}>Connection Moments</Text>
+          <View style={styles.titleHint}>
+            <ConceptHint id="connection-moments" text="A daily prompt your circle answers together." />
+          </View>
 
           {/* Support: daily check-in + advice from your circle */}
           {userId && circleId && (
@@ -293,6 +297,9 @@ export default function ConnectionScreen() {
               {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
               {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
             </DisclosureSection>
+            <View style={styles.gamesHint}>
+              <ConceptHint id="light-moments" text="A daily moment of reflection." />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -304,7 +311,8 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: 16 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
+    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
+    titleHint: { marginBottom: 12 },
     sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
     composer: {
       backgroundColor: colors.surface,
@@ -372,5 +380,8 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     replySendText: { color: '#fff', fontWeight: '700', fontSize: 12 },
     empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
     gamesSection: { marginTop: 24 },
+    // Sits under the collapsed DisclosureSection header (which owns a 16px
+    // bottom margin), so pull the hint back up toward its label.
+    gamesHint: { marginTop: -10, paddingHorizontal: 16 },
   });
 }

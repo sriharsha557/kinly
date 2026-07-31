@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useGardenState } from '../hooks/useGarden';
+import { ConceptHint } from './ConceptHint';
 import { GardenStageArt } from './GardenStageArt';
 import { useTheme } from '../theme/ThemeProvider';
 import SproutIcon from '../../assets/icons/feed/sprout.svg';
@@ -28,6 +29,8 @@ export function GardenCard({ circleId }: { circleId: string }) {
         </View>
         <Text style={styles.health}>{data.health}% thriving</Text>
       </View>
+      <ConceptHint id="circle-garden" text="Every check-in grows your shared garden." />
+      <ConceptHint id="thriving" text={'"Thriving" means everyone in your circle checked in today.'} />
       <Text style={styles.message}>{healthMessage(data.health)}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {data.members.map((member) => (

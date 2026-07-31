@@ -78,7 +78,20 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
   );
 }
 
-function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; userId: string }) {
+function GoalCard({
+  goal,
+  circleId,
+  userId,
+  friendsCompletedToday,
+}: {
+  goal: Goal;
+  circleId: string;
+  userId: string;
+  // How many *other* circle members logged anything today - shown next to
+  // the owner's own progress so a goal reads as a shared effort, not a
+  // private task-manager row.
+  friendsCompletedToday: number;
+}) {
   const { data: circle } = useCircleDetail(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const deleteGoal = useDeleteGoal();
@@ -133,6 +146,8 @@ function GoalCard({ goal, circleId, userId }: { goal: Goal; circleId: string; us
       <View style={styles.cardFooter}>
         <Text style={styles.cardMeta}>
           {goal.progress} / {goal.target}
+          {friendsCompletedToday > 0 &&
+            ` · ${friendsCompletedToday} ${friendsCompletedToday === 1 ? 'friend' : 'friends'} completed today`}
         </Text>
         {isComplete ? (
           <View style={styles.doneRow}>
@@ -308,6 +323,15 @@ export default function GoalsScreen() {
     goals,
   );
 
+  // Everyone who logged anything today, so each goal row can carry a
+  // collective signal ("· 3 friends completed today") alongside the owner's
+  // own progress. useGoals already returns the whole circle's goals.
+  const today = new Date().toISOString().slice(0, 10);
+  const loggedTodayUserIds = useMemo(
+    () => new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id)),
+    [goals, today],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
@@ -332,7 +356,12 @@ export default function GoalsScreen() {
           renderItem={({ item, index }) =>
             userId && circleId ? (
               <Animated.View entering={FadeInDown.duration(350).delay(Math.min(index, 6) * 60)}>
-                <GoalCard goal={item} circleId={circleId} userId={userId} />
+                <GoalCard
+                  goal={item}
+                  circleId={circleId}
+                  userId={userId}
+                  friendsCompletedToday={loggedTodayUserIds.size - (loggedTodayUserIds.has(item.user_id) ? 1 : 0)}
+                />
               </Animated.View>
             ) : null
           }

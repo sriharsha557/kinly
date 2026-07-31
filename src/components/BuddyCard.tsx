@@ -6,6 +6,7 @@ import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { ConceptHint } from './ConceptHint';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
@@ -93,6 +94,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
         <BuddyIcon width={22} height={22} />
         <Text style={styles.title}>Accountability Buddy</Text>
       </View>
+      <ConceptHint id="buddy" text="One person who'll encourage you when you miss a goal." />
 
       {buddy ? (
         <>
