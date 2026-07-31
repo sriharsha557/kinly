@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -25,10 +24,8 @@ function App() {
             <Sentry.ErrorBoundary fallback={ErrorFallback}>
               <RootNavigator />
             </Sentry.ErrorBoundary>
-            {/* App has no dark mode yet - background is always light, so the
-                status bar text must always be dark regardless of the phone's
-                system theme ("auto" follows system theme, not our UI). */}
-            <StatusBar style="dark" />
+            {/* Status bar now lives inside ThemeProvider, which styles it
+                from the resolved light/dark scheme. */}
           </PersistQueryClientProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>

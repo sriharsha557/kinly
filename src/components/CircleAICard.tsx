@@ -69,7 +69,7 @@ export function CircleAICard({
             onPress={handleStartChallenge}
             disabled={createChallenge.isPending}
           >
-            <IdeasIcon size={14} color="#fff" />
+            <IdeasIcon size={14} color={colors.onAccent} />
             <Text style={styles.suggestionText}>
               {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
             </Text>
@@ -107,6 +107,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
     suggestionDone: { backgroundColor: colors.success },
-    suggestionText: { fontSize: 13, fontWeight: '700', color: '#fff', textAlign: 'center' },
+    suggestionText: { fontSize: 13, fontWeight: '700', color: colors.onAccent, textAlign: 'center' },
   });
 }

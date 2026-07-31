@@ -21,6 +21,9 @@ import { GradientHeader } from '../components/GradientHeader';
 import { AppTextInput } from '../components/AppTextInput';
 import { PillButton } from '../components/PillButton';
 import { InterestPicker } from '../components/InterestPicker';
+import { ThemePicker } from '../components/ThemePicker';
+import { useThemeStore } from '../state/useThemeStore';
+import { setThemePrefs } from '../lib/themePrefs';
 import { useTheme } from '../theme/ThemeProvider';
 import type { Circle, InterestCategory } from '../types/models';
 
@@ -278,6 +281,45 @@ function InterestsStep() {
   );
 }
 
+function ThemeStep() {
+  // Changes apply to the live theme store immediately, so the whole
+  // onboarding screen previews the pick in real time. Continue persists
+  // the current picks; Skip persists the defaults - either way the
+  // profile columns go non-null, which is what advances this step.
+  const accent = useThemeStore((state) => state.accent);
+  const mode = useThemeStore((state) => state.mode);
+  const setAccent = useThemeStore((state) => state.setAccent);
+  const setMode = useThemeStore((state) => state.setMode);
+  const [saving, setSaving] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  async function finish(skip: boolean) {
+    setSaving(true);
+    try {
+      if (skip) {
+        setAccent('ember');
+        setMode('system');
+        await setThemePrefs({ accent: 'ember', mode: 'system' });
+      } else {
+        await setThemePrefs({ accent, mode });
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <View style={styles.form}>
+      <ThemePicker accent={accent} mode={mode} onChangeAccent={setAccent} onChangeMode={setMode} />
+      <PillButton label="Continue" onPress={() => finish(false)} loading={saving} />
+      <TouchableOpacity onPress={() => finish(true)} disabled={saving}>
+        <Text style={styles.link}>Skip for now</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => void }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -407,9 +449,13 @@ export default function OnboardingScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const needsInterests = !!user && user.interests === null;
+  // Null = never chose (migration 0037's marker) - after interests so the
+  // flow stays "what matters -> make it yours -> find your circle".
+  const needsTheme = !!user && !needsInterests && user.theme_accent === null && user.theme_mode === null;
 
   let subtitle = 'Together, We Thrive.';
   if (user && needsInterests) subtitle = 'Pick what matters most today. You can change this anytime.';
+  else if (user && needsTheme) subtitle = 'Make Kinly yours. You can change this anytime in Profile.';
   else if (user) subtitle = "Start solo, invite friends when you're ready, or join one with a code.";
 
   return (
@@ -426,8 +472,8 @@ export default function OnboardingScreen() {
           </GradientHeader>
 
           <View style={styles.body}>
-            {user && <StepDots step={needsInterests ? 1 : 2} total={2} />}
-            {!user ? <AuthStep /> : needsInterests ? <InterestsStep /> : <CircleStep />}
+            {user && <StepDots step={needsInterests ? 1 : needsTheme ? 2 : 3} total={3} />}
+            {!user ? <AuthStep /> : needsInterests ? <InterestsStep /> : needsTheme ? <ThemeStep /> : <CircleStep />}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -451,8 +497,8 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     },
     inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
     inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
-    title: { fontSize: 28, fontWeight: '800', color: '#fff', marginTop: 12 },
-    subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+    title: { fontSize: 28, fontWeight: '800', color: colors.onAccent, marginTop: 12 },
+    subtitle: { fontSize: 14, color: colors.onAccentMuted, marginTop: 4 },
     link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
     legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
     legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },

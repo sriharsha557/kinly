@@ -62,7 +62,7 @@ export function ActionSheet({
 
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+    overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' },
     overlayDismiss: { ...StyleSheet.absoluteFillObject },
     sheet: {
       backgroundColor: colors.background,
@@ -77,7 +77,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       width: 40,
       height: 4,
       borderRadius: 2,
-      backgroundColor: '#E4DFD1',
+      backgroundColor: colors.border,
       alignSelf: 'center',
       marginBottom: 16,
     },

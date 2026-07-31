@@ -279,8 +279,8 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
               accessibilityState={{ checked: active }}
               accessibilityLabel={label}
             >
-              <Icon size={15} color={active ? '#fff' : cat.solid} />
-              <Text style={[styles.categoryChipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
+              <Icon size={15} color={active ? colors.onAccent : cat.solid} />
+              <Text style={[styles.categoryChipLabel, { color: active ? colors.onAccent : colors.textPrimary }]}>{label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -381,7 +381,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingHorizontal: 16,
       justifyContent: 'center',
     },
-    addButtonText: { color: '#fff', fontWeight: '700' },
+    addButtonText: { color: colors.onAccent, fontWeight: '700' },
     list: { gap: 12 },
     card: {
       ...cardShell,
@@ -411,7 +411,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: colors.overlay,
       justifyContent: 'center',
       padding: 24,
     },

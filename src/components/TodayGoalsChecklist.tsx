@@ -138,7 +138,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-    checkmark: { color: '#fff', fontSize: 13, fontWeight: '800' },
+    checkmark: { color: colors.onAccent, fontSize: 13, fontWeight: '800' },
     checkboxLoading: { fontSize: 12, color: colors.primary },
     rowText: { fontSize: 14, color: colors.textPrimary, flex: 1 },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },

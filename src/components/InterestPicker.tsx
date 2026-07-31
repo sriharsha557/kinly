@@ -42,9 +42,9 @@ export function InterestPicker({
             accessibilityRole="checkbox"
             accessibilityState={{ checked: active }}
           >
-            <Icon size={18} color={active ? '#fff' : category.solid} />
-            <Text style={[styles.chipLabel, { color: active ? '#fff' : colors.textPrimary }]}>{label}</Text>
-            {active && <CheckIcon size={15} color="#fff" />}
+            <Icon size={18} color={active ? colors.onAccent : category.solid} />
+            <Text style={[styles.chipLabel, { color: active ? colors.onAccent : colors.textPrimary }]}>{label}</Text>
+            {active && <CheckIcon size={15} color={colors.onAccent} />}
           </TouchableOpacity>
         );
       })}

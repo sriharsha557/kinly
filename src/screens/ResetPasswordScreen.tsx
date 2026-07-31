@@ -94,8 +94,8 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
     container: { flex: 1, backgroundColor: colors.background },
     body: { padding: 24, paddingTop: 28 },
     form: { gap: 14 },
-    title: { fontSize: 24, fontWeight: '800', color: '#fff', marginTop: 12, textAlign: 'center' },
-    subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4, textAlign: 'center' },
+    title: { fontSize: 24, fontWeight: '800', color: colors.onAccent, marginTop: 12, textAlign: 'center' },
+    subtitle: { fontSize: 14, color: colors.onAccentMuted, marginTop: 4, textAlign: 'center' },
     error: { color: colors.danger, textAlign: 'center' },
   });
 }

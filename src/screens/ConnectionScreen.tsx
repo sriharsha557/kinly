@@ -325,7 +325,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     goalChipActive: { backgroundColor: colors.primary },
     goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
     goalChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-    goalChipTextActive: { color: '#fff' },
+    goalChipTextActive: { color: colors.onAccent },
     goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
     goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
     postButton: {
@@ -335,7 +335,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingHorizontal: 16,
       paddingVertical: 8,
     },
-    postButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+    postButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 13 },
     list: { gap: 12 },
     card: {
       backgroundColor: colors.surface,
@@ -369,7 +369,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingHorizontal: 12,
       justifyContent: 'center',
     },
-    replySendText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+    replySendText: { color: colors.onAccent, fontWeight: '700', fontSize: 12 },
     empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
     gamesSection: { marginTop: 24 },
   });

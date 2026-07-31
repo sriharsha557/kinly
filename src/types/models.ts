@@ -1,3 +1,5 @@
+import type { AccentId, ThemeMode } from '../theme/colors';
+
 export type InterestCategory = 'health' | 'wealth' | 'ideas' | 'learning' | 'relationships';
 
 export interface User {
@@ -6,6 +8,10 @@ export interface User {
   avatar: string | null;
   bio: string | null;
   interests: InterestCategory[] | null;
+  // null = never chose (same "never asked" marker pattern as interests) -
+  // the app then falls back to ember/system without writing anything.
+  theme_accent: AccentId | null;
+  theme_mode: ThemeMode | null;
   created_at: string;
 }
 

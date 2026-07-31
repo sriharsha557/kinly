@@ -24,7 +24,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
       disabled={disabled || loading}
     >
       {loading ? (
-        <LoadingSpinner size={9} color={isOutline ? theme.colors.primary : '#fff'} />
+        <LoadingSpinner size={9} color={isOutline ? theme.colors.primary : theme.colors.onAccent} />
       ) : (
         <Text style={isOutline ? styles.outlineText : styles.solidText}>{label}</Text>
       )}
@@ -41,7 +41,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     solid: { backgroundColor: colors.primary },
-    solidText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    solidText: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
     outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
     outlineText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
   });

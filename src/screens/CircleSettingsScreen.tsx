@@ -401,7 +401,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     },
     roleChipActive: { backgroundColor: colors.primary },
     roleChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textTransform: 'capitalize' },
-    roleChipTextActive: { color: '#fff' },
+    roleChipTextActive: { color: colors.onAccent },
     circleRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -427,7 +427,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
+      backgroundColor: colors.overlay,
       justifyContent: 'center',
       padding: 24,
     },
