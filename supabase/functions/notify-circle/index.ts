@@ -90,14 +90,22 @@ Deno.serve(async (req) => {
         // about them, not by them. This branch used to fall through to the
         // generic "notify every active member except user_id", which sent
         // "X could use a nudge" to the whole circle and to nobody who could
-        // act on it. Narrowed to the owner plus their buddy; the spec
+        // act on it. Narrowed to the owner plus their watcher(s); the spec
         // records this as an intentional reduction in reach.
-        const { data: pair } = await supabase
+        //
+        // buddy_pairs is one-directional (migration 0011): a row
+        // (user_id: A, buddy_id: B) means A picked B to watch, not the
+        // reverse, and reciprocation isn't required. So the people who
+        // should be nudged about subjectId's at-risk streak are the rows
+        // pointing AT subjectId (buddy_id = subjectId) - the watchers - not
+        // whoever subjectId themselves picked. The primary key is
+        // (circle_id, user_id), so buddy_id isn't unique: several members
+        // can all watch the same person, and all of them should be notified.
+        const { data: watchers } = await supabase
           .from('buddy_pairs')
-          .select('buddy_id')
+          .select('user_id')
           .eq('circle_id', circleId)
-          .eq('user_id', subjectId)
-          .maybeSingle();
+          .eq('buddy_id', subjectId);
 
         // payload.message is already written in the second person by
         // check-streaks-at-risk ("Your 5-day streak on X is at risk..."),
@@ -108,10 +116,12 @@ Deno.serve(async (req) => {
           body: (payload.message as string) ?? 'Your streak is at risk — log progress today!',
         });
 
-        const buddyId = pair?.buddy_id as string | undefined;
-        if (buddyId && buddyId !== subjectId) {
+        const watcherIds = (watchers ?? [])
+          .map((w) => w.user_id as string)
+          .filter((id) => id !== subjectId);
+        if (watcherIds.length > 0) {
           deliveries.push({
-            recipients: [buddyId],
+            recipients: watcherIds,
             title: 'Kinly',
             body: `${subjectName}'s streak is at risk — nudge them?`,
           });
