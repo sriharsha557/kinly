@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 
-// logo-master.png is the gradient version made for a light surface (see
-// ARCHITECTURE.md's Brand note) - the counterpart to logo-white-glyph.png,
-// which only reads on an orange/dark background. Square (1254x1254).
-const LOGO = require('../../assets/brand/logo-master.png');
+// logo-web.png, not logo-master.png: the master is the raw artwork and
+// carries its own opaque white field, which rendered as a white square on
+// the cream background here (and worse in dark mode). logo-web.png is that
+// same gradient mark after generate-brand-icons.mjs keys the white out and
+// crops it to the glyph, so it composites onto colors.background cleanly.
+const LOGO = require('../../assets/brand/logo-web.png');
 
 // Lightweight stand-in for LaunchVideoScreen on every cold start after the
 // first - just the mark on the app's background, gone the moment loading
