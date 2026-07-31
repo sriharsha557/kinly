@@ -7,7 +7,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { ReactNode } from 'react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useMyCircles } from '../hooks/useCircles';
-import { GardenCard } from '../components/GardenCard';
+import { GardenHero } from '../components/GardenHero';
 import { BuddyCard } from '../components/BuddyCard';
 import { ChallengesCard } from '../components/ChallengesCard';
 import { VisionBoardCard } from '../components/VisionBoardCard';
@@ -86,10 +86,11 @@ export default function CircleScreen() {
 
         {circleId && <CircleSwitcher activeCircleId={circleId} onSwitch={setActiveCircleId} />}
 
-        {/* Primary: the accountability loop — how your circle's goals are actually going */}
+        {/* Primary: the living garden in tend mode — tap a plant to water
+            or check in on that member (design/REDESIGN.md §5.4) */}
         {circleId && (
           <Reveal index={0}>
-            <GardenCard circleId={circleId} />
+            <GardenHero circleId={circleId} variant="tend" />
           </Reveal>
         )}
         {userId && circleId && (
@@ -126,19 +127,20 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: 16 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary },
-    settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    settingsLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
+    settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 48, paddingHorizontal: 8 },
+    settingsLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
     switcherRow: { gap: 8, marginBottom: 16 },
     switcherChip: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
       paddingHorizontal: 16,
-      paddingVertical: 9,
+      minHeight: 48,
+      justifyContent: 'center',
       maxWidth: 160,
     },
     switcherChipActive: { backgroundColor: colors.primary },
-    switcherChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
+    switcherChipText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
     switcherChipTextActive: { color: colors.onAccent },
   });
 }

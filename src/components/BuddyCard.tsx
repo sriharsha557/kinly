@@ -148,9 +148,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
     buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-    status: { fontSize: 13, color: colors.shellSecondary, marginTop: 2 },
-    changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
-    empty: { fontSize: 13, color: colors.shellSecondary, marginTop: 6 },
+    status: { fontSize: 14, lineHeight: 20, color: colors.shellSecondary, marginTop: 2 },
+    changeLink: { fontSize: 14, fontWeight: '600', color: colors.primary },
+    empty: { fontSize: 14, lineHeight: 20, color: colors.shellSecondary, marginTop: 6 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
