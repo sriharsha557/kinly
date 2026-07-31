@@ -130,11 +130,18 @@ Deno.serve(async (req) => {
         // ask and tough-day mood_checkin: the circle, minus the actor.
         // Pending members (migration 0022) can't see anything circle-scoped
         // yet, so they must not be notified about it either.
+        //
+        // Leaving a circle (migration 0019) only sets deleted_at - it never
+        // flips status away from 'active' - and this function runs with
+        // SUPABASE_SERVICE_ROLE_KEY, which bypasses the RLS that hides
+        // those rows from the app. Without this filter, ex-members would
+        // keep getting pushed about asks and tough-day check-ins.
         const { data: members } = await supabase
           .from('circle_members')
           .select('user_id')
           .eq('circle_id', circleId)
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .is('deleted_at', null);
         deliveries.push({
           recipients: (members ?? []).map((m) => m.user_id as string).filter((id) => id !== subjectId),
           title: 'Kinly',

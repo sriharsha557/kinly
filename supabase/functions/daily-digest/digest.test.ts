@@ -44,7 +44,7 @@ test('one person checking in reads in the singular', () => {
 });
 
 test('the same person checking in twice counts once', () => {
-  const lines = composeDigest([ev('mood_checkin', 'A', {}, 'a'), ev('mood_checkin', 'A', {}, 'a')], 5);
+  const lines = composeDigest([ev('mood_checkin', 'A', {}, 'a'), ev('mood_checkin', 'B', {}, 'a')], 5);
   assert.deepEqual(lines, ['1 friend checked in']);
 });
 

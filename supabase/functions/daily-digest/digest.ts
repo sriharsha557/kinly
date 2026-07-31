@@ -24,8 +24,8 @@ export function composeDigest(
   // Priority order from the spec: streak milestones, goal completions,
   // garden growth, then aggregated check-in participation.
   const streaks = events
-    .filter((e) => e.type === 'streak')
-    .map((e) => `${e.actor_name} reached a ${e.payload.streak_count ?? 0}-day streak`);
+    .filter((e) => e.type === 'streak' && typeof e.payload.streak_count === 'number' && e.payload.streak_count > 0)
+    .map((e) => `${e.actor_name} reached a ${e.payload.streak_count}-day streak`);
 
   const completions = events
     .filter((e) => e.type === 'goal_completed')
