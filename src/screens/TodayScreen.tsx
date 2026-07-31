@@ -14,7 +14,7 @@ import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
-import { GardenTeaser } from '../components/GardenTeaser';
+import { GardenHero } from '../components/GardenHero';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
@@ -174,6 +174,10 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
+  // Tertiary-level feed (design/REDESIGN.md §4): nudge actions are
+  // revealed by tapping the row instead of six always-visible buttons per
+  // event - the feed reads as quiet rows until you choose to react.
+  const [expanded, setExpanded] = useState(false);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -236,17 +240,23 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       entering={isCelebration ? ZoomIn.springify().damping(14) : FadeInDown.duration(350)}
       style={styles.eventCard}
     >
-      <View style={styles.eventHeader}>
-        <Icon width={20} height={20} />
+      <TouchableOpacity
+        style={styles.eventHeader}
+        onPress={() => setExpanded((prev) => !prev)}
+        disabled={event.user_id === userId}
+        accessibilityRole="button"
+        accessibilityLabel={`${describeEvent(event)}. ${expanded ? 'Hide' : 'Show'} reactions`}
+      >
+        <Icon width={22} height={22} />
         <View style={styles.eventBody}>
           <Text style={styles.eventText}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
-      {event.user_id !== userId && (
+      {event.user_id !== userId && expanded && (
         <View style={styles.nudgeRow}>
           {NUDGE_KINDS.map(({ kind, Icon: NudgeIcon, label }) => (
             <TouchableOpacity
@@ -340,12 +350,12 @@ export default function TodayScreen() {
         </View>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
-        {/* Hierarchy is deliberate (see the UI-clarity pass): today's
-            mission and the circle's collective status lead; personal mood,
-            shortcuts and the feed are secondary. */}
-        {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
-        {circleId && <GardenTeaser circleId={circleId} />}
+        {/* Hierarchy per design/REDESIGN.md §4: the living garden leads,
+            mood check-in is the primary action beneath it, the mission is
+            secondary, and shortcuts + feed are tertiary. */}
+        {circleId && <GardenHero circleId={circleId} variant="overview" />}
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
+        {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
         <QuickActionsRow />
 
         <Text style={styles.sectionTitle}>Circle Activity</Text>
@@ -417,13 +427,15 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       backgroundColor: colors.inputBg,
     },
     loadMoreLabel: { fontSize: 14, fontWeight: '700', color: colors.primary },
+    // Tertiary level: no card chrome - quiet rows on the screen background
+    // with a hairline separator (design/REDESIGN.md §4).
     eventCard: {
-      ...cardShell,
-      padding: 14,
-      paddingLeft: 12,
+      paddingVertical: 6,
       gap: 10,
+      borderBottomWidth: 0.5,
+      borderBottomColor: colors.border,
     },
-    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
     eventBody: { flex: 1, gap: 2 },
     eventText: { fontSize: 16, lineHeight: 22, fontWeight: '600', color: colors.shellTitle },
     eventTime: { fontSize: 13, color: colors.textSecondary },

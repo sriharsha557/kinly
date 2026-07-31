@@ -7,7 +7,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { ReactNode } from 'react';
 import { useAuthStore } from '../state/useAuthStore';
 import { useMyCircles } from '../hooks/useCircles';
-import { GardenCard } from '../components/GardenCard';
+import { GardenHero } from '../components/GardenHero';
 import { BuddyCard } from '../components/BuddyCard';
 import { ChallengesCard } from '../components/ChallengesCard';
 import { VisionBoardCard } from '../components/VisionBoardCard';
@@ -86,10 +86,11 @@ export default function CircleScreen() {
 
         {circleId && <CircleSwitcher activeCircleId={circleId} onSwitch={setActiveCircleId} />}
 
-        {/* Primary: the accountability loop — how your circle's goals are actually going */}
+        {/* Primary: the living garden in tend mode — tap a plant to water
+            or check in on that member (design/REDESIGN.md §5.4) */}
         {circleId && (
           <Reveal index={0}>
-            <GardenCard circleId={circleId} />
+            <GardenHero circleId={circleId} variant="tend" />
           </Reveal>
         )}
         {userId && circleId && (
