@@ -51,12 +51,17 @@ export function useCheckInOnBuddy(circleId: string | undefined) {
       buddyName: string;
       fromUserId: string;
     }) => {
+      // user_id is the buddy being checked *on*, not the sender - the row is
+      // about them, which is why this can't share the 'reminder' type. As
+      // 'reminder' it fanned out to the whole circle (including the sender,
+      // about their own action); 'buddy_checkin' is feed-only, and the
+      // nudges row inserted below carries the single push, to the buddy.
       const { data: event, error } = await supabase
         .from('events')
         .insert({
           circle_id: circleId,
           user_id: buddyId,
-          type: 'reminder',
+          type: 'buddy_checkin',
           payload: { message: 'Your buddy is checking in on you' },
         })
         .select()
