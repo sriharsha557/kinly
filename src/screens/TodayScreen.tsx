@@ -21,6 +21,7 @@ import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono } from '../components/icons/MonoIcons';
+import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
@@ -33,7 +34,6 @@ import CheerIcon from '../../assets/icons/nudges/cheer.svg';
 import WalkIcon from '../../assets/icons/nudges/walk.svg';
 import WorkoutIcon from '../../assets/icons/nudges/workout.svg';
 import StudyIcon from '../../assets/icons/nudges/study.svg';
-import WaveIcon from '../../assets/icons/feed/wave.svg';
 import ClockIcon from '../../assets/icons/feed/clock.svg';
 import ChatIcon from '../../assets/icons/feed/chat.svg';
 import RocketIcon from '../../assets/icons/feed/rocket.svg';
@@ -355,7 +355,9 @@ export default function TodayScreen() {
           <Text style={styles.greeting}>
             {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'}
           </Text>
-          <WaveIcon width={22} height={22} />
+          {/* Decorative, not interactive - so it takes textSecondary, not
+              the accent (design/PRINCIPLES.md's one-accent rule). */}
+          <GreetingIcon size={22} color={theme.colors.textSecondary} />
         </View>
         <Text style={styles.date}>{todayDateLabel()}</Text>
 
