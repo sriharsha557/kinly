@@ -18,6 +18,8 @@
 - **Read stamping happens on screen focus**, not on scroll.
 - **Migrations are sequential.** The next number is `0038`.
 - **Node version:** 22.16.0 local. Test runner verified working with `node --experimental-strip-types --test "src/**/*.test.ts"`.
+- **Test imports use the explicit `.ts` extension** (`from './moments.ts'`) because Node ESM performs no extension resolution. This requires `allowImportingTsExtensions` in `tsconfig.json`, added in Task 1 — without it `npx tsc --noEmit` fails with `TS5097`.
+- **Verification commands** used throughout: `npm test`, `npx tsc --noEmit`, `npx eslint <paths>`. All three must be clean before a task is committed.
 - **Deployment:** migrations and RPCs are applied by hand in the Supabase Dashboard (SQL Editor). This repo has no migration CLI step.
 
 ---
@@ -30,6 +32,7 @@ Establishes the project's first unit test. The function is deliberately self-con
 - Create: `src/lib/moments.ts`
 - Create: `src/lib/moments.test.ts`
 - Modify: `package.json` (add `test` script)
+- Modify: `tsconfig.json` (add `allowImportingTsExtensions`)
 
 **Interfaces:**
 - Consumes: nothing
@@ -41,6 +44,28 @@ In the `"scripts"` block, add the `test` entry (keep the existing entries):
 
 ```json
 "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
+```
+
+- [ ] **Step 1b: Allow `.ts` extensions in imports**
+
+Node's type stripping requires the explicit `./moments.ts` extension in the
+test's import (Node ESM does no extension resolution). TypeScript rejects that
+by default with `TS5097`, and `src/**` is inside the typecheck, so
+`npx tsc --noEmit` would fail from Task 3 onward without this. Verified: adding
+the flag makes the probe compile clean, and it is legal here because
+`expo/tsconfig.base` already sets `noEmit: true`.
+
+Replace `tsconfig.json` with:
+
+```json
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "allowImportingTsExtensions": true
+  },
+  "exclude": ["node_modules", "supabase/functions"]
+}
 ```
 
 - [ ] **Step 2: Write the failing test**
@@ -134,7 +159,7 @@ Expected: PASS — `# pass 6`, `# fail 0`
 - [ ] **Step 6: Commit**
 
 ```bash
-git add package.json src/lib/moments.ts src/lib/moments.test.ts
+git add package.json tsconfig.json src/lib/moments.ts src/lib/moments.test.ts
 git commit -m "Add unread counting for Moments feed, with first unit tests"
 ```
 
