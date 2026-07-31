@@ -358,7 +358,7 @@ export default function TodayScreen() {
     isFetchingNextPage,
   } = useEvents(circleId ?? undefined);
   const events = data?.pages.flat();
-  const { lastReadAt } = useMomentsUnread(circleId ?? undefined, userId);
+  const { lastReadAt, isLoaded: readStateLoaded } = useMomentsUnread(circleId ?? undefined, userId);
   const markRead = useMarkMomentsRead(circleId ?? undefined, userId);
 
   // lastReadAtRef always mirrors the latest lastReadAt from the query, kept
@@ -387,7 +387,11 @@ export default function TodayScreen() {
   const hasStampedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      if (!hasStampedRef.current) {
+      // Wait for the read state to actually load before stamping. lastReadAt
+      // is null while the query is in flight *and* when the member has never
+      // read the feed, so stamping too early would capture null on every
+      // cold start and file the whole feed under "New".
+      if (readStateLoaded && !hasStampedRef.current) {
         hasStampedRef.current = true;
         setLastReadAtOnEntry(lastReadAtRef.current);
         markRead.mutate();
@@ -397,10 +401,14 @@ export default function TodayScreen() {
       };
       // markRead is a stable React Query mutation object; lastReadAtRef is a
       // ref (its identity never changes) and is always read via .current, so
-      // neither belongs in this dependency array - deliberately empty so
-      // this only re-runs on focus/blur, never because lastReadAt changed.
+      // neither belongs in this dependency array. readStateLoaded does: it
+      // flips false->true once when the query settles, and the effect has to
+      // re-run then or a screen focused before the fetch lands would never
+      // stamp at all. That flip happens once per mount and hasStampedRef
+      // absorbs it, so this still stamps exactly once per focus - unlike
+      // lastReadAt, which changes on every stamp and would loop.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [readStateLoaded]),
   );
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();

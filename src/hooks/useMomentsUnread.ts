@@ -41,6 +41,12 @@ export function useMomentsUnread(circleId: string | undefined, userId: string | 
   return {
     unreadCount: query.data?.unreadCount ?? 0,
     lastReadAt: query.data?.lastReadAt ?? null,
+    // lastReadAt is null both while the query is in flight and when the
+    // member genuinely has never read the feed, and those two mean opposite
+    // things to the "New" divider. Callers that stamp read state need to
+    // wait for this before trusting lastReadAt, or a cold start would treat
+    // an already-read feed as entirely unread.
+    isLoaded: query.isSuccess,
   };
 }
 
