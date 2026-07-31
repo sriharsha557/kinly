@@ -169,14 +169,14 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           onPress={() => Linking.openURL('https://sriharsha557.github.io/kinly/privacy.html')}
-          style={{ marginTop: 32, alignItems: 'center' }}
+          style={{ marginTop: 32, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}
         >
           <Text style={styles.privacyLink}>Privacy Policy</Text>
         </TouchableOpacity>
 
         <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 12 }} />
 
-        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: 20, alignItems: 'center' }}>
+        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: 20, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}>
           <Text style={styles.deleteLink}>Delete account</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -200,9 +200,9 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
     content: { padding: 20 },
     header: { alignItems: 'center', gap: 4, marginBottom: 24 },
     avatarImage: { width: 72, height: 72, borderRadius: 36 },
-    bio: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
+    bio: { fontSize: 14, lineHeight: 20, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
     name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-    circleName: { fontSize: 14, color: colors.textSecondary },
+    circleName: { fontSize: 15, color: colors.textSecondary },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
     sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
     badgeList: { gap: 10 },
@@ -219,7 +219,7 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
       paddingLeft: 14,
     },
     empty: { color: colors.textSecondary },
-    privacyLink: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
-    deleteLink: { fontSize: 13, fontWeight: '600', color: colors.danger },
+    privacyLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
+    deleteLink: { fontSize: 14, fontWeight: '600', color: colors.danger },
   });
 }

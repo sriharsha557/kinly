@@ -59,7 +59,7 @@ function createStyles({ radii }: ReturnType<typeof useTheme>) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      minHeight: 46,
+      minHeight: 48,
       borderRadius: radii.pill,
       paddingHorizontal: 16,
       paddingVertical: 12,

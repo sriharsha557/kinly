@@ -161,9 +161,70 @@ const categoryColorsByScheme: Record<
 export const radii = {
   card: 20,
   tile: 24,
+  hero: 28,
   input: 16,
   pill: 999,
 } as const;
+
+// 4pt spacing scale (design/REDESIGN.md §2.1). Components use names, not
+// numbers - `gutter` is the horizontal screen inset, `section` the gap
+// between sections.
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  section: 32,
+  hero: 40,
+  gutter: 20,
+} as const;
+
+// Type scale (design/REDESIGN.md §2.2). 13 is the floor - nothing smaller
+// anywhere. Sizes pair with lineHeight; weights stay per-use.
+export const type = {
+  display: { fontSize: 32, lineHeight: 38 },
+  title: { fontSize: 26, lineHeight: 32 },
+  heading: { fontSize: 20, lineHeight: 26 },
+  subheading: { fontSize: 17, lineHeight: 24 },
+  body: { fontSize: 16, lineHeight: 24 },
+  secondary: { fontSize: 14, lineHeight: 20 },
+  caption: { fontSize: 13, lineHeight: 18 },
+} as const;
+
+// Touch standards (design/REDESIGN.md §2.3): minimum interactive box,
+// tappable list rows, chips.
+export const touch = {
+  min: 48,
+  row: 56,
+  chip: 48,
+} as const;
+
+// The garden's own palette - fixed nature hues that never follow the
+// accent (the accent drives chrome and the hero's sky tint only), dimmed
+// once centrally for dark mode.
+const gardenByScheme: Record<
+  ResolvedScheme,
+  { leaf: string; leafDeep: string; soil: string; bloomWarm: string; bloomGold: string; wilt: string }
+> = {
+  light: {
+    leaf: '#4CAF6D',
+    leafDeep: '#2F7D4F',
+    soil: '#8A6A4F',
+    bloomWarm: '#FF8FA3',
+    bloomGold: '#FFD166',
+    wilt: '#A8A08F',
+  },
+  dark: {
+    leaf: '#5BBF7E',
+    leafDeep: '#3E9663',
+    soil: '#5C4632',
+    bloomWarm: '#FF8FA3',
+    bloomGold: '#FFD166',
+    wilt: '#8A8272',
+  },
+};
 
 export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
   const accent = accents[accentId];
@@ -205,6 +266,10 @@ export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
       amber: n.amber,
     },
     categoryColors: categoryColorsByScheme[scheme],
+    garden: gardenByScheme[scheme],
+    spacing,
+    type,
+    touch,
     gradients: {
       hero: [accent.celebration, accent.primarySoft] as const,
       achievement: [n.amber, accent.celebration] as const,
