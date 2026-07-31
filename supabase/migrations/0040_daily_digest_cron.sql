@@ -13,6 +13,15 @@
 -- is anchored to that fixed time, not computed as "now minus 24h", so if the
 -- cron time and those constants ever disagree, every digest silently covers
 -- the wrong window.
+--
+-- The net.http_post call below sends only a Content-Type header - no
+-- Authorization. That only works if "Enforce JWT verification" is turned
+-- OFF for the daily-digest function in the Dashboard (Edge Functions ->
+-- daily-digest -> Settings). This requirement is also documented inside the
+-- function file itself, but this migration is the artifact an operator
+-- actually runs, so it's called out here too: if that box is left checked,
+-- this cron 401s every night with no in-app symptom at all - the only sign
+-- is that the digest never arrives.
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 

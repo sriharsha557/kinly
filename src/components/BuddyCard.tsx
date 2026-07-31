@@ -106,7 +106,16 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
             <PillButton
               label={`Check in on ${buddy.buddy_name}`}
               onPress={() =>
-                checkIn.mutate({ buddyId: buddy.buddy_id, buddyName: buddy.buddy_name, fromUserId: userId })
+                checkIn.mutate(
+                  { buddyId: buddy.buddy_id, buddyName: buddy.buddy_name, fromUserId: userId },
+                  {
+                    onError: (err) =>
+                      Alert.alert(
+                        'Could not check in',
+                        err instanceof Error ? err.message : 'Please try again.',
+                      ),
+                  },
+                )
               }
               loading={checkIn.isPending}
               style={{ marginTop: 10 }}

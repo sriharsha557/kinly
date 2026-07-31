@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -361,19 +361,46 @@ export default function TodayScreen() {
   const { lastReadAt } = useMomentsUnread(circleId ?? undefined, userId);
   const markRead = useMarkMomentsRead(circleId ?? undefined, userId);
 
+  // lastReadAtRef always mirrors the latest lastReadAt from the query, kept
+  // current on every render (not just while focused) so the focus effect
+  // below can read "the value right now" without needing lastReadAt in its
+  // dependency array.
+  const lastReadAtRef = useRef(lastReadAt);
+  lastReadAtRef.current = lastReadAt;
+
   // Arriving at the screen counts as reading, per the spec - not scrolling.
   // The stamp captured on focus is held in lastReadAtOnEntry so the "New"
   // divider stays put while you read, instead of vanishing the instant the
   // stamp updates.
+  //
+  // markRead.mutate()'s onSuccess invalidates the moments-unread query,
+  // which changes lastReadAt once the refetch lands. If lastReadAt were a
+  // dependency of this callback, that change would re-run the effect while
+  // still focused, stamp again, invalidate again, and loop forever - and
+  // also overwrite lastReadAtOnEntry with the fresh stamp, making the "New"
+  // divider vanish instead of holding still. hasStampedRef guards against
+  // exactly that: it makes the effect body run at most once per focus (using
+  // lastReadAtRef.current, captured before this visit's stamp fires),
+  // regardless of how many times lastReadAt changes while focused, and
+  // resets on blur so the next focus stamps again.
   const [lastReadAtOnEntry, setLastReadAtOnEntry] = useState<string | null>(null);
+  const hasStampedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      setLastReadAtOnEntry(lastReadAt);
-      markRead.mutate();
-      // markRead is a stable React Query mutation object; including it would
-      // re-fire the effect on every render.
+      if (!hasStampedRef.current) {
+        hasStampedRef.current = true;
+        setLastReadAtOnEntry(lastReadAtRef.current);
+        markRead.mutate();
+      }
+      return () => {
+        hasStampedRef.current = false;
+      };
+      // markRead is a stable React Query mutation object; lastReadAtRef is a
+      // ref (its identity never changes) and is always read via .current, so
+      // neither belongs in this dependency array - deliberately empty so
+      // this only re-runs on focus/blur, never because lastReadAt changed.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lastReadAt]),
+    }, []),
   );
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();

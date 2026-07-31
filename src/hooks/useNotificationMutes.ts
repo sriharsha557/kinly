@@ -12,16 +12,19 @@ export const TIER_SWITCHES = [
   { key: 'tier_digest', label: 'Daily digest', hint: "Your circle's day, once each evening" },
 ] as const;
 
+// Only categories that still push belong here. goal_completed, streak,
+// challenge_completed and streak_saved moved to the daily digest and are
+// feed-only now - toggling a switch for any of them would change nothing,
+// which is worse than not offering the switch at all. Digest *content*
+// isn't per-category filterable either: the digest is one composed message
+// shared by the whole circle, not a per-recipient assembly of the categories
+// they still want, so there's no per-category knob to wire up for it.
 export const MUTE_CATEGORIES = [
-  { key: 'goal_completed', label: 'Goal milestones' },
-  { key: 'streak', label: 'Streak achieved' },
   { key: 'reminder', label: 'Streak at risk / check-ins' },
   { key: 'ask', label: 'Ask posted' },
   { key: 'reply', label: 'Replies' },
   { key: 'nudge', label: 'Nudges received' },
-  { key: 'challenge_completed', label: 'Challenge completed' },
   { key: 'mood_checkin', label: 'Mood check-ins' },
-  { key: 'streak_saved', label: 'Streak saves' },
 ] as const;
 
 export function useNotificationMutes(circleId: string | undefined, userId: string | undefined) {
