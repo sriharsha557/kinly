@@ -44,6 +44,21 @@ export function useCreateGoal() {
         .select()
         .single();
       if (error) throw error;
+
+      // Starting a goal is a moment the circle should see - previously only
+      // *finishing* one produced a feed row, so a friend planting something
+      // new was invisible until they completed it. Feed-only (migration
+      // 0039), so this adds a Moments row and no push. Deliberately not
+      // awaited into the error path: a failed event insert must not roll
+      // back a successfully created goal.
+      const { error: eventError } = await supabase.from('events').insert({
+        circle_id: circleId,
+        user_id: userId,
+        type: 'goal_started',
+        payload: { title, goal_id: (data as Goal).id },
+      });
+      if (eventError) console.warn('goal_started event failed', eventError.message);
+
       return data as Goal;
     },
     onSuccess: (_data, variables) =>
