@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { FC } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import TodayScreen from '../screens/TodayScreen';
@@ -16,6 +17,8 @@ import {
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
+import { useAuthStore } from '../state/useAuthStore';
+import { useMomentsUnread } from '../hooks/useMomentsUnread';
 import { TAB_BAR_HEIGHT } from '../hooks/useTabBarClearance';
 import type { MainTabParamList } from './types';
 
@@ -35,10 +38,16 @@ function TabIcon({
   Icon,
   color,
   focused,
+  showDot,
+  dotColor,
+  dotBorderColor,
 }: {
   Icon: FC<{ size?: number; color: string }>;
   color: string;
   focused: boolean;
+  showDot?: boolean;
+  dotColor: string;
+  dotBorderColor: string;
 }) {
   const scale = useSharedValue(1);
 
@@ -53,6 +62,21 @@ function TabIcon({
   return (
     <Animated.View style={iconStyle}>
       <Icon size={24} color={color} />
+      {showDot && (
+        <View
+          style={{
+            position: 'absolute',
+            top: -2,
+            right: -3,
+            width: 9,
+            height: 9,
+            borderRadius: 4.5,
+            backgroundColor: dotColor,
+            borderWidth: 1.5,
+            borderColor: dotBorderColor,
+          }}
+        />
+      )}
     </Animated.View>
   );
 }
@@ -62,6 +86,9 @@ export default function MainTabs() {
   const theme = useTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const circleId = useAuthStore((state) => state.activeCircleId);
+  const userId = useAuthStore((state) => state.user?.id);
+  const { unreadCount } = useMomentsUnread(circleId ?? undefined, userId);
 
   return (
     <Tab.Navigator
@@ -79,7 +106,16 @@ export default function MainTabs() {
         ],
         tabBarItemStyle: styles.tabBarItem,
         tabBarIcon: ({ color, focused }) => (
-          <TabIcon Icon={ICONS[route.name]} color={color} focused={focused} />
+          <TabIcon
+            Icon={ICONS[route.name]}
+            color={color}
+            focused={focused}
+            // Only Today hosts the Moments feed, and a dot on the screen
+            // you are already looking at is noise.
+            showDot={route.name === 'Today' && !focused && unreadCount > 0}
+            dotColor={colors.primary}
+            dotBorderColor={colors.surface}
+          />
         ),
       })}
     >
