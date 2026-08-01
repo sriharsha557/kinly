@@ -52,15 +52,12 @@ export function CircleTodaySection({
         targetId: row.userId,
         targetName: row.name,
         fromUserId: userId,
-        // A tough day wants encouragement to keep going; a quiet stretch
-        // wants a cheer. Both map onto existing nudge kinds.
-        kind: row.reason === 'tough_day' ? 'keep_going' : 'cheer',
-        // Context only where it is both true and safe to say back. A tough
-        // day is worth naming. "Quiet for 4 days" is deliberately withheld:
-        // it is true, but handing it to the generator invites a message that
-        // reads as being called out, and MoodCheckinCard's no-shame rule
+        // A tough day gets the support pool, which is written for exactly
+        // that: no advice, no "you've got this", nothing that reads as
+        // pressure. A quiet stretch gets an ordinary cheer - deliberately
+        // NOT copy about being quiet, since MoodCheckinCard's no-shame rule
         // applies to what we write on someone's behalf too.
-        context: row.reason === 'tough_day' ? 'they said today was a tough one' : undefined,
+        kind: row.reason === 'tough_day' ? 'support' : 'cheer',
       });
     } catch (err) {
       Alert.alert('Could not send that', err instanceof Error ? err.message : 'Please try again.');

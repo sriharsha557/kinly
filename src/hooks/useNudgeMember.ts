@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { generateNudgeMessage } from '../lib/nudgeMessage';
+import { useNudgeCopy } from './useNudgeCopy';
+import type { NudgeContext } from '../lib/nudgeMessages';
 import type { NudgeKind } from '../types/models';
 
 // Reaches out to a circle member who has no event to nudge.
@@ -17,6 +18,7 @@ import type { NudgeKind } from '../types/models';
 // generalisation needs no schema change.
 export function useNudgeMember(circleId: string | undefined) {
   const queryClient = useQueryClient();
+  const { nudgeCopy } = useNudgeCopy();
   return useMutation({
     mutationFn: async ({
       targetId,
@@ -29,12 +31,11 @@ export function useNudgeMember(circleId: string | undefined) {
       targetName: string;
       fromUserId: string;
       kind: NudgeKind;
-      // A true fact about the person, or nothing. Never a guess: the
-      // generator is instructed to invent nothing when this is absent, and
-      // passing something speculative here would defeat that.
-      context?: string;
+      // Structured, not prose. The old string existed only to feed a prompt;
+      // the library needs values it can substitute.
+      context?: NudgeContext;
     }) => {
-      const message = await generateNudgeMessage(kind, targetName, context);
+      const message = nudgeCopy(kind, { name: targetName, ...context });
 
       const { data: event, error } = await supabase
         .from('events')

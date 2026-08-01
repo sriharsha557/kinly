@@ -52,9 +52,9 @@ export function CircleMembersSection({
         fromUserId: userId,
         kind: 'cheer',
         // Their streak is the one thing we actually know, so it is the one
-        // thing the message may mention. With no streak we pass nothing and
-        // the generator is instructed to invent nothing.
-        context: streak > 0 ? `they are on a ${streak}-day streak` : undefined,
+        // thing a message may mention. With no streak, streak-placeholder
+        // messages are simply ineligible and a generic line is picked.
+        context: streak > 0 ? { streak } : undefined,
       });
     } catch (err) {
       Alert.alert('Could not send that', err instanceof Error ? err.message : 'Please try again.');

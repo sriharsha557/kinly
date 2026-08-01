@@ -14,7 +14,7 @@ import { useWaterStreak, type StreakSaveReason } from '../hooks/useStreakSaves';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
 import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
-import { generateNudgeMessage } from '../lib/nudgeMessage';
+import { useNudgeCopy } from '../hooks/useNudgeCopy';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
 import { CirclePicker, CircleName } from '../components/CirclePicker';
@@ -221,6 +221,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
+  const { nudgeCopy } = useNudgeCopy();
   // Tertiary-level feed (design/REDESIGN.md §4): nudge actions are
   // revealed by tapping the row instead of six always-visible buttons per
   // event - the feed reads as quiet rows until you choose to react.
@@ -243,7 +244,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
     setSendingKind(kind);
     try {
       const recipientName = event.profiles?.name ?? 'your friend';
-      const message = await generateNudgeMessage(kind, recipientName, goalTitleFromEvent(event));
+      const message = nudgeCopy(kind, { name: recipientName, goal: goalTitleFromEvent(event) });
       await sendNudge.mutateAsync({ eventId: event.id, userId, kind, message });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } finally {

@@ -76,7 +76,10 @@ export interface Event {
   created_at: string;
 }
 
-export type NudgeKind = 'cheer' | 'water' | 'walk' | 'workout' | 'keep_going' | 'streak';
+// 'support' is for a tough-day check-in, added alongside migration 0044. It
+// exists so someone who has just said today was hard is not sent the same
+// copy as someone being told to keep going on a goal.
+export type NudgeKind = 'cheer' | 'water' | 'walk' | 'workout' | 'keep_going' | 'streak' | 'support';
 
 export type MoodValue = 'great' | 'okay' | 'tough';
 

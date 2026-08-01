@@ -8,6 +8,7 @@ const FALLBACK_MESSAGES: Record<NudgeKind, string> = {
   workout: "Let's get that workout in!",
   keep_going: "You're doing great, keep going!",
   streak: "Don't break the streak now!",
+  support: 'Thinking of you today.',
 };
 
 export async function generateNudgeMessage(
