@@ -137,7 +137,7 @@ function AskCard({
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
             >
-              <DeleteIcon width={15} height={15} opacity={0.6} />
+              <DeleteIcon width={15} height={15} color={theme.colors.textSecondary} opacity={0.6} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity

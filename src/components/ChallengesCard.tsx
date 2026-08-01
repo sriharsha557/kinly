@@ -162,7 +162,7 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <RocketIcon width={22} height={22} />
+          <RocketIcon width={22} height={22} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Circle Challenges</Text>
         </View>
         <TouchableOpacity onPress={() => setCreating(true)}>

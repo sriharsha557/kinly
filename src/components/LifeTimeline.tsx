@@ -77,7 +77,7 @@ export function LifeTimeline({ userId }: { userId: string }) {
                 style={styles.row}
               >
                 <View style={styles.iconBubble}>
-                  <Icon width={16} height={16} />
+                  <Icon width={16} height={16} color={theme.colors.textSecondary} />
                 </View>
                 <View style={styles.rowBody}>
                   <Text style={styles.entryTitle}>{entry.title}</Text>

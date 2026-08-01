@@ -63,9 +63,11 @@ const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
   buddy_checkin: WaveIcon,
 };
 
-// Mood faces come from the prop-driven MonoIcons set so they tint with the
-// theme; the rest of EVENT_ICON is still static assets awaiting the wider
-// illustration pass (design/PRINCIPLES.md "Open work").
+// Mood faces come from the prop-driven MonoIcons set, which takes {size,
+// color} rather than SvgProps - hence the separate map and the prop-shape
+// dispatch in EventIcon below. The EVENT_ICON assets tint too now (their
+// fills were rewritten to currentColor), they just take a different prop
+// shape, so both sides of that dispatch follow the accent.
 const MOOD_MONO: Record<MoodValue, FC<{ size?: number; color: string }>> = {
   great: HappyMono,
   okay: NeutralMono,
@@ -114,7 +116,7 @@ function EventIcon({ event, color }: { event: EventWithProfile; color: string })
     if (Mono) return <Mono size={22} color={color} />;
   }
   const Icon = EVENT_ICON[event.type];
-  return <Icon width={22} height={22} />;
+  return <Icon width={22} height={22} color={color} />;
 }
 
 // dayLabel feeds describeEvent's "took a ___ day" feed copy - kept separate
@@ -299,7 +301,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
               accessibilityLabel={label}
               hitSlop={4}
             >
-              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} />}
+              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} color={theme.colors.primary} />}
             </TouchableOpacity>
           ))}
         </View>
@@ -317,7 +319,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
             <Text style={styles.waterButtonText}>Watering…</Text>
           ) : (
             <View style={styles.waterButtonRow}>
-              <WaterIcon width={14} height={14} />
+              <WaterIcon width={14} height={14} color={theme.colors.primary} />
               <Text style={styles.waterButtonText}>Water their streak</Text>
             </View>
           )}

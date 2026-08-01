@@ -91,7 +91,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
   return (
     <View style={styles.card}>
       <View style={styles.titleRow}>
-        <BuddyIcon width={22} height={22} />
+        <BuddyIcon width={22} height={22} color={theme.colors.textSecondary} />
         <Text style={styles.title}>Accountability Buddy</Text>
       </View>
       <ConceptHint id="buddy" text="One person who'll encourage you when you miss a goal." />

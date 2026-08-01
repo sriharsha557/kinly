@@ -79,7 +79,7 @@ export default function CircleScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Circle</Text>
           <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
-            <SettingsIcon width={15} height={15} />
+            <SettingsIcon width={15} height={15} color={theme.colors.textSecondary} />
             <Text style={styles.settingsLink}>Settings</Text>
           </TouchableOpacity>
         </View>

@@ -31,7 +31,7 @@ export function QuickActionsRow() {
       {ACTIONS.map(({ label, icon: Icon, tab }, index) => (
         <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
           <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
-            <Icon width={22} height={22} />
+            <Icon width={22} height={22} color={theme.colors.primary} />
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>
         </Animated.View>

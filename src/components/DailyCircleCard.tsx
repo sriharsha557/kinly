@@ -25,7 +25,7 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
   return (
     <LinearGradient colors={theme.gradients.brand} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
       <View style={styles.titleRow}>
-        <ChatIcon width={20} height={20} />
+        <ChatIcon width={20} height={20} color={theme.colors.textSecondary} />
         <Text style={styles.title}>Circle Card</Text>
       </View>
       <Text style={styles.prompt}>{prompt}</Text>

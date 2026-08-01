@@ -127,9 +127,9 @@ function GoalCard({
         <View style={styles.cardHeaderRight}>
           {goal.streak_count > 0 && (
             <View style={styles.streakRow}>
-              <StreakIcon width={14} height={14} />
+              <StreakIcon width={14} height={14} color={theme.colors.textSecondary} />
               <Text style={styles.streak}>{goal.streak_count}</Text>
-              {hasWaterMark && <WaterIcon width={13} height={13} />}
+              {hasWaterMark && <WaterIcon width={13} height={13} color={theme.colors.primary} />}
             </View>
           )}
           <TouchableOpacity
@@ -165,7 +165,7 @@ function GoalCard({
               accessibilityRole="button"
               accessibilityLabel="Log progress with a photo"
             >
-              <CameraIcon width={18} height={18} />
+              <CameraIcon width={18} height={18} color={theme.colors.primary} />
             </TouchableOpacity>
             <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
               <Text style={styles.logButtonText}>Log progress</Text>
