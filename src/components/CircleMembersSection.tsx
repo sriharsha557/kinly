@@ -41,12 +41,21 @@ export function CircleMembersSection({
   const members = (garden?.members ?? []).filter((m) => !excluded.has(m.userId));
   const moodByUser = new Map((moods ?? []).map((m) => [m.user_id, m.mood as MoodValue]));
 
-  async function handleCheer(targetId: string, targetName: string) {
+  async function handleCheer(targetId: string, targetName: string, streak: number) {
     if (pendingUserId !== null) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setPendingUserId(targetId);
     try {
-      await nudgeMember.mutateAsync({ targetId, targetName, fromUserId: userId, kind: 'cheer' });
+      await nudgeMember.mutateAsync({
+        targetId,
+        targetName,
+        fromUserId: userId,
+        kind: 'cheer',
+        // Their streak is the one thing we actually know, so it is the one
+        // thing the message may mention. With no streak we pass nothing and
+        // the generator is instructed to invent nothing.
+        context: streak > 0 ? `they are on a ${streak}-day streak` : undefined,
+      });
     } catch (err) {
       Alert.alert('Could not send that', err instanceof Error ? err.message : 'Please try again.');
     } finally {
@@ -82,7 +91,7 @@ export function CircleMembersSection({
               <PillButton
                 label="Cheer"
                 variant="outline"
-                onPress={() => handleCheer(member.userId, member.name)}
+                onPress={() => handleCheer(member.userId, member.name, member.streak)}
                 loading={pendingUserId === member.userId}
                 disabled={pendingUserId !== null && pendingUserId !== member.userId}
                 style={styles.action}

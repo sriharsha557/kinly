@@ -52,9 +52,23 @@ Deno.serve(async (req) => {
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
     const hint = KIND_HINTS[kind] ?? 'encouraging them';
+
+    // The grounding rule is the whole game here. This prompt used to ask for
+    // "specific" unconditionally while passing no facts, so with no context
+    // the model had nothing true to be specific about and invented something
+    // plausible instead - real users got messages congratulating them on
+    // presentations they never gave. Only ask for specificity when there is
+    // an actual fact to be specific about; otherwise forbid invention
+    // outright, because a warm generic line is fine and a confident lie is not.
+    const grounding = context
+      ? `Refer to that specific thing. Do not add any other details.`
+      : `You do NOT know anything about what they have been doing. Do NOT invent or reference any specific event, achievement, activity, place, or time. Keep it general encouragement.`;
+
     const prompt = `Write ONE short text message (under 18 words) from a close friend to ${recipientName}, ${hint}${
       context ? ` about: ${context}` : ''
-    }. Warm, casual, specific, no emojis, no quotes, no preamble - just the message itself.`;
+    }. Warm and casual, no emojis, no quotes, no preamble - just the message itself.
+
+${grounding}`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

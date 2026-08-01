@@ -23,13 +23,18 @@ export function useNudgeMember(circleId: string | undefined) {
       targetName,
       fromUserId,
       kind,
+      context,
     }: {
       targetId: string;
       targetName: string;
       fromUserId: string;
       kind: NudgeKind;
+      // A true fact about the person, or nothing. Never a guess: the
+      // generator is instructed to invent nothing when this is absent, and
+      // passing something speculative here would defeat that.
+      context?: string;
     }) => {
-      const message = await generateNudgeMessage(kind, targetName);
+      const message = await generateNudgeMessage(kind, targetName, context);
 
       const { data: event, error } = await supabase
         .from('events')
