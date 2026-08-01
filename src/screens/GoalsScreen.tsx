@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
-  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -232,7 +231,6 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const [category, setCategory] = useState<InterestCategory | null>(null);
-  const [trackSteps, setTrackSteps] = useState(false);
   const createGoal = useCreateGoal();
   const theme = useTheme();
   const { colors } = theme;
@@ -247,12 +245,10 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
       title: title.trim(),
       target: targetValue,
       category,
-      source: trackSteps ? 'health_steps' : 'manual',
     });
     setTitle('');
     setTarget('');
     setCategory(null);
-    setTrackSteps(false);
   }
 
   return (
@@ -301,12 +297,6 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           );
         })}
       </View>
-      {Platform.OS === 'android' && (
-        <View style={styles.stepsToggleRow}>
-          <ToggleSwitch value={trackSteps} onValueChange={setTrackSteps} />
-          <Text style={styles.stepsToggleLabel}>Track automatically with Health Connect (steps)</Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -394,8 +384,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 8,
     },
     categoryChipLabel: { fontSize: 14, fontWeight: '600' },
-    stepsToggleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-    stepsToggleLabel: { fontSize: 13, color: colors.textSecondary, flex: 1 },
     input: {
       flex: 1,
       backgroundColor: colors.inputBg,

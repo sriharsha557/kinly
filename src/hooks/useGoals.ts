@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { isStepGoal } from '../lib/stepGoal';
+import { useHealthSyncStore } from '../state/useHealthSyncStore';
 import type { Goal, GoalSource, InterestCategory } from '../types/models';
 
 export function useGoals(circleId: string | undefined) {
@@ -27,6 +29,19 @@ interface NewGoal {
   source?: GoalSource;
 }
 
+// An explicit `source` from the caller always wins; otherwise a connected
+// device auto-detects. On a device that never connected every goal is
+// 'manual', so nothing is ever marked for a sync that cannot happen.
+function resolveGoalSource(
+  source: GoalSource | undefined,
+  title: string,
+  target: number,
+): GoalSource {
+  if (source) return source;
+  const connected = useHealthSyncStore.getState().decision === 'connected';
+  return connected && isStepGoal(title, target) ? 'health_steps' : 'manual';
+}
+
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -39,7 +54,7 @@ export function useCreateGoal() {
           title,
           target,
           category: category ?? null,
-          goal_source: source ?? 'manual',
+          goal_source: resolveGoalSource(source, title, target),
         })
         .select()
         .single();
