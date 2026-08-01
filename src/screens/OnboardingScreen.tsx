@@ -300,9 +300,9 @@ function ThemeStep() {
     setSaving(true);
     try {
       if (skip) {
-        setAccent('ember');
-        setMode('system');
-        await setThemePrefs({ accent: 'ember', mode: 'system' });
+        setAccent('dusk');
+        setMode('light');
+        await setThemePrefs({ accent: 'dusk', mode: 'light' });
       } else {
         await setThemePrefs({ accent, mode });
       }

@@ -5,8 +5,8 @@
 // { accent, scheme } into the same theme shape every screen already
 // consumes via useTheme().
 
-// 'ember' is the original orange and the default - existing users see no
-// change unless they pick otherwise.
+// 'dusk' is the default (the calm muted indigo the app opens on); 'ember'
+// is the original orange, kept as a choice rather than the starting point.
 export type AccentId = 'ember' | 'garden' | 'dusk';
 // 'system' follows the OS via useColorScheme(). A future "dim" mode slots
 // in here as a third resolved scheme, not a new mechanism.
@@ -59,11 +59,11 @@ export const accents: Record<AccentId, AccentRamp> = {
   },
 };
 
-// Order = display order in pickers; ember first because it's the default.
+// Order = display order in pickers; dusk first because it's the default.
 export const ACCENT_OPTIONS: { id: AccentId; label: string }[] = [
-  { id: 'ember', label: 'Ember' },
-  { id: 'garden', label: 'Garden' },
   { id: 'dusk', label: 'Dusk' },
+  { id: 'garden', label: 'Garden' },
+  { id: 'ember', label: 'Ember' },
 ];
 
 interface NeutralRamp {
