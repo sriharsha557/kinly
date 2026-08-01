@@ -22,6 +22,15 @@
 -- acted on, so leaving it open would let anyone push arbitrary text into any
 -- circle whose id they knew.
 --
+-- PREREQUISITE: Database Webhooks must be enabled on the project first, via
+-- Dashboard -> Database -> Webhooks -> "Enable webhooks". That one-time action
+-- installs the `supabase_functions` schema and the `http_request()` function
+-- these triggers call. Without it this file fails immediately with
+-- `ERROR: 3F000: schema "supabase_functions" does not exist` - which is
+-- exactly how the original omission was finally traced, after the webhooks
+-- appeared to be "missing" when in fact the feature they depend on had never
+-- been turned on. It is not something SQL can enable for you.
+--
 -- Safe to re-run: each trigger is dropped first.
 
 create extension if not exists pg_net;
