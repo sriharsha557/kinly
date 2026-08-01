@@ -41,7 +41,9 @@ export function CircleAICard({
     <View style={styles.card}>
       <View style={styles.titleRow}>
         <IdeaBulb width={20} height={20} />
-        <Text style={styles.title}>Kinly AI</Text>
+        {/* Not "Kinly AI" any more - nothing here calls an AI, and leaving
+            the name would be a false claim about how the app works. */}
+        <Text style={styles.title}>Circle Ideas</Text>
       </View>
       <Text style={styles.message}>{data.message}</Text>
       <View style={styles.pillRow}>
