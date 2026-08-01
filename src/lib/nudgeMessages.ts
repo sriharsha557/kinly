@@ -33,11 +33,14 @@ function satisfies(context: NudgeContext, placeholder: string): boolean {
   return typeof value === 'number' ? true : value.length > 0;
 }
 
+// One pass, not three chained replaces: sequential passes re-scan what the
+// previous one inserted, so a member whose display name is literally
+// "{streak}" would have it substituted again by the next pass. Values are
+// user-supplied, so they must be written in, never read back.
 function substitute(body: string, context: NudgeContext): string {
-  return body
-    .replace(/\{name\}/g, String(context.name ?? ''))
-    .replace(/\{goal\}/g, String(context.goal ?? ''))
-    .replace(/\{streak\}/g, String(context.streak ?? ''));
+  return body.replace(/\{(name|goal|streak)\}/g, (_match, key: 'name' | 'goal' | 'streak') =>
+    String(context[key] ?? ''),
+  );
 }
 
 export function pickNudgeMessage(

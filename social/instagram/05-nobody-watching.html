@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nobody's watching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0; padding:0; box-sizing:border-box;}
+  html,body{width:1080px; height:1080px; overflow:hidden;}
+  body{background:#FBF7F2; font-family:'Public Sans',sans-serif; color:#22281F; position:relative;}
+  .blob{position:absolute; width:640px; height:640px; border-radius:50%; background:#F6EDE2; top:-300px; right:-220px;}
+  .card{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:0 120px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:26px; letter-spacing:0.16em; text-transform:uppercase; color:#3B5D45; font-weight:600; margin-bottom:52px;}
+  h1{font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:96px; line-height:1.14; letter-spacing:-0.01em;}
+  h1 em{font-style:italic; color:#F97316;}
+  .body{margin-top:56px; font-size:35px; line-height:1.55; color:#565C4C; max-width:27ch;}
+  .footer{position:absolute; left:120px; bottom:90px; display:flex; align-items:center; gap:18px;}
+  .footer img{width:56px; height:56px;}
+  .footer span{font-family:'Newsreader',Georgia,serif; font-size:40px;}
+</style>
+</head>
+<body>
+  <div class="blob"></div>
+  <div class="card">
+    <div class="eyebrow">Why apps get abandoned</div>
+    <h1>Most people quit quietly. Because <em>nobody's watching</em>.</h1>
+    <div class="body">Habit apps are built for an audience of one. When you stop showing up, nothing happens. Nobody notices. So it never feels like quitting.</div>
+  </div>
+  <div class="footer">
+    <img src="../../store-listing/logo-glyph.png" alt="">
+    <span>kinly</span>
+  </div>
+</body>
+</html>

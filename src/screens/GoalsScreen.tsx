@@ -144,11 +144,17 @@ function GoalCard({
         </View>
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
-      {/* Only while connected: a health_steps goal on a disconnected device
-          is not being auto-tracked, so calling it "Auto" would be a lie. */}
-      {isHealthStepsGoal && isConnected && (
+      {/* Shown whenever the goal IS a step goal, connected or not - the badge
+          carries the only control that converts it back to manual, and
+          goal_source is a database column while the connection is
+          device-local. Hiding this when disconnected stranded the goal on
+          every other device, on iOS, and after any Sync steps toggle-off:
+          no log button, no undo, and a label claiming it was syncing. */}
+      {isHealthStepsGoal && (
         <View style={styles.autoBadge}>
-          <Text style={styles.autoBadgeText}>Auto · Health Connect</Text>
+          <Text style={styles.autoBadgeText}>
+            {isConnected ? 'Auto · Health Connect' : 'Auto-tracking paused'}
+          </Text>
           <AnimatedPressable
             onPress={() =>
               setGoalSource.mutate({ goalId: goal.id, circleId, source: 'manual' })
@@ -172,7 +178,7 @@ function GoalCard({
             <ToggleSwitch value onValueChange={() => {}} />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
-        ) : isHealthStepsGoal ? (
+        ) : isHealthStepsGoal && isConnected ? (
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>

@@ -98,3 +98,13 @@ test('random at the very top of the range still returns a message', () => {
 test('an empty library returns null', () => {
   assert.equal(pickNudgeMessage([], 'cheer', {}, [], 0), null);
 });
+
+test('a value containing a placeholder is not substituted again', () => {
+  // Names are user-supplied. Chained replaces would re-scan what the previous
+  // pass inserted and blank this out.
+  const messages = [msg('a', 'cheer', 'Nice one, {name}!', ['name'])];
+  assert.deepEqual(pickNudgeMessage(messages, 'cheer', { name: '{streak}' }, [], 0), {
+    id: 'a',
+    body: 'Nice one, {streak}!',
+  });
+});

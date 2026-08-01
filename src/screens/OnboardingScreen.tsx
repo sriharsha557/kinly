@@ -347,7 +347,7 @@ function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => 
 // is never asked again on this device; Profile is where they change their
 // mind.
 function HealthStep() {
-  const { connect, decline, isBusy } = useHealthSync();
+  const { connect, decline, isBusy, permissionDenied, openSettings } = useHealthSync();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -355,10 +355,22 @@ function HealthStep() {
     <View style={styles.form}>
       <Text style={styles.confirmTitle}>Count your steps for you?</Text>
       <Text style={styles.confirmBody}>
-        Kinly can read your daily step count from Health Connect, so walking goals log themselves.
+        {permissionDenied
+          ? // Without this the step said nothing at all when a user denied:
+            // connect() returned false, the decision stayed null, and the
+            // screen simply did not change. Android auto-denies silently
+            // after two refusals, so further taps looked broken too - the
+            // exact "a denial must not look like nothing happening" failure
+            // this feature exists to avoid.
+            "Kinly doesn't have permission to read your steps. You can grant it in Health Connect, or skip this — it changes nothing else."
+          : 'Kinly can read your daily step count from Health Connect, so walking goals log themselves.'}
       </Text>
-      <PillButton label="Connect" onPress={() => void connect()} loading={isBusy} />
-      <PillButton label="Not now" variant="outline" onPress={decline} />
+      {permissionDenied ? (
+        <PillButton label="Open Health Connect" onPress={() => void openSettings()} />
+      ) : (
+        <PillButton label="Connect" onPress={() => void connect()} loading={isBusy} />
+      )}
+      <PillButton label={permissionDenied ? 'Skip' : 'Not now'} variant="outline" onPress={decline} />
     </View>
   );
 }

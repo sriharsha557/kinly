@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getHealthConnectStatus,
   openHealthConnectSettings,
@@ -40,6 +41,23 @@ export function useHealthSync(circleId?: string) {
   // Connect uninstalled reports 'connected' but cannot sync, and a switch
   // showing on while nothing happens is worse than one showing off.
   const isConnected = decision === 'connected' && status === 'available';
+
+  // "Fix in Settings" replaces the toggle while permissionDenied is set, so
+  // without this the advertised recovery path was a dead end: the user taps
+  // it, grants the permission in Health Connect, comes back - and Profile is
+  // a tab screen that never unmounted, so the flag is still true and the
+  // only control on screen sends them straight back to settings. Returning
+  // to the foreground is exactly the moment their answer may have changed,
+  // so clear the flag and re-read the SDK status then.
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (next) => {
+      if (next !== 'active') return;
+      setPermissionDenied(false);
+      void queryClient.invalidateQueries({ queryKey: ['healthConnectStatus'] });
+    });
+    return () => subscription.remove();
+  }, [queryClient]);
 
   const connect = useCallback(async (): Promise<boolean> => {
     setIsBusy(true);

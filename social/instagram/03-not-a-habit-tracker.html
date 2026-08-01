@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Not a habit tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500;1,6..72,600&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0; padding:0; box-sizing:border-box;}
+  html,body{width:1080px; height:1080px; overflow:hidden;}
+  body{background:radial-gradient(circle at 30% 20%, #FB8B3C, #F97316 60%, #EA6A0E); font-family:'Public Sans',sans-serif; color:#FFF8F0; position:relative;}
+  .card{position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; padding:0 120px;}
+  h1{font-family:'Newsreader',Georgia,serif; font-weight:500; font-size:110px; line-height:1.12; letter-spacing:-0.01em;}
+  h1 em{font-style:italic;}
+  .strike{position:relative; white-space:nowrap; text-decoration:none;}
+  .strike::after{content:''; position:absolute; left:-2%; right:-2%; top:48%; height:10px; background:#FFF8F0; border-radius:5px;}
+  .body{margin-top:64px; font-size:36px; line-height:1.55; color:rgba(255,248,240,0.92); max-width:26ch;}
+  .footer{position:absolute; left:120px; bottom:90px; font-family:'Newsreader',Georgia,serif; font-size:40px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Kinly is not a<br><span class="strike">habit tracker</span>.</h1>
+    <div class="body">A tracker gives you a checkbox. Kinly gives you people. The checkbox was never the hard part.</div>
+  </div>
+  <div class="footer">kinly</div>
+</body>
+</html>

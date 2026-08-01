@@ -244,7 +244,16 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
     setSendingKind(kind);
     try {
       const recipientName = event.profiles?.name ?? 'your friend';
-      const message = nudgeCopy(kind, { name: recipientName, goal: goalTitleFromEvent(event) });
+      // streak_count comes off the same payload describeEvent already reads.
+      // Without it, the two seeded 'streak' messages that use {streak} were
+      // permanently ineligible - including the highest-weighted one - so the
+      // "Cheer their streak" button drew from 4 of its 6 lines.
+      const streakCount = (event.payload as Record<string, unknown>)?.streak_count;
+      const message = nudgeCopy(kind, {
+        name: recipientName,
+        goal: goalTitleFromEvent(event),
+        streak: typeof streakCount === 'number' ? streakCount : undefined,
+      });
       await sendNudge.mutateAsync({ eventId: event.id, userId, kind, message });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } finally {

@@ -36,5 +36,11 @@ alter table nudge_messages enable row level security;
 
 -- Reference data: any signed-in user reads it, nobody writes it from the
 -- app. Edits happen here, in SQL.
+-- Dropped first so the whole file is genuinely re-runnable: the create
+-- table and alter type above both say "if not exists", which reads as
+-- idempotent, but create policy has no such clause and would error on a
+-- second run.
+drop policy if exists "authenticated users read nudge messages" on nudge_messages;
+
 create policy "authenticated users read nudge messages" on nudge_messages
   for select to authenticated using (true);
