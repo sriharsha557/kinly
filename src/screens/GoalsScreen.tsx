@@ -278,6 +278,11 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // TouchableOpacity does not dim itself when disabled, so without an
+  // explicit style the button looked tappable and silently did nothing until
+  // both fields were filled.
+  const canAdd = !createGoal.isPending && !!title.trim() && !!Number(target);
+
   async function handleAdd() {
     const targetValue = Number(target);
     if (!title.trim() || !targetValue) return;
@@ -295,28 +300,40 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
 
   return (
     <View style={styles.addGoalWrap}>
+      {/* Stacked, not a single row. Side by side, the narrow Target field
+          read as a white pill button next to the coloured Add one, so the
+          row looked like two unlabelled buttons and nobody could tell which
+          was which. Labels above each field, and a full-width button that
+          says what it does. */}
       <View style={styles.form}>
+        <Text style={styles.fieldLabel}>Goal</Text>
         <TextInput
           style={styles.input}
-          placeholder="Goal (e.g. Drink 4L water)"
+          placeholder="e.g. Drink 4L water"
           placeholderTextColor={colors.textSecondary}
           value={title}
           onChangeText={setTitle}
         />
+        <Text style={styles.fieldLabel}>Target</Text>
         <TextInput
-          style={[styles.input, styles.targetInput]}
-          placeholder="Target"
+          style={styles.input}
+          placeholder="e.g. 4"
           placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           value={target}
           onChangeText={setTarget}
         />
         <TouchableOpacity
-          style={styles.addButton}
+          style={[styles.addButton, !canAdd && styles.addButtonDisabled]}
           onPress={handleAdd}
-          disabled={createGoal.isPending || !title.trim() || !target}
+          disabled={!canAdd}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canAdd }}
+          accessibilityLabel="Add goal"
         >
-          <Text style={styles.addButtonText}>Add</Text>
+          <Text style={[styles.addButtonText, !canAdd && styles.addButtonTextDisabled]}>
+            {createGoal.isPending ? 'Adding…' : 'Add goal'}
+          </Text>
         </TouchableOpacity>
       </View>
       {/* One-accent rule: resting chips are neutral with monochrome icons;
@@ -405,8 +422,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: colors.background },
     title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-    addGoalWrap: { marginBottom: 16, gap: 8 },
-    form: { flexDirection: 'row', gap: 8 },
+    addGoalWrap: { marginBottom: 16, gap: 12 },
+    form: { gap: 6 },
+    fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
     categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     categoryChip: {
       flexDirection: 'row',
@@ -419,22 +437,27 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     categoryChipLabel: { fontSize: 14, fontWeight: '600' },
     input: {
-      flex: 1,
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 12,
       minHeight: 52,
       color: colors.textPrimary,
     },
-    targetInput: { flex: 0.4 },
     addButton: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
       paddingHorizontal: 16,
       minHeight: 52,
       justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 6,
     },
-    addButtonText: { color: colors.onAccent, fontWeight: '700' },
+    // surfaceSubtle rather than a dimmed accent: the one-accent rule reserves
+    // colors.primary for things you can actually act on, and a faded accent
+    // still reads as the primary action.
+    addButtonDisabled: { backgroundColor: colors.surfaceSubtle },
+    addButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
+    addButtonTextDisabled: { color: colors.textSecondary },
     list: { gap: 12 },
     card: {
       ...cardShell,
