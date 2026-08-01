@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { circlePrompt } from '../lib/circlePrompts';
 import type { InterestCategory } from '../types/models';
 
 export interface CircleAIInsight {
@@ -7,6 +8,13 @@ export interface CircleAIInsight {
   weakest: InterestCategory | null;
   message: string;
   suggestedChallenge: string | null;
+}
+
+// Weeks since the epoch. Only its stability matters, not its absolute value:
+// it holds steady for seven days and then moves on, which is exactly what
+// keeps the suggested challenge from changing on every render.
+function isoWeek(now: Date): number {
+  return Math.floor(now.getTime() / (7 * 24 * 60 * 60 * 1000));
 }
 
 export function useCircleAI(circleId: string | undefined) {
@@ -34,19 +42,9 @@ export function useCircleAI(circleId: string | undefined) {
       const weakestRaw = sorted[sorted.length - 1][0] as InterestCategory;
       const weakest = strongest === weakestRaw ? null : weakestRaw;
 
-      let message = '';
-      let suggestedChallenge: string | null = null;
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke('circle-ai-insight', {
-          body: { strongest, weakest, categoryTotals: Object.fromEntries(totals) },
-        });
-        if (!fnError && data) {
-          message = (data.message as string) ?? '';
-          suggestedChallenge = (data.suggestedChallenge as string) ?? null;
-        }
-      } catch {
-        // No AI line yet if the function isn't deployed - card just won't render (see CircleAICard).
-      }
+      // Curated copy chosen from the same category totals an API used to be
+      // sent. The week seed keeps one suggestion in place for seven days.
+      const { message, suggestedChallenge } = circlePrompt(strongest, weakest, isoWeek(new Date()));
 
       return { strongest, weakest, message, suggestedChallenge };
     },
