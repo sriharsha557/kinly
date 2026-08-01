@@ -178,7 +178,9 @@ function describeEvent(event: EventWithProfile): string {
       return `${name}'s garden ${stageLabel}`;
     }
     case 'buddy_checkin':
-      return `${name}'s buddy checked in on them`;
+      // Not only buddies send these any more - the Circle tab's member rows
+      // use the same event type to reach anyone in the circle.
+      return `${name} got a check-in from a circle-mate`;
     default:
       return `${name} had an update`;
   }

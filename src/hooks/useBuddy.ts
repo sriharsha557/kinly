@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { generateNudgeMessage } from '../lib/nudgeMessage';
+import { useNudgeMember } from './useNudgeMember';
 
 export interface BuddyPair {
   buddy_id: string;
@@ -39,8 +39,11 @@ export function useSetBuddy(circleId: string | undefined, userId: string | undef
   });
 }
 
+// Checking in on your buddy is just a nudge to someone with no event to
+// attach it to - the same shape as reaching out from the Circle tab, so it
+// shares useNudgeMember rather than keeping a second copy of both inserts.
 export function useCheckInOnBuddy(circleId: string | undefined) {
-  const queryClient = useQueryClient();
+  const nudgeMember = useNudgeMember(circleId);
   return useMutation({
     mutationFn: async ({
       buddyId,
@@ -51,28 +54,12 @@ export function useCheckInOnBuddy(circleId: string | undefined) {
       buddyName: string;
       fromUserId: string;
     }) => {
-      // user_id is the buddy being checked *on*, not the sender - the row is
-      // about them, which is why this can't share the 'reminder' type. As
-      // 'reminder' it fanned out to the whole circle (including the sender,
-      // about their own action); 'buddy_checkin' is feed-only, and the
-      // nudges row inserted below carries the single push, to the buddy.
-      const { data: event, error } = await supabase
-        .from('events')
-        .insert({
-          circle_id: circleId,
-          user_id: buddyId,
-          type: 'buddy_checkin',
-          payload: { message: 'Your buddy is checking in on you' },
-        })
-        .select()
-        .single();
-      if (error) throw error;
-
-      const message = await generateNudgeMessage('keep_going', buddyName);
-      await supabase
-        .from('nudges')
-        .insert({ event_id: event.id, from_user_id: fromUserId, kind: 'keep_going', message });
+      await nudgeMember.mutateAsync({
+        targetId: buddyId,
+        targetName: buddyName,
+        fromUserId,
+        kind: 'keep_going',
+      });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events', circleId] }),
   });
 }
