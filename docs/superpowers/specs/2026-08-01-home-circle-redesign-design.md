@@ -137,6 +137,24 @@ Renders the active circle's name with a chevron; tapping opens a sheet listing t
 
 Consumes the existing `useMyCircles` and `useAuthStore`'s `setActiveCircleId`. Replaces `CircleSwitcher`, which is deleted.
 
+### `useNudgeMember` — `src/hooks/useNudgeMember.ts`
+
+**The gap this closes.** `useSendNudge` requires an `eventId` — nudges hang off a row in `events`. On Today that is fine, because you nudge an event you can see in the feed. A member row on the Circle tab has no event to attach to, and a member who has gone quiet has, by definition, produced none recently.
+
+`useCheckInOnBuddy` already solved exactly this for the buddy flow: insert an `events` row of type `buddy_checkin` whose `user_id` is the person being reached out to, then hang the nudge off it. `useNudgeMember` generalises that one flow so both callers share it:
+
+```ts
+useNudgeMember(circleId: string | undefined): UseMutationResult<
+  void, Error, { targetId: string; targetName: string; fromUserId: string; kind: NudgeKind }
+>
+```
+
+It inserts the `buddy_checkin` event, generates copy with the existing `generateNudgeMessage(kind, name)`, then inserts the `nudges` row. `useCheckInOnBuddy` is refactored to call it rather than keeping a second copy of the same two inserts.
+
+Migration `0041`'s policy already permits this: it admits `type = 'buddy_checkin'` from any `is_circle_member(circle_id)`, not only from the target's buddy.
+
+**One copy change follows.** `describeEvent`'s `buddy_checkin` case currently reads "{name}'s buddy checked in on them", which is wrong once a non-buddy can send one. It becomes "{name} got a check-in from a circle-mate" — true for both callers.
+
 ### `needsAttention` — `src/lib/needsAttention.ts`
 
 Pure and dependency-free, unit-tested with `node:test`, matching the pattern already established by `src/lib/moments.ts`, `src/lib/gardenGrowth.ts` and `supabase/functions/notify-circle/tiers.ts`.
@@ -169,7 +187,7 @@ Everything is derived from `goals` and `toughToday`; `members` supplies only ide
 
 - `streak_at_risk` — the member owns a goal whose `last_logged_date` is exactly 2 days ago. This is the single-day grace window `water_streak()` enforces server-side; the predicate currently lives inlined in `BuddyCard.tsx` as `isInGraceWindow` and **moves here**, so Buddy and Circle can no longer disagree about who is waterable. Client-side it decides only whether to offer the action — the RPC re-validates. `detail` reads "{goal.streak_count}-day streak ends today"; where a member has several such goals, the one with the longest streak wins (most to lose).
 - `tough_day` — the member's `user_id` appears in `toughToday`. `detail` reads "had a tough day".
-- `quiet` — the member's most recent `last_logged_date` across all their goals is 3 or more days ago, the same threshold `useGarden.stageFor()` uses for `wilted`. `detail` reads "quiet for {n} days".
+- `quiet` — the member's most recent `last_logged_date` across all their goals is **more than 3 days** ago (so 4+), which is exactly `useGarden.stageFor()`'s `days > 3` wilt threshold. The two must agree: a member showing wilted art in Members while absent from Circle Today would read as a bug. `detail` reads "quiet for {n} days".
 - **A member who has never logged anything is not "quiet".** `stageFor()` renders them `wilted` because it has no date to work from, but there is nothing for them to have lapsed from, and prompting the circle to chase a brand-new member is hostile. They appear in Members, never in Circle Today.
 - **Ranking:** `streak_at_risk` → `tough_day` → `quiet`. At-risk streaks come first because the grace window closes today; the others keep.
 - **One row per member.** A member matching several signals appears once, under the most urgent.
