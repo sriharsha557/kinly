@@ -147,6 +147,24 @@ export default function ProfileScreen() {
           </View>
         )}
 
+        {/* Renders its own "Connect Health" heading and card, and nothing at
+            all on a device without Health Connect - so this must not be
+            wrapped in a section header here. It used to sit inside Appearance,
+            where a step-sync toggle is not what anyone is looking for. */}
+        <HealthSyncRow />
+
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        {/* setThemePrefs applies to the live theme store first, so the whole
+            app restyles on tap - the profile-row sync happens behind it. */}
+        <View style={styles.appearanceCard}>
+          <ThemePicker
+            accent={themeAccent}
+            mode={themeMode}
+            onChangeAccent={(accent) => setThemePrefs({ accent })}
+            onChangeMode={(mode) => setThemePrefs({ mode })}
+          />
+        </View>
+
         <Text style={styles.sectionTitle}>Achievements</Text>
         {stats && stats.achievements.length > 0 ? (
           <View style={styles.badgeList}>
@@ -164,22 +182,10 @@ export default function ProfileScreen() {
           <Text style={styles.empty}>No achievements yet — complete a goal to earn your first badge.</Text>
         )}
 
-        <Text style={styles.sectionTitle}>Appearance</Text>
-        {/* setThemePrefs applies to the live theme store first, so the whole
-            app restyles on tap - the profile-row sync happens behind it. */}
-        <View style={styles.appearanceCard}>
-          <HealthSyncRow />
-          <ThemePicker
-            accent={themeAccent}
-            mode={themeMode}
-            onChangeAccent={(accent) => setThemePrefs({ accent })}
-            onChangeMode={(mode) => setThemePrefs({ mode })}
-          />
-        </View>
-
         <Text style={styles.sectionTitle}>Your Story</Text>
         {user && <LifeTimeline userId={user.id} />}
 
+        <Text style={styles.sectionTitle}>Future Self</Text>
         {user && <FutureSelfCard userId={user.id} />}
 
         <TouchableOpacity

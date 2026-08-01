@@ -6,8 +6,12 @@ import { useHealthSync } from '../hooks/useHealthSync';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
 
-// Always reflects real state, so "why aren't my steps syncing?" is answered
-// on screen rather than guessed at. Android's permission denial is otherwise
+// Renders its own section heading and card, not just a row: the whole section
+// has to disappear together on a device that cannot have the feature, or an
+// iOS user would see a "Connect Health" heading with nothing under it.
+//
+// Always reflects real state, so "why aren't my steps syncing?" is answered on
+// screen rather than guessed at. Android's permission denial is otherwise
 // indistinguishable from nothing happening - the exact failure
 // MOBILE_APP_LEARNINGS.md's UI-states checklist calls out.
 export function HealthSyncRow() {
@@ -17,7 +21,7 @@ export function HealthSyncRow() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // iOS and Android-without-Health-Connect get nothing at all - a row
+  // iOS and Android-without-Health-Connect get nothing at all - a section
   // explaining a feature the device cannot have is just noise.
   if (status === 'checking' || status === 'unavailable') return null;
 
@@ -29,38 +33,61 @@ export function HealthSyncRow() {
   const needsSettings = status === 'needs-install' || permissionDenied;
 
   return (
-    <View style={styles.row}>
-      <View style={styles.copy}>
-        <Text style={styles.label}>Sync steps</Text>
-        <Text style={styles.hint}>{hint}</Text>
+    <>
+      <Text style={styles.sectionTitle}>Connect Health</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.copy}>
+            <Text style={styles.label}>Sync steps</Text>
+            <Text style={styles.hint}>{hint}</Text>
+          </View>
+          {needsSettings ? (
+            <AnimatedPressable
+              style={styles.fix}
+              onPress={openSettings}
+              accessibilityRole="button"
+              accessibilityLabel={
+                status === 'needs-install' ? 'Install Health Connect' : 'Open Health Connect settings'
+              }
+            >
+              <Text style={styles.fixText}>
+                {status === 'needs-install' ? 'Install' : 'Fix in Settings'}
+              </Text>
+            </AnimatedPressable>
+          ) : (
+            <ToggleSwitch
+              value={isConnected}
+              onValueChange={(next) => {
+                if (isBusy) return;
+                if (next) void connect();
+                else disconnect();
+              }}
+            />
+          )}
+        </View>
       </View>
-      {needsSettings ? (
-        <AnimatedPressable style={styles.fix} onPress={openSettings} accessibilityRole="button">
-          <Text style={styles.fixText}>{status === 'needs-install' ? 'Install' : 'Fix in Settings'}</Text>
-        </AnimatedPressable>
-      ) : (
-        <ToggleSwitch
-          value={isConnected}
-          onValueChange={(next) => {
-            if (isBusy) return;
-            if (next) void connect();
-            else disconnect();
-          }}
-        />
-      )}
-    </View>
+    </>
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
+    // Matches ProfileScreen's own sectionTitle so this sits level with
+    // Appearance and the rest rather than looking bolted on.
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      marginTop: 28,
+      marginBottom: 12,
+    },
+    card: { ...cardShell, padding: 16 },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 12,
       minHeight: 56,
-      paddingVertical: 8,
     },
     copy: { flex: 1, gap: 2 },
     label: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
