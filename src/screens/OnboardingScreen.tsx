@@ -25,6 +25,8 @@ import { ThemePicker } from '../components/ThemePicker';
 import { useThemeStore } from '../state/useThemeStore';
 import { setThemePrefs } from '../lib/themePrefs';
 import { useTheme } from '../theme/ThemeProvider';
+import { useHealthSync } from '../hooks/useHealthSync';
+import { useHealthSyncStore } from '../state/useHealthSyncStore';
 import type { Circle, InterestCategory } from '../types/models';
 
 // The real brand mark (two people, an infinity/hands-reaching shape) -
@@ -340,6 +342,27 @@ function InviteStep({ circle, onContinue }: { circle: Circle; onContinue: () => 
   );
 }
 
+// Offered only where it can actually work - Android with Health Connect
+// present - and only once. "Not now" is remembered, so a user who declines
+// is never asked again on this device; Profile is where they change their
+// mind.
+function HealthStep() {
+  const { connect, decline, isBusy } = useHealthSync();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  return (
+    <View style={styles.form}>
+      <Text style={styles.confirmTitle}>Count your steps for you?</Text>
+      <Text style={styles.confirmBody}>
+        Kinly can read your daily step count from Health Connect, so walking goals log themselves.
+      </Text>
+      <PillButton label="Connect" onPress={() => void connect()} loading={isBusy} />
+      <PillButton label="Not now" variant="outline" onPress={decline} />
+    </View>
+  );
+}
+
 function CircleStep() {
   const userId = useAuthStore((state) => state.user?.id);
   const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
@@ -453,9 +476,24 @@ export default function OnboardingScreen() {
   // flow stays "what matters -> make it yours -> find your circle".
   const needsTheme = !!user && !needsInterests && user.theme_accent === null && user.theme_mode === null;
 
+  // Only where it can work, and only once. hasHydrated matters: without it
+  // a returning user who already declined would be asked again during the
+  // moment before AsyncStorage resolves.
+  const healthDecision = useHealthSyncStore((state) => state.decision);
+  const healthHydrated = useHealthSyncStore((state) => state.hasHydrated);
+  const { status: healthStatus } = useHealthSync();
+  const needsHealth =
+    !!user &&
+    !needsInterests &&
+    !needsTheme &&
+    healthHydrated &&
+    healthDecision === null &&
+    healthStatus === 'available';
+
   let subtitle = 'Together, We Thrive.';
   if (user && needsInterests) subtitle = 'Pick what matters most today. You can change this anytime.';
   else if (user && needsTheme) subtitle = 'Make Kinly yours. You can change this anytime in Profile.';
+  else if (user && needsHealth) subtitle = 'One less thing to remember. Optional, and changeable in Profile.';
   else if (user) subtitle = "Start solo, invite friends when you're ready, or join one with a code.";
 
   return (
@@ -472,8 +510,23 @@ export default function OnboardingScreen() {
           </GradientHeader>
 
           <View style={styles.body}>
-            {user && <StepDots step={needsInterests ? 1 : needsTheme ? 2 : 3} total={3} />}
-            {!user ? <AuthStep /> : needsInterests ? <InterestsStep /> : needsTheme ? <ThemeStep /> : <CircleStep />}
+            {user && (
+              <StepDots
+                step={needsInterests ? 1 : needsTheme ? 2 : 3}
+                total={needsHealth ? 4 : 3}
+              />
+            )}
+            {!user ? (
+              <AuthStep />
+            ) : needsInterests ? (
+              <InterestsStep />
+            ) : needsTheme ? (
+              <ThemeStep />
+            ) : needsHealth ? (
+              <HealthStep />
+            ) : (
+              <CircleStep />
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
