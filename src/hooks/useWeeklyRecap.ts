@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { weeklyHighlight } from '../lib/weeklyHighlight';
 
 export interface WeeklyRecap {
   goalsCompleted: number;
@@ -15,8 +16,6 @@ export interface WeeklyRecap {
   healthNow: number;
   healthWeekAgo: number | null;
 }
-
-const WEEKLY_RECAP_FUNCTION = 'weekly-recap';
 
 export function useWeeklyRecap(circleId: string | undefined) {
   return useQuery({
@@ -104,13 +103,16 @@ export function useWeeklyRecap(circleId: string | undefined) {
 
       const stats = { goalsCompleted, streakMilestones, nudgesSent: nudgesSent ?? 0, asksPosted };
 
-      let highlight = '';
-      try {
-        const { data, error } = await supabase.functions.invoke(WEEKLY_RECAP_FUNCTION, { body: stats });
-        if (!error && data?.highlight) highlight = data.highlight as string;
-      } catch {
-        // Numbers still render without the AI highlight line if the function isn't deployed yet.
-      }
+      // Assembled locally from the numbers just computed above, rather than
+      // sent to an API to be phrased. No network call, so nothing here can
+      // fail and no tolerate-failure path is needed.
+      const highlight = weeklyHighlight({
+        ...stats,
+        bestStreak,
+        mostWateredFriendName,
+        healthNow,
+        healthWeekAgo,
+      });
 
       return { ...stats, highlight, bestStreak, mostWateredFriendName, healthNow, healthWeekAgo };
     },
