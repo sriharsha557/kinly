@@ -9,6 +9,7 @@ import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
 import { useMomentsUnread, useMarkMomentsRead } from '../hooks/useMomentsUnread';
+import { isUnreadFor, type UnreadCandidate } from '../lib/moments';
 import { useWaterStreak, type StreakSaveReason } from '../hooks/useStreakSaves';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
@@ -140,6 +141,16 @@ const NUDGE_KINDS: { kind: NudgeKind; Icon: FC<SvgProps>; label: string }[] = [
   { kind: 'keep_going', Icon: StudyIcon, label: 'Encourage to keep going' },
   { kind: 'streak', Icon: StreakIcon, label: 'Cheer their streak' },
 ];
+
+// Adapts a feed row to what the unread rule needs. buddy_checkin's user_id
+// is the person reached out to, so its actor rides along in the payload.
+function unreadCandidate(event: EventWithProfile): UnreadCandidate {
+  return {
+    created_at: event.created_at,
+    user_id: event.user_id,
+    actor_id: (event.payload as Record<string, unknown>)?.from_user_id as string | undefined,
+  };
+}
 
 function describeEvent(event: EventWithProfile): string {
   const name = event.profiles?.name ?? 'Someone';
@@ -465,14 +476,16 @@ export default function TodayScreen() {
               const label = dayLabel(event.created_at);
               const showHeader = label !== lastLabel;
               lastLabel = label;
-              const isUnread =
-                event.user_id !== userId &&
-                (lastReadAtOnEntry === null || event.created_at > lastReadAtOnEntry);
+              // Shares isUnreadFor with the tab-bar dot rather than
+              // restating the rule, so the divider and the dot can never
+              // disagree about which events are new - including for
+              // buddy_checkin, whose actor is in the payload, not user_id.
+              const isUnread = userId ? isUnreadFor(unreadCandidate(event), lastReadAtOnEntry, userId) : false;
               const previous = index > 0 ? events[index - 1] : null;
               const previousUnread =
                 previous !== null &&
-                previous.user_id !== userId &&
-                (lastReadAtOnEntry === null || previous.created_at > lastReadAtOnEntry);
+                !!userId &&
+                isUnreadFor(unreadCandidate(previous), lastReadAtOnEntry, userId);
               const showNewDivider = isUnread && !previousUnread;
               return (
                 <View key={event.id}>

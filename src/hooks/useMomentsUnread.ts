@@ -25,14 +25,27 @@ export function useMomentsUnread(circleId: string | undefined, userId: string | 
 
       const { data: events, error: eventsError } = await supabase
         .from('events')
-        .select('created_at, user_id')
+        .select('created_at, user_id, payload')
         .eq('circle_id', circleId as string)
         .order('created_at', { ascending: false })
         .limit(UNREAD_WINDOW);
       if (eventsError) throw eventsError;
 
       return {
-        unreadCount: countUnreadEvents(events ?? [], lastReadAt, userId as string),
+        // payload.from_user_id is only set on event types whose user_id is
+        // the subject rather than the actor (buddy_checkin); everywhere else
+        // it is absent and the rule falls back to user_id.
+        unreadCount: countUnreadEvents(
+          (events ?? []).map((event) => ({
+            created_at: event.created_at as string,
+            user_id: event.user_id as string,
+            actor_id: (event.payload as Record<string, unknown> | null)?.from_user_id as
+              | string
+              | undefined,
+          })),
+          lastReadAt,
+          userId as string,
+        ),
         lastReadAt,
       };
     },

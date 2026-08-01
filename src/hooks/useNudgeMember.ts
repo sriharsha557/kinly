@@ -37,7 +37,11 @@ export function useNudgeMember(circleId: string | undefined) {
           circle_id: circleId,
           user_id: targetId,
           type: 'buddy_checkin',
-          payload: { message },
+          // from_user_id is what lets the unread rule tell who *acted*: on
+          // this event type user_id is the person reached out to, not the
+          // sender, so without it cheering someone marks your own feed
+          // unread instead of theirs (see moments.ts's actor_id).
+          payload: { message, from_user_id: fromUserId },
         })
         .select()
         .single();
