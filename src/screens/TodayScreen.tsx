@@ -16,6 +16,7 @@ import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
+import { CirclePicker } from '../components/CirclePicker';
 import { GardenHero } from '../components/GardenHero';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
@@ -429,6 +430,9 @@ export default function TodayScreen() {
           <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
         }
       >
+        {/* Which circle the garden below belongs to. Above the greeting and
+            deliberately quiet: it is context, not the screen's headline. */}
+        <CirclePicker variant="chip" />
         <View style={styles.greetingRow}>
           <Text style={styles.greeting}>
             {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'}

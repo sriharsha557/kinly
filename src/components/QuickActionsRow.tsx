@@ -17,7 +17,10 @@ import CheckIcon from '../../assets/icons/feed/check.svg';
 // feels like moving forward across tabs instead of jumping around.
 const ACTIONS: { label: string; icon: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
   { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
-  { label: 'Check In', icon: CheckIcon, tab: 'Goals' },
+  // "Check In" collided with the mood check-in directly above this row on
+  // Home, and was ambiguous between mood, attendance, daily login and goal
+  // progress. All three labels are verb phrases now.
+  { label: 'Log Progress', icon: CheckIcon, tab: 'Goals' },
   { label: 'Ask Friends', icon: ChatIcon, tab: 'Connection' },
 ];
 
