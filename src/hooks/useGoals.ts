@@ -137,8 +137,20 @@ export function useDeleteGoal() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ goalId }: { goalId: string; circleId: string }) => {
-      const { error } = await supabase.from('goals').update({ deleted_at: new Date().toISOString() }).eq('id', goalId);
+      // .select() is what makes this honest. An update that matches no rows -
+      // which is what RLS produces when the goal is not yours - succeeds with
+      // error === null and affects nothing, so the old version reported
+      // success, invalidated the list, and left the goal exactly where it
+      // was. That is indistinguishable from "delete is broken".
+      const { data, error } = await supabase
+        .from('goals')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', goalId)
+        .select('id');
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("This goal belongs to someone else, so it can't be deleted from here.");
+      }
     },
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Modal,
   RefreshControl,
@@ -103,6 +104,11 @@ function GoalCard({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const isComplete = goal.progress >= goal.target;
   const isHealthStepsGoal = goal.goal_source === 'health_steps';
+  // The Goals tab lists the whole circle's goals, not just yours - the
+  // collective signals below each card depend on that. But Edit and Delete
+  // only ever worked on your own, and RLS rejected the rest by matching
+  // zero rows, which reads to a user as the button being broken.
+  const isMine = goal.user_id === userId;
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -133,14 +139,16 @@ function GoalCard({
               {hasWaterMark && <WaterIcon width={13} height={13} color={theme.colors.primary} />}
             </View>
           )}
-          <TouchableOpacity
-            onPress={() => setMenuOpen(true)}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel={`Options for ${goal.title}`}
-          >
-            <Text style={styles.optionsButton}>⋯</Text>
-          </TouchableOpacity>
+          {isMine && (
+            <TouchableOpacity
+              onPress={() => setMenuOpen(true)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={`Options for ${goal.title}`}
+            >
+              <Text style={styles.optionsButton}>⋯</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
@@ -231,7 +239,16 @@ function GoalCard({
               destructive: true,
               onPress: () => {
                 setConfirmingDelete(false);
-                deleteGoal.mutate({ goalId: goal.id, circleId });
+                deleteGoal.mutate(
+                  { goalId: goal.id, circleId },
+                  {
+                    onError: (err) =>
+                      Alert.alert(
+                        'Could not delete this goal',
+                        err instanceof Error ? err.message : 'Please try again.',
+                      ),
+                  },
+                );
               },
             },
           ]}
