@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import Animated, {
   Easing,
   FadeInDown,
@@ -18,17 +17,12 @@ import Animated, {
   ZoomIn,
 } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
-import { ActionSheet, type ActionSheetOption } from './ActionSheet';
 import { GardenStageArt } from './GardenStageArt';
 import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
-import { useCheckInOnBuddy } from '../hooks/useBuddy';
-import { useWaterStreak } from '../hooks/useStreakSaves';
-import { isInGraceWindow } from '../lib/needsAttention';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
 import type { MainTabParamList } from '../navigation/types';
-import type { Goal } from '../types/models';
 import SunIcon from '../../assets/illustrations/kinly-ill-sun.svg';
 import SunCloudIcon from '../../assets/illustrations/kinly-ill-sun-cloud.svg';
 import RainCloudIcon from '../../assets/illustrations/kinly-ill-rain-cloud.svg';
@@ -150,20 +144,16 @@ function Plant({
   );
 }
 
-// The Living Garden hero (design/REDESIGN.md §5) - replaces GardenTeaser
-// (variant="overview", Today) and GardenCard (variant="tend", Circle).
-// Purely presentational over existing data + mutations: useGardenState,
-// useGoals, water_streak, check-in-on-member. Never reaches outside the
-// circle.
-export function GardenHero({ circleId, variant }: { circleId: string; variant: 'overview' | 'tend' }) {
+// Today's garden. The Circle tab used to render this same component in a
+// "tend" variant, which made that screen a second dashboard and put the
+// water/cheer actions behind tapping a 56dp plant; those actions live in
+// CircleTodaySection's labelled rows now, and this has one form again.
+export function GardenHero({ circleId }: { circleId: string }) {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const userId = useAuthStore((state) => state.user?.id);
   const { data } = useGardenState(circleId);
   const { data: goals } = useGoals(circleId);
-  const waterStreak = useWaterStreak(circleId);
-  const checkInOnMember = useCheckInOnBuddy(circleId);
   const reducedMotion = useReducedMotion();
-  const [tending, setTending] = useState<MemberGardenState | null>(null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -184,46 +174,12 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
   const statusParts = [`${checkedInToday}/${members.length} checked in today`];
   if (bestStreak > 0) statusParts.push(`${bestStreak}-day streak`);
 
-  function tendOptions(member: MemberGardenState): ActionSheetOption[] {
-    if (!userId || member.userId === userId) return [];
-    const waterableGoal: Goal | undefined = (goals ?? []).find(
-      (g) => g.user_id === member.userId && isInGraceWindow(g.last_logged_date, Date.now()),
-    );
-    if (waterableGoal) {
-      return [
-        {
-          label: `💧 Water ${member.name}'s streak`,
-          onPress: async () => {
-            setTending(null);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            try {
-              await waterStreak.mutateAsync({ goalId: waterableGoal.id });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            } catch {
-              // Server re-validates the grace window; a race just no-ops here.
-            }
-          },
-        },
-      ];
-    }
-    return [
-      {
-        label: `Check in on ${member.name}`,
-        onPress: () => {
-          setTending(null);
-          if (userId) checkInOnMember.mutate({ buddyId: member.userId, buddyName: member.name, fromUserId: userId });
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        },
-      },
-    ];
-  }
-
   const hero = (
     <LinearGradient
       colors={[theme.colors.inputBg, theme.colors.background]}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
-      style={[styles.hero, variant === 'tend' && styles.heroTend]}
+      style={styles.hero}
     >
       {Weather && (
         // Keyed by state so a change in circle health (growing → thriving)
@@ -261,7 +217,6 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
                 isSelf={member.userId === userId}
                 artSize={artSize}
                 swayIndex={reducedMotion ? 0 : index}
-                onPress={variant === 'tend' ? () => setTending(member) : undefined}
               />
             </Animated.View>
           ))}
@@ -282,29 +237,13 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
 
   return (
     <Animated.View entering={FadeInDown.duration(400)}>
-      {variant === 'overview' ? (
-        <AnimatedPressable
-          onPress={() => navigation.navigate('Circle')}
-          accessibilityRole="button"
-          accessibilityLabel="Open your Circle Garden"
-        >
-          {hero}
-        </AnimatedPressable>
-      ) : (
-        hero
-      )}
-
-      {tending && (
-        <ActionSheet
-          title={tending.userId === userId ? 'Your plant' : tending.name}
-          message={`${tending.stage === 'wilted' ? 'Needs water' : 'Growing'} · ${
-            tending.streak > 0 ? `${tending.streak}-day streak` : 'no streak yet'
-          }${loggedToday.has(tending.userId) ? ' · checked in today' : ''}`}
-          options={tendOptions(tending)}
-          onCancel={() => setTending(null)}
-          cancelLabel="Close"
-        />
-      )}
+      <AnimatedPressable
+        onPress={() => navigation.navigate('Circle')}
+        accessibilityRole="button"
+        accessibilityLabel="Open your Circle Garden"
+      >
+        {hero}
+      </AnimatedPressable>
     </Animated.View>
   );
 }
@@ -318,7 +257,6 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
       marginBottom: spacing.lg,
       ...shadow,
     },
-    heroTend: { marginBottom: spacing.xl },
     weather: {
       position: 'absolute',
       top: spacing.md,

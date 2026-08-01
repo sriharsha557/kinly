@@ -447,7 +447,7 @@ export default function TodayScreen() {
             mood-first order): garden state leads, today's mission is the
             next action, mood check-in follows, shortcuts + feed are
             tertiary - each section sets up the one below it. */}
-        {circleId && <GardenHero circleId={circleId} variant="overview" />}
+        {circleId && <GardenHero circleId={circleId} />}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         <QuickActionsRow />
