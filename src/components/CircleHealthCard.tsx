@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GardenStageArt } from './GardenStageArt';
 import { useGardenState, type GardenStage } from '../hooks/useGarden';
-import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { useTheme } from '../theme/ThemeProvider';
 
 // The Circle tab's answer to "how are we?", given before the screen asks
@@ -22,24 +21,28 @@ function healthLabel(health: number): { word: string; stage: GardenStage } {
 export function CircleHealthCard({
   circleId,
   needsSupportCount,
+  checkedInToday,
 }: {
   circleId: string;
   needsSupportCount: number;
+  checkedInToday: number;
 }) {
   const { data: garden } = useGardenState(circleId);
-  const { data: moods } = useTodayMoodCheckins(circleId);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const members = garden?.members ?? [];
   const { word, stage } = healthLabel(garden?.health ?? 0);
-  const checkedIn = new Set((moods ?? []).map((m) => m.user_id)).size;
   const activeStreaks = members.filter((m) => m.streak > 0).length;
 
   // "1 needs support" is omitted entirely at zero rather than rendered as
   // "0 need support" - a good day should not be phrased as an absence.
+  //
+  // "checked in today" means goal logs today (last_logged_date === today),
+  // matching GardenHero on Home - not mood check-ins, so the same copy
+  // never disagrees between the two tabs.
   const facts = [
-    `${checkedIn}/${members.length} checked in today`,
+    `${checkedInToday}/${members.length} checked in today`,
     `${activeStreaks} active ${activeStreaks === 1 ? 'streak' : 'streaks'}`,
     needsSupportCount > 0
       ? `${needsSupportCount} ${needsSupportCount === 1 ? 'person needs' : 'people need'} support`

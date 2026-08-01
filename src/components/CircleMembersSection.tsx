@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { PillButton } from './PillButton';
@@ -32,17 +32,25 @@ export function CircleMembersSection({
   const nudgeMember = useNudgeMember(circleId);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  // Which member's Cheer is currently in flight - per-row so a double-tap on
+  // one row (or a tap on another row while one is sending) cannot fire a
+  // second real push.
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
   const excluded = new Set(excludeUserIds);
   const members = (garden?.members ?? []).filter((m) => !excluded.has(m.userId));
   const moodByUser = new Map((moods ?? []).map((m) => [m.user_id, m.mood as MoodValue]));
 
   async function handleCheer(targetId: string, targetName: string) {
+    if (pendingUserId !== null) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPendingUserId(targetId);
     try {
       await nudgeMember.mutateAsync({ targetId, targetName, fromUserId: userId, kind: 'cheer' });
     } catch (err) {
       Alert.alert('Could not send that', err instanceof Error ? err.message : 'Please try again.');
+    } finally {
+      setPendingUserId(null);
     }
   }
 
@@ -75,6 +83,8 @@ export function CircleMembersSection({
                 label="Cheer"
                 variant="outline"
                 onPress={() => handleCheer(member.userId, member.name)}
+                loading={pendingUserId === member.userId}
+                disabled={pendingUserId !== null && pendingUserId !== member.userId}
                 style={styles.action}
               />
             )}

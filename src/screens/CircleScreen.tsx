@@ -1,5 +1,5 @@
-import { useMemo, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useMemo, useRef } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,9 +41,41 @@ export default function CircleScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const { data: garden } = useGardenState(circleId ?? undefined);
-  const { data: goals } = useGoals(circleId ?? undefined);
-  const { data: moods } = useTodayMoodCheckins(circleId ?? undefined);
+  const {
+    data: garden,
+    isPending: gardenPending,
+    isFetching: gardenFetching,
+    isError: gardenError,
+    refetch: refetchGarden,
+  } = useGardenState(circleId ?? undefined);
+  const {
+    data: goals,
+    isPending: goalsPending,
+    isFetching: goalsFetching,
+    isError: goalsError,
+    refetch: refetchGoals,
+  } = useGoals(circleId ?? undefined);
+  const {
+    data: moods,
+    isPending: moodsPending,
+    isFetching: moodsFetching,
+    isError: moodsError,
+    refetch: refetchMoods,
+  } = useTodayMoodCheckins(circleId ?? undefined);
+
+  // Cold start (every query still []) must not be mistaken for "checked, and
+  // everyone is fine" - and a query error must not settle on that same
+  // all-clear forever. CircleTodaySection needs both signals to tell the
+  // difference.
+  const isLoading = gardenPending || goalsPending || moodsPending;
+  const isError = gardenError || goalsError || moodsError;
+  const isRefreshing = (gardenFetching || goalsFetching || moodsFetching) && !isLoading;
+
+  const handleRefresh = useCallback(() => {
+    refetchGarden();
+    refetchGoals();
+    refetchMoods();
+  }, [refetchGarden, refetchGoals, refetchMoods]);
 
   // The screen owns no rules - needsAttention is the single definition of
   // all three signals, so this cannot drift from what BuddyCard believes.
@@ -61,9 +93,23 @@ export default function CircleScreen() {
     [garden, goals, moods, userId],
   );
 
+  // Same definition Home's GardenHero uses: distinct users whose
+  // last_logged_date is today, not mood check-ins - see GardenHero.tsx.
+  const today = new Date().toISOString().slice(0, 10);
+  const checkedInToday = useMemo(
+    () => new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id)).size,
+    [goals, today],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView ref={scrollRef} contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={theme.colors.primary} />
+        }
+      >
         <View style={styles.header}>
           <CirclePicker variant="title" />
           <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
@@ -74,12 +120,22 @@ export default function CircleScreen() {
 
         {circleId && (
           <Reveal index={0}>
-            <CircleHealthCard circleId={circleId} needsSupportCount={attentionRows.length} />
+            <CircleHealthCard
+              circleId={circleId}
+              needsSupportCount={attentionRows.length}
+              checkedInToday={checkedInToday}
+            />
           </Reveal>
         )}
         {userId && circleId && (
           <Reveal index={1}>
-            <CircleTodaySection circleId={circleId} userId={userId} rows={attentionRows} />
+            <CircleTodaySection
+              circleId={circleId}
+              userId={userId}
+              rows={attentionRows}
+              isLoading={isLoading}
+              isError={isError}
+            />
           </Reveal>
         )}
         {userId && circleId && (

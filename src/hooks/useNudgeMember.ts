@@ -46,7 +46,22 @@ export function useNudgeMember(circleId: string | undefined) {
       const { error: nudgeError } = await supabase
         .from('nudges')
         .insert({ event_id: event.id, from_user_id: fromUserId, kind, message });
-      if (nudgeError) throw nudgeError;
+      if (nudgeError) {
+        // The event row above is already durable, and without a matching
+        // nudge it becomes an orphan: the feed would permanently claim this
+        // person "got a check-in from a circle-mate" for a gesture that
+        // never happened, with no push ever sent. Compensate by deleting
+        // the event we just inserted before surfacing the real error. If
+        // the delete itself fails, swallow that failure - the user-facing
+        // error must describe why the nudge failed, not why the cleanup did.
+        try {
+          await supabase.from('events').delete().eq('id', event.id);
+        } catch {
+          // Cleanup is best-effort - even a thrown/network failure here
+          // must not mask the original nudge error below.
+        }
+        throw nudgeError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events', circleId] });
