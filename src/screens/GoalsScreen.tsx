@@ -15,7 +15,6 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useDeleteGoal, useGoals, useSetGoalSource, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { useHealthSync } from '../hooks/useHealthSync';
-import { useSyncStepGoals } from '../hooks/useSyncStepGoals';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
 import { pickAndUploadCheckinPhoto } from '../lib/checkinPhotoUpload';
@@ -328,11 +327,6 @@ export default function GoalsScreen() {
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { celebration: stepCelebration, dismissCelebration } = useSyncStepGoals(
-    circleId ?? undefined,
-    userId,
-    goals,
-  );
 
   // Everyone who logged anything today, so each goal row can carry a
   // collective signal ("· 3 friends completed today") alongside the owner's
@@ -346,9 +340,6 @@ export default function GoalsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
-      {stepCelebration && (
-        <MilestoneCardModal title={stepCelebration.title} subtitle={stepCelebration.subtitle} onClose={dismissCelebration} />
-      )}
 
       {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
 
