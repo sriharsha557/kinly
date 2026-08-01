@@ -56,6 +56,32 @@ begin
       'anon_jwt is not set to a JWT-format anon key (it must start with eyJ). Every webhook would 401 silently.';
   end if;
 
+  -- Reject the service_role key explicitly. It is also a JWT starting `eyJ`,
+  -- so a shape check alone waves it through - and it very nearly did: the
+  -- Dashboard's key page lists both, and they are indistinguishable by eye.
+  --
+  -- Using it here would be genuinely dangerous, not merely wrong. Trigger
+  -- definitions are stored as plain text and readable via
+  -- information_schema.triggers, so this would write the one credential that
+  -- bypasses every RLS policy into a queryable table - and into this file,
+  -- which is committed to git.
+  if convert_from(
+       decode(
+         -- base64url -> base64, padded to a multiple of 4
+         rpad(translate(split_part(anon_jwt, '.', 2), '-_', '+/'),
+              ((length(split_part(anon_jwt, '.', 2)) + 3) / 4) * 4, '='),
+         'base64'
+       ), 'utf8'
+     )::jsonb ->> 'role' is distinct from 'anon'
+  then
+    raise exception
+      'anon_jwt is not an anon key - its role claim is %. Use the key labelled anon/public, never service_role.',
+      coalesce(
+        convert_from(decode(rpad(translate(split_part(anon_jwt, '.', 2), '-_', '+/'),
+          ((length(split_part(anon_jwt, '.', 2)) + 3) / 4) * 4, '='), 'base64'), 'utf8')::jsonb ->> 'role',
+        'unreadable');
+  end if;
+
   headers := format('{"Content-Type":"application/json","Authorization":"Bearer %s"}', anon_jwt);
 
   -- Each row is one webhook. notify-circle's tier map decides which of these
