@@ -12,8 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
+import { useCreateGoal, useDeleteGoal, useGoals, useSetGoalSource, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
+import { useHealthSync } from '../hooks/useHealthSync';
 import { useSyncStepGoals } from '../hooks/useSyncStepGoals';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
@@ -94,13 +95,15 @@ function GoalCard({
   const { data: circle } = useCircleDetail(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const deleteGoal = useDeleteGoal();
+  const setGoalSource = useSetGoalSource();
+  const { isConnected } = useHealthSync(circleId);
   const { data: hasWaterMark } = useHasWaterMark(goal.id);
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const isComplete = goal.progress >= goal.target;
-  const isStepGoal = goal.goal_source === 'health_steps';
+  const isHealthStepsGoal = goal.goal_source === 'health_steps';
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -142,6 +145,23 @@ function GoalCard({
         </View>
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
+      {/* Only while connected: a health_steps goal on a disconnected device
+          is not being auto-tracked, so calling it "Auto" would be a lie. */}
+      {isHealthStepsGoal && isConnected && (
+        <View style={styles.autoBadge}>
+          <Text style={styles.autoBadgeText}>Auto · Health Connect</Text>
+          <AnimatedPressable
+            onPress={() =>
+              setGoalSource.mutate({ goalId: goal.id, circleId, source: 'manual' })
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Stop tracking this goal from Health Connect"
+            style={styles.autoBadgeUndo}
+          >
+            <Text style={styles.autoBadgeUndoText}>✕</Text>
+          </AnimatedPressable>
+        </View>
+      )}
       <View style={styles.cardFooter}>
         <Text style={styles.cardMeta}>
           {goal.progress} / {goal.target}
@@ -153,7 +173,7 @@ function GoalCard({
             <ToggleSwitch value onValueChange={() => {}} />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
-        ) : isStepGoal ? (
+        ) : isHealthStepsGoal ? (
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
@@ -413,6 +433,19 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
     optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    autoBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 6,
+      marginTop: 8,
+      paddingLeft: 10,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceSubtle,
+    },
+    autoBadgeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+    autoBadgeUndoText: { fontSize: 13, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardMeta: { fontSize: 13, color: colors.textSecondary },
     doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
