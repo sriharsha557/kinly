@@ -18,6 +18,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { ThemePicker } from '../components/ThemePicker';
+import { HealthSyncRow } from '../components/HealthSyncRow';
 import { useThemeStore } from '../state/useThemeStore';
 import { setThemePrefs } from '../lib/themePrefs';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
@@ -167,6 +168,7 @@ export default function ProfileScreen() {
         {/* setThemePrefs applies to the live theme store first, so the whole
             app restyles on tap - the profile-row sync happens behind it. */}
         <View style={styles.appearanceCard}>
+          <HealthSyncRow />
           <ThemePicker
             accent={themeAccent}
             mode={themeMode}
