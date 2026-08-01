@@ -7,7 +7,7 @@ import { useAuthStore } from '../state/useAuthStore';
 
 export type { Theme } from './colors';
 
-const ThemeContext = createContext<Theme>(resolveTheme('ember', 'light'));
+const ThemeContext = createContext<Theme>(resolveTheme('dusk', 'light'));
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // null while the OS hasn't reported (rare, first frame) - treat as light.
