@@ -128,11 +128,17 @@ async function generateAppIcon() {
   await (await iconOnBrandOrange(1024)).toFile('assets/icon.png');
   console.log('wrote assets/icon.png');
 
-  // Android adaptive icon: transparent white-glyph foreground (66% safe
-  // zone, deliberately tighter than icon.png's natural fill - the OS's own
-  // circle/squircle mask crops closer to the safe-zone circle) + a solid
+  // Android adaptive icon: transparent white-glyph foreground + a solid
   // BRAND_ORANGE background layer.
-  const foreground = await glyphOnTransparent(keyed, box, 1024, 0.66);
+  //
+  // 0.52, not the 0.66 this used to pass. `fill` sizes the glyph's *bounding
+  // box* to a fraction of the canvas, but the region a launcher guarantees
+  // to keep is a circle of diameter 72/108 = 0.667 of the canvas - and a box
+  // does not fit in a circle of its own width. The mark is 676x525 (aspect
+  // 1.288), so a box of width w has diagonal w * sqrt(1 + 1/1.288^2) =
+  // 1.266w; requiring 1.266w <= 0.667 gives w <= 0.527. At 0.66 the diagonal
+  // was 0.84 and a round launcher mask visibly clipped the glyph's sides.
+  const foreground = await glyphOnTransparent(keyed, box, 1024, 0.52);
   await foreground.toFile('assets/android-icon-foreground.png');
   console.log('wrote assets/android-icon-foreground.png');
 
