@@ -33,19 +33,44 @@ Deno.serve(async (_req) => {
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
 
+    // Every query in this function runs with the service-role key, which
+    // bypasses RLS - so the soft-delete filters the app gets for free from
+    // its policies have to be written by hand here. Without them a deleted
+    // goal, or a goal belonging to someone who left the circle, still
+    // generates a reminder event. That was invisible while notify-circle
+    // was never invoked; the moment push notifications started working it
+    // became a push to someone about a goal they deleted, or about a circle
+    // they left.
     const { data: goals, error } = await supabase
       .from('goals')
       .select('id, user_id, circle_id, title, streak_count')
       .eq('last_logged_date', isoDate(yesterday))
-      .gt('streak_count', 0);
+      .gt('streak_count', 0)
+      .is('deleted_at', null);
     if (error) throw error;
+
+    // Membership is checked per (circle, user) rather than per user: leaving
+    // one circle should silence reminders for that circle's goals only.
+    const { data: memberships, error: membershipError } = await supabase
+      .from('circle_members')
+      .select('circle_id, user_id')
+      .eq('status', 'active')
+      .is('deleted_at', null);
+    if (membershipError) throw membershipError;
+    const activeMembers = new Set(
+      (memberships ?? []).map((m) => `${m.circle_id}:${m.user_id}`),
+    );
+
+    const liveGoals = (goals ?? []).filter((goal) =>
+      activeMembers.has(`${goal.circle_id}:${goal.user_id}`),
+    );
 
     let inserted = 0;
     // Deliberately no early-return when goals is empty (there used to be
     // one) - the health-snapshot pass below needs to run every day
     // regardless of whether any goal happens to be at risk that day, or
     // the weekly scorecard's history would have gaps.
-    if (goals && goals.length > 0) {
+    if (liveGoals.length > 0) {
       const { data: todaysReminders } = await supabase
         .from('events')
         .select('payload')
@@ -57,7 +82,7 @@ Deno.serve(async (_req) => {
           .filter(Boolean),
       );
 
-      for (const goal of goals) {
+      for (const goal of liveGoals) {
         if (alreadyNotifiedGoalIds.has(goal.id)) continue;
         const { error: insertError } = await supabase.from('events').insert({
           circle_id: goal.circle_id,
@@ -83,13 +108,18 @@ Deno.serve(async (_req) => {
         .from('circle_members')
         .select('user_id')
         .eq('circle_id', circle.id)
-        .eq('status', 'active');
+        .eq('status', 'active')
+        // Departed members would otherwise inflate the denominator, so a
+        // circle someone left could never reach 100% health again.
+        .is('deleted_at', null);
       if (!members || members.length === 0) continue;
 
       const { data: circleGoals } = await supabase
         .from('goals')
         .select('user_id, last_logged_date')
-        .eq('circle_id', circle.id);
+        .eq('circle_id', circle.id)
+        // A deleted goal must not keep a member counting as active.
+        .is('deleted_at', null);
 
       const mostRecentByUser = new Map<string, string>();
       for (const g of circleGoals ?? []) {
@@ -117,7 +147,7 @@ Deno.serve(async (_req) => {
       if (!snapshotError) snapshotted++;
     }
 
-    return new Response(JSON.stringify({ checked: goals?.length ?? 0, notified: inserted, snapshotted }), {
+    return new Response(JSON.stringify({ checked: liveGoals.length, notified: inserted, snapshotted }), {
       headers: { 'content-type': 'application/json' },
     });
   } catch (error) {
