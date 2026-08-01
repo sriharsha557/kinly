@@ -94,6 +94,30 @@ export function useUpdateGoal() {
   });
 }
 
+// Changes only goal_source. Separate from useUpdateGoal, which writes title
+// and target and would need both to change one field. Used by the Auto
+// badge's undo and by the convert-on-connect pass in useHealthSync.
+export function useSetGoalSource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      goalId,
+      circleId,
+      source,
+    }: {
+      goalId: string;
+      circleId: string;
+      source: GoalSource;
+    }) => {
+      const { error } = await supabase.from('goals').update({ goal_source: source }).eq('id', goalId);
+      if (error) throw error;
+      return { circleId };
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+  });
+}
+
 export function useDeleteGoal() {
   const queryClient = useQueryClient();
   return useMutation({
