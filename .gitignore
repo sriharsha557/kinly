@@ -48,3 +48,9 @@ yarn-error.*
 # raw icon/illustration staging area (curated copies live in assets/illustrations/)
 /kinly-illustrations
 google-services.json
+
+# Agent tooling and scratch - not part of the app
+.claude/skills/
+.agents/
+.superpowers/
+skills-lock.json
