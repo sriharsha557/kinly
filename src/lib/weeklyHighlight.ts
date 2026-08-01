@@ -1,0 +1,74 @@
+// One sentence about a circle's week, assembled from numbers the client has
+// already computed (docs/superpowers/specs/2026-08-01-remove-remaining-ai-
+// design.md). Replaces a Claude API call that received these same numbers and
+// returned only wording.
+//
+// The ORDER is the design. Several of these are usually true at once, and the
+// order decides which true thing is worth saying. A saved streak comes second
+// - above longer streaks, above volume - because it is the only line that
+// names one person doing something for another, which is what the app is for.
+// The empty week comes first and does not scold: MoodCheckinCard's no-shame
+// rule applies to what the app says about a whole circle too.
+//
+// Dependency-free so node:test can import it under --experimental-strip-types.
+
+export interface WeeklyHighlightStats {
+  goalsCompleted: number;
+  streakMilestones: number;
+  nudgesSent: number;
+  asksPosted: number;
+  bestStreak: number;
+  mostWateredFriendName: string | null;
+  healthNow: number;
+  healthWeekAgo: number | null;
+}
+
+const LONG_STREAK = 14;
+const HEALTH_CLIMB = 15;
+const STRONG_WEEK_GOALS = 5;
+const LOTS_OF_SUPPORT = 5;
+
+export function weeklyHighlight(stats: WeeklyHighlightStats): string {
+  const {
+    goalsCompleted,
+    streakMilestones,
+    nudgesSent,
+    asksPosted,
+    bestStreak,
+    mostWateredFriendName,
+    healthNow,
+    healthWeekAgo,
+  } = stats;
+
+  // Every signal, not just the four counters: a lone bestStreak, name, or
+  // health delta is still something, and must not be swallowed by the quiet
+  // fallback before its own branch gets a chance to fire.
+  const nothingHappened =
+    goalsCompleted === 0 &&
+    streakMilestones === 0 &&
+    nudgesSent === 0 &&
+    asksPosted === 0 &&
+    bestStreak === 0 &&
+    mostWateredFriendName === null &&
+    healthWeekAgo === null;
+  if (nothingHappened) return 'A quiet week. Next one is yours.';
+
+  // Guarded on the name itself, not on a separate count - this is the only
+  // branch that interpolates one, and a null here would render "null's back".
+  if (mostWateredFriendName) {
+    // "their", not "her": we know a name, never a pronoun.
+    return `Someone had ${mostWateredFriendName}'s back this week - their streak survived.`;
+  }
+
+  if (bestStreak >= LONG_STREAK) return `A ${bestStreak}-day streak is carrying this circle.`;
+
+  if (healthWeekAgo !== null && healthNow - healthWeekAgo >= HEALTH_CLIMB) {
+    return 'Your garden is greener than it was last week.';
+  }
+
+  if (goalsCompleted >= STRONG_WEEK_GOALS) return `${goalsCompleted} goals finished. A strong week.`;
+
+  if (nudgesSent >= LOTS_OF_SUPPORT) return 'Plenty of encouragement went around this week.';
+
+  return 'Something moved this week. That counts.';
+}
