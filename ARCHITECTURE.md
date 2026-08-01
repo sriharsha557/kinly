@@ -153,3 +153,49 @@ Name, bio, interest pillars, and avatar — two ways to set the avatar: **Upload
 - **Photo proof check-ins** (migration `0026_checkin_photos.sql`): an optional photo on a goal-progress log, never required, never nagged. `checkin-photos` is a **private** Storage bucket — unlike `avatars`/`vision-images` (public, security-through-obscurity-only URLs), a circle-mate's photo mid-progress gets real RLS-enforced access control, gated by `is_circle_member()` on the folder's `circle_id`. That means every display needs a signed URL (`useSignedCheckinPhotoUrl`, 1-hour TTL) rather than a static public one — `EventPhoto` (`TodayScreen`) resolves one per photo and shows a loading placeholder until it's ready. Path convention is `<circle_id>/<user_id>-<timestamp>.ext`, deliberately *not* `<user_id>/...` like the other two buckets, both so RLS can gate by circle and so account-deletion cleanup (below) can isolate one user's photos within a folder several circle members share. `useLogGoalWithCelebration` attaches `photo_path` to whichever event a log already produces (`goal_completed`/`streak`/the first-ever-log celebration) — or, since a plain progress log normally produces **no** event at all, inserts a new `progress_photo` one specifically so an attached photo always has somewhere to surface; a log with no photo behaves exactly as before, zero new events. Compression uses `expo-image-picker`'s own `quality` option (`0.5`, a touch more aggressive than avatar/vision-board's `0.6`), not `expo-image-manipulator` — that package was assumed "already SDK-bundled" by the spec that requested this feature but isn't actually an installed dependency, and adding it would mean a new native module and a full `eas build` for what image-picker's built-in compression already covers. Account deletion (`delete-account` Edge Function) captures the caller's circle memberships *before* `delete_my_account()` leaves them (the RPC soft-deletes those rows as part of the same call, so this is the last moment the caller's own client can see them), then lists and filters each circle's `checkin-photos` folder by `${userId}-` filename prefix to remove just that user's photos, leaving the rest of the circle's photos untouched.
 - **Shareable weekly scorecard** (migration `0027_weekly_scorecard.sql`): `WeeklyRecapCard` gets a "Share" link that opens the OS share sheet with a plain **text** summary (goals completed, best streak, most-watered friend, circle health + its week-over-week delta, plus the existing AI highlight sentence) — never a captured image. `react-native-view-shot`-style screenshotting is a native module and isn't an installed dependency; every change this whole session ships via `eas update`, so image capture stays out of scope rather than forcing a native rebuild for one button (the original spec anticipated exactly this and explicitly allowed a text fallback). Nothing auto-posts — the share sheet only opens on that explicit tap. Circle health has no stored history to diff against otherwise (see "Derived vs. stored state" above), so `check-streaks-at-risk` (already scheduled daily via migration 0016) was extended to also snapshot every active circle's health into `circle_health_snapshots` on its existing run, reusing that cron instead of adding a second one just for this. **Fixed a real bug found while extending it**: the function used to `return` immediately whenever no goal happened to be at risk that day, which would have skipped the new snapshot pass entirely most days and left the scorecard's history full of gaps — the early return is gone, the snapshot pass now always runs.
 - **Analytics** (migration `0024_analytics_events.sql`): no analytics SDK anywhere in this app — `analytics_events` is a minimal, purpose-built table for exactly one thing right now: measuring % of circles reaching 3+ members within 48h of creation (Feature 2's cold-start success metric). RLS enabled with only an INSERT policy and no SELECT policy at all, so nothing in the client can read it back — it's queried ad-hoc via the SQL editor, not surfaced in-app. [src/lib/analytics.ts](src/lib/analytics.ts)'s `logAnalyticsEvent()` is fire-and-forget (a failed analytics insert must never break the feature it's attached to) and separates `actor_user_id` (who performed the action, defaults to `auth.uid()`) from `subject_user_id` (who the event is *about*) — `member_joined` is logged from `useApproveMember`'s `onSuccess`, i.e. the *approving* owner/admin's session, not the joining member's own, so those two are deliberately different people. Convention: the circle owner is implicitly member #1 at `circle_created` time with no separate `member_joined` logged for them, so "reached 3 members" means 2 subsequent `member_joined` rows for that `circle_id`.
+
+## Deployment checklist
+
+Most of this app's behaviour lives in code and migrations, which are version-controlled and hard to lose. A few things do not, and on 2026-08-01 that gap cost a full day: **no push notification had ever been delivered by this project**, because the five Database Webhooks that invoke `notify-circle` existed only as prose in that function's header comment and had never been created. Every tier, recipient rule and mute was correct code sitting behind a trigger that did not exist. Nothing in the app surfaced this — the Moments feed still filled up, so the only symptom was an absence.
+
+Run these checks against any environment before trusting notifications in it. Each is a query or a screen, not a belief.
+
+**1. Database Webhooks are enabled.** Dashboard → Database → Webhooks. If it offers an "Enable webhooks" button rather than a list, the feature was never turned on and the `supabase_functions` schema does not exist. Migration `0043` fails with `ERROR: 3F000: schema "supabase_functions" does not exist` until you click it; SQL cannot enable it.
+
+**2. All five triggers exist.**
+
+```sql
+select event_object_table, trigger_name
+from information_schema.triggers
+where trigger_schema = 'public' and action_statement ilike '%http_request%'
+order by event_object_table;
+```
+
+Expect five: `ask_replies` insert, `circle_members` insert *and* update, `events` insert, `nudges` insert. Zero rows means no push notification can ever be sent. Create them with `supabase/migrations/0043_notify_circle_webhooks.sql`.
+
+**3. The triggers carry an `anon` key, not `service_role`.**
+
+```sql
+select trigger_name,
+       convert_from(decode(rpad(translate(split_part(jwt, '.', 2), '-_', '+/'),
+              ((length(split_part(jwt, '.', 2)) + 3) / 4) * 4, '='), 'base64'), 'utf8')::jsonb ->> 'role' as key_role
+from (select trigger_name, substring(action_statement from 'Bearer ([A-Za-z0-9_.\-]+)') as jwt
+      from information_schema.triggers
+      where trigger_schema = 'public' and action_statement ilike '%http_request%') t;
+```
+
+Every row must read `anon`. Both keys are JWTs starting `eyJ` and are indistinguishable by eye, and trigger definitions are stored as readable plain text — so a `service_role` key here writes the credential that bypasses every RLS policy into a queryable table. `0043` now decodes the role claim and refuses anything else.
+
+**4. JWT verification is off on the two cron-invoked functions, and on only those.** `check-streaks-at-risk` and `daily-digest` are called by pg_cron, which sends no JWT — leaving verification on gives a nightly 401 and no other symptom (that is how the streak reminders and the daily garden-health snapshots were found to have never run). `notify-circle` keeps verification **on**: it acts on the payload it is handed, so an open endpoint would let a caller push arbitrary text into any circle whose id they knew.
+
+**5. Both cron jobs are scheduled.**
+
+```sql
+select jobname, schedule, active from cron.job order by jobname;
+```
+
+Expect `check-streaks-at-risk-daily` at `0 18 * * *` and `daily-digest` at `30 13 * * *`. The digest's schedule must match `DIGEST_HOUR_UTC` / `DIGEST_MINUTE_UTC` in `supabase/functions/daily-digest/index.ts`, which anchors its query window to it — if they drift apart the digest silently summarises the wrong period.
+
+**6. Delivery actually works end to end.** Send a cheer between two accounts. `select id, status_code, created from net._http_response order by created desc limit 10;` should show `200`s (a `401` means step 3 or 4 is wrong), and Edge Functions → `notify-circle` → Logs should show an invocation containing an `expo push tickets` line. A push that is muted logs nothing at all, which is indistinguishable from one that was never attempted — so check `notification_mutes` for the recipient before concluding anything is broken.
+
+**Known follow-up.** The anon key in these triggers ships inside every copy of the app, so it keeps out casual scanning and nothing more. The robust version is JWT verification off on `notify-circle` plus a shared-secret header that the trigger sends and the function checks against a Deno secret — not yet done.
