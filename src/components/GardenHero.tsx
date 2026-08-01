@@ -24,6 +24,7 @@ import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useCheckInOnBuddy } from '../hooks/useBuddy';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { isInGraceWindow } from '../lib/needsAttention';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
 import type { MainTabParamList } from '../navigation/types';
@@ -59,14 +60,6 @@ function statusCopy(state: CircleGardenState, droopiestName: string | null, chec
   if (checkedInToday === 0) return 'Check in to keep your garden growing.';
   if (state === 'thriving') return 'Everyone is thriving today.';
   return 'Your garden is growing steadily.';
-}
-
-// The same single-day grace window water_streak() enforces server-side -
-// mirrored (like BuddyCard does) only to decide which action to offer.
-function isInGraceWindow(lastLoggedDate: string | null): boolean {
-  if (!lastLoggedDate) return false;
-  const daysSince = Math.floor((Date.now() - new Date(lastLoggedDate).getTime()) / 86_400_000);
-  return daysSince === 2;
 }
 
 // One plant in the row: stage art inside a 64dp target, idle sway when
@@ -194,7 +187,7 @@ export function GardenHero({ circleId, variant }: { circleId: string; variant: '
   function tendOptions(member: MemberGardenState): ActionSheetOption[] {
     if (!userId || member.userId === userId) return [];
     const waterableGoal: Goal | undefined = (goals ?? []).find(
-      (g) => g.user_id === member.userId && isInGraceWindow(g.last_logged_date),
+      (g) => g.user_id === member.userId && isInGraceWindow(g.last_logged_date, Date.now()),
     );
     if (waterableGoal) {
       return [

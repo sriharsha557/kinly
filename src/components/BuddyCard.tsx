@@ -6,19 +6,11 @@ import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { isInGraceWindow } from '../lib/needsAttention';
 import { ConceptHint } from './ConceptHint';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
-
-// The exact single-day grace window water_streak() itself enforces
-// server-side - mirrored here just to decide whether to show the button at
-// all, not as the source of truth (the RPC re-validates everything).
-function isInGraceWindow(lastLoggedDate: string | null): boolean {
-  if (!lastLoggedDate) return false;
-  const daysSince = Math.floor((Date.now() - new Date(lastLoggedDate).getTime()) / 86_400_000);
-  return daysSince === 2;
-}
 
 function PickBuddyModal({
   circleId,
@@ -73,8 +65,10 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
   const buddyGarden = garden?.members.find((m) => m.userId === buddy?.buddy_id);
   const isInactive = buddyGarden?.stage === 'wilted';
+  // needsAttention owns this rule now, so the Circle tab and this card can
+  // never disagree about whether a streak is still savable.
   const waterableGoal = (goals ?? []).find(
-    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date),
+    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date, Date.now()),
   );
 
   async function handleWater() {
