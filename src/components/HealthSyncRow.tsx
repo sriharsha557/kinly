@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { ToggleSwitch } from './ToggleSwitch';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useHealthSync } from '../hooks/useHealthSync';
@@ -21,12 +21,19 @@ export function HealthSyncRow() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // iOS and Android-without-Health-Connect get nothing at all - a section
-  // explaining a feature the device cannot have is just noise.
-  if (status === 'checking' || status === 'unavailable') return null;
+  // Hidden only where the feature can genuinely never apply. It used to hide
+  // on 'unavailable' too, which meant an Android user with Health Connect not
+  // installed - or on a build predating the native module - saw no section at
+  // all and no way to tell whether the feature was missing, broken, or just
+  // not on their phone. "I can't find Sync steps" is the report that produced
+  // this change.
+  if (Platform.OS !== 'android' || status === 'checking') return null;
+
+  const unavailable = status === 'unavailable';
 
   let hint = 'Log walking goals automatically';
   if (isConnected) hint = "Reads today's step count from Health Connect";
+  else if (unavailable) hint = 'Health Connect is not available on this phone';
   else if (status === 'needs-install') hint = "Health Connect isn't installed on this phone";
   else if (permissionDenied) hint = "Kinly doesn't have permission to read steps";
 
@@ -41,7 +48,11 @@ export function HealthSyncRow() {
             <Text style={styles.label}>Sync steps</Text>
             <Text style={styles.hint}>{hint}</Text>
           </View>
-          {needsSettings ? (
+          {unavailable ? (
+            // No control: we cannot open settings for an app that is not
+            // there, and a dead button is worse than none. The hint says why.
+            <Text style={styles.hint}>Not supported</Text>
+          ) : needsSettings ? (
             <AnimatedPressable
               style={styles.fix}
               onPress={openSettings}

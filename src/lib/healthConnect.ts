@@ -17,11 +17,20 @@ export type HealthConnectStatus = 'unavailable' | 'needs-install' | 'available';
 
 export async function getHealthConnectStatus(): Promise<HealthConnectStatus> {
   if (Platform.OS !== 'android') return 'unavailable';
-  const { getSdkStatus, SdkAvailabilityStatus } = await loadModule();
-  const status = await getSdkStatus();
-  if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE) return 'unavailable';
-  if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) return 'needs-install';
-  return 'available';
+  try {
+    const { getSdkStatus, SdkAvailabilityStatus } = await loadModule();
+    const status = await getSdkStatus();
+    if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE) return 'unavailable';
+    if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) return 'needs-install';
+    return 'available';
+  } catch {
+    // The native module is missing from this build - which happens to anyone
+    // running an APK older than the dependency. Left to throw, the query
+    // errors, its data stays undefined, callers read the status as forever
+    // 'checking', and the whole Health section silently never appears. A
+    // definite 'unavailable' at least gives the UI something to explain.
+    return 'unavailable';
+  }
 }
 
 export async function requestStepsReadPermission(): Promise<boolean> {
