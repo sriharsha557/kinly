@@ -25,9 +25,15 @@ import {
 import { PillButton } from '../components/PillButton';
 import { ActionSheet } from '../components/ActionSheet';
 import { ToggleSwitch } from '../components/ToggleSwitch';
+import { DisclosureSection } from '../components/DisclosureSection';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { inviteMessage, shareToWhatsApp } from '../lib/share';
-import { MUTE_CATEGORIES, useNotificationMutes, useToggleMute } from '../hooks/useNotificationMutes';
+import {
+  MUTE_CATEGORIES,
+  TIER_SWITCHES,
+  useNotificationMutes,
+  useToggleMute,
+} from '../hooks/useNotificationMutes';
 import { useTheme } from '../theme/ThemeProvider';
 import type { CircleRole } from '../types/models';
 
@@ -311,11 +317,14 @@ export default function CircleSettingsScreen() {
 
         <Text style={styles.sectionTitle}>Notifications</Text>
         <View style={styles.memberList}>
-          {MUTE_CATEGORIES.map(({ key, label }) => {
+          {TIER_SWITCHES.map(({ key, label, hint }) => {
             const muted = mutedCategories?.includes(key) ?? false;
             return (
               <View key={key} style={styles.notifyRow}>
-                <Text style={styles.notifyLabel}>{label}</Text>
+                <View style={styles.notifyLabelCol}>
+                  <Text style={styles.notifyLabel}>{label}</Text>
+                  <Text style={styles.notifyHint}>{hint}</Text>
+                </View>
                 <ToggleSwitch
                   value={!muted}
                   onValueChange={(next) => toggleMute.mutate({ category: key, muted: !next })}
@@ -324,6 +333,23 @@ export default function CircleSettingsScreen() {
             );
           })}
         </View>
+
+        <DisclosureSection label="Advanced">
+          <View style={styles.memberList}>
+            {MUTE_CATEGORIES.map(({ key, label }) => {
+              const muted = mutedCategories?.includes(key) ?? false;
+              return (
+                <View key={key} style={styles.notifyRow}>
+                  <Text style={styles.notifyLabel}>{label}</Text>
+                  <ToggleSwitch
+                    value={!muted}
+                    onValueChange={(next) => toggleMute.mutate({ category: key, muted: !next })}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        </DisclosureSection>
 
         <PillButton
           label="Join or start another circle"
@@ -425,6 +451,10 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    notifyLabelCol: { flex: 1, gap: 1 },
+    // 13 is the type floor in design/PRINCIPLES.md, which supersedes the
+    // plan's 12 for any new copy.
+    notifyHint: { fontSize: 13, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,

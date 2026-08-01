@@ -59,8 +59,16 @@ Notion: near-monochrome surfaces where a single accent means "you can act here".
 ## Iconography
 
 - One family: the app's own prop-driven SVG components (`MonoIcons`, `PillarIcons`,
-  `TabIcons`) tinted via theme tokens. No emoji as icons, no hardcoded-color SVG
-  imports in new work (existing ones are queued for the illustration pass).
+  `TabIcons`) tinted via theme tokens, plus the `assets/icons/**` SVG files, which
+  are compiled to components by `react-native-svg-transformer` and take `SvgProps`.
+- **No hardcoded colours in an SVG asset.** Every live asset's `fill`/`stroke` is
+  `currentColor`, which `react-native-svg` resolves from the component's `color`
+  prop — so an icon that renders without a `color` prop is a bug, not a default.
+  Pass `colors.textSecondary` at rest and `colors.primary` when the icon marks
+  something interactive or selected. (The unused assets under `assets/brand/` and
+  the duplicate top-level `assets/icons/*.svg` still carry baked-in orange; they
+  are dead and should be deleted rather than converted.)
+- No emoji as icons.
 - Nav: icons + labels, active = accent, inactive = `textSecondary`.
 
 ## Illustration system

@@ -6,19 +6,11 @@ import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useWaterStreak } from '../hooks/useStreakSaves';
+import { isInGraceWindow } from '../lib/needsAttention';
 import { ConceptHint } from './ConceptHint';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
 import BuddyIcon from '../../assets/illustrations/kinly-ill-buddy.svg';
-
-// The exact single-day grace window water_streak() itself enforces
-// server-side - mirrored here just to decide whether to show the button at
-// all, not as the source of truth (the RPC re-validates everything).
-function isInGraceWindow(lastLoggedDate: string | null): boolean {
-  if (!lastLoggedDate) return false;
-  const daysSince = Math.floor((Date.now() - new Date(lastLoggedDate).getTime()) / 86_400_000);
-  return daysSince === 2;
-}
 
 function PickBuddyModal({
   circleId,
@@ -73,8 +65,10 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
   const buddyGarden = garden?.members.find((m) => m.userId === buddy?.buddy_id);
   const isInactive = buddyGarden?.stage === 'wilted';
+  // needsAttention owns this rule now, so the Circle tab and this card can
+  // never disagree about whether a streak is still savable.
   const waterableGoal = (goals ?? []).find(
-    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date),
+    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date, Date.now()),
   );
 
   async function handleWater() {
@@ -91,7 +85,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
   return (
     <View style={styles.card}>
       <View style={styles.titleRow}>
-        <BuddyIcon width={22} height={22} />
+        <BuddyIcon width={22} height={22} color={theme.colors.textSecondary} />
         <Text style={styles.title}>Accountability Buddy</Text>
       </View>
       <ConceptHint id="buddy" text="One person who'll encourage you when you miss a goal." />
@@ -106,7 +100,16 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
             <PillButton
               label={`Check in on ${buddy.buddy_name}`}
               onPress={() =>
-                checkIn.mutate({ buddyId: buddy.buddy_id, buddyName: buddy.buddy_name, fromUserId: userId })
+                checkIn.mutate(
+                  { buddyId: buddy.buddy_id, buddyName: buddy.buddy_name, fromUserId: userId },
+                  {
+                    onError: (err) =>
+                      Alert.alert(
+                        'Could not check in',
+                        err instanceof Error ? err.message : 'Please try again.',
+                      ),
+                  },
+                )
               }
               loading={checkIn.isPending}
               style={{ marginTop: 10 }}

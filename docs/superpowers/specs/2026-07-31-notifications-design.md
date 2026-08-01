@@ -3,9 +3,19 @@
 **Date:** 2026-07-31
 **Status:** Approved design, ready for implementation planning
 
+## Terminology
+
+These two are different things, and this document never uses "notification" alone to mean either.
+
+**Push Notification** — an OS-level notification on the phone, arriving even when Kinly is closed or backgrounded. Reserved for things that need someone now: *"Priya needs your support."* / *"Your streak ends today."* / *"Your join request was approved."*
+
+**Moments Feed** — the in-app activity feed, visible only inside Kinly. Where everything lands, urgent or not: goal completed, friend checked in, garden grew, challenge completed.
+
+Every event appears in the Moments Feed. A Push Notification is a deliberate promotion out of it, never the default.
+
 ## Problem
 
-Kinly has exactly one notification mechanism. A row lands in `events`, a Supabase
+Kinly has exactly one delivery mechanism, and it makes no distinction between the two. A row lands in `events`, a Supabase
 Database Webhook fires, and `notify-circle` pushes it to every active circle member
 except the actor. The same row is also the in-app Circle Activity feed. Feed entry
 and phone interruption are therefore the same decision — there is no way to show
@@ -16,7 +26,7 @@ so in a five-person circle each person receives four pushes a day before anythin
 else happens. Adding streak-at-risk reminders, goal completions, streak milestones,
 nudges and asks puts a healthy circle at roughly **5–10 pushes per person per day**.
 
-That is the range where users do not tune preferences — they disable notifications at
+That is the range where users do not tune preferences — they disable Push Notifications at
 the OS level, permanently, including the ones that mattered. For a product whose
 differentiator is *not being another chat app*, training users to mute it is fatal.
 
@@ -32,7 +42,7 @@ day!". One is a call to action, the other is ambient. Today they share one toggl
 And the test that decides every case, now and in future:
 
 > **If the user ignores this until tomorrow, did someone suffer?**
-> Yes → phone notification. No → feed.
+> Yes → Push Notification. No → Moments Feed only.
 
 Everything lands in the feed. Pushing is a deliberate promotion out of it, not the
 default. This is the inverse of today's behaviour.
@@ -97,7 +107,7 @@ it in dilutes the meaning the feed exists to protect.
 ## Naming
 
 The activity feed becomes **Moments** — a timeline of the circle's journey rather than
-a list of notifications.
+a list of Push Notifications.
 
 This collides with `ConnectionScreen`, whose title is "Connection Moments" and whose
 tab label is currently "Moments". That tab (asks, Would You Rather, Guess Who) is

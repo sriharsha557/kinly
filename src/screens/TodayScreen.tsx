@@ -1,19 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, Image, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { FC } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import type { SvgProps } from 'react-native-svg';
 import { useAuthStore } from '../state/useAuthStore';
 import { useEvents, useSendNudge, type EventWithProfile } from '../hooks/useEvents';
+import { useMomentsUnread, useMarkMomentsRead } from '../hooks/useMomentsUnread';
+import { isUnreadFor, type UnreadCandidate } from '../lib/moments';
 import { useWaterStreak, type StreakSaveReason } from '../hooks/useStreakSaves';
 import { useBlockUser, useReportContent } from '../hooks/useReports';
 import { showModerationSheet } from '../lib/moderation';
 import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
-import { generateNudgeMessage } from '../lib/nudgeMessage';
+import { useNudgeCopy } from '../hooks/useNudgeCopy';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
+import { CirclePicker, CircleName } from '../components/CirclePicker';
 import { GardenHero } from '../components/GardenHero';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
@@ -37,6 +41,10 @@ import StudyIcon from '../../assets/icons/nudges/study.svg';
 import ClockIcon from '../../assets/icons/feed/clock.svg';
 import ChatIcon from '../../assets/icons/feed/chat.svg';
 import RocketIcon from '../../assets/icons/feed/rocket.svg';
+import StartIcon from '../../assets/icons/feed/sprout.svg';
+import CelebrateIcon from '../../assets/icons/feed/celebrate.svg';
+import GalaxyIcon from '../../assets/icons/feed/galaxy.svg';
+import WaveIcon from '../../assets/icons/feed/wave.svg';
 
 // All event types now render on the same flat white card shell - color no
 // longer differentiates event type, the icon does (see ARCHITECTURE.md's
@@ -51,11 +59,17 @@ const EVENT_ICON: Record<EventType, FC<SvgProps>> = {
   mood_checkin: NeutralIcon,
   streak_saved: WaterIcon,
   progress_photo: CameraIcon,
+  goal_started: StartIcon,
+  achievement_unlocked: CelebrateIcon,
+  garden_grew: GalaxyIcon,
+  buddy_checkin: WaveIcon,
 };
 
-// Mood faces come from the prop-driven MonoIcons set so they tint with the
-// theme; the rest of EVENT_ICON is still static assets awaiting the wider
-// illustration pass (design/PRINCIPLES.md "Open work").
+// Mood faces come from the prop-driven MonoIcons set, which takes {size,
+// color} rather than SvgProps - hence the separate map and the prop-shape
+// dispatch in EventIcon below. The EVENT_ICON assets tint too now (their
+// fills were rewritten to currentColor), they just take a different prop
+// shape, so both sides of that dispatch follow the accent.
 const MOOD_MONO: Record<MoodValue, FC<{ size?: number; color: string }>> = {
   great: HappyMono,
   okay: NeutralMono,
@@ -104,7 +118,7 @@ function EventIcon({ event, color }: { event: EventWithProfile; color: string })
     if (Mono) return <Mono size={22} color={color} />;
   }
   const Icon = EVENT_ICON[event.type];
-  return <Icon width={22} height={22} />;
+  return <Icon width={22} height={22} color={color} />;
 }
 
 // dayLabel feeds describeEvent's "took a ___ day" feed copy - kept separate
@@ -127,6 +141,16 @@ const NUDGE_KINDS: { kind: NudgeKind; Icon: FC<SvgProps>; label: string }[] = [
   { kind: 'keep_going', Icon: StudyIcon, label: 'Encourage to keep going' },
   { kind: 'streak', Icon: StreakIcon, label: 'Cheer their streak' },
 ];
+
+// Adapts a feed row to what the unread rule needs. buddy_checkin's user_id
+// is the person reached out to, so its actor rides along in the payload.
+function unreadCandidate(event: EventWithProfile): UnreadCandidate {
+  return {
+    created_at: event.created_at,
+    user_id: event.user_id,
+    actor_id: (event.payload as Record<string, unknown>)?.from_user_id as string | undefined,
+  };
+}
 
 function describeEvent(event: EventWithProfile): string {
   const name = event.profiles?.name ?? 'Someone';
@@ -155,6 +179,20 @@ function describeEvent(event: EventWithProfile): string {
     }
     case 'progress_photo':
       return `${name} logged progress on "${payload.title ?? 'a goal'}"`;
+    case 'goal_started':
+      return `${name} started "${payload.title ?? 'a goal'}"`;
+    case 'achievement_unlocked':
+      return `${name} unlocked "${payload.title ?? 'an achievement'}"`;
+    case 'garden_grew': {
+      const stage = payload.stage as string | undefined;
+      const stageLabel =
+        stage === 'bloom' ? 'is blooming' : stage === 'tree' ? 'grew into a tree' : 'sprouted';
+      return `${name}'s garden ${stageLabel}`;
+    }
+    case 'buddy_checkin':
+      // Not only buddies send these any more - the Circle tab's member rows
+      // use the same event type to reach anyone in the circle.
+      return `${name} got a check-in from a circle-mate`;
     default:
       return `${name} had an update`;
   }
@@ -183,6 +221,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   const reportContent = useReportContent();
   const blockUser = useBlockUser();
   const [sendingKind, setSendingKind] = useState<NudgeKind | null>(null);
+  const { nudgeCopy } = useNudgeCopy();
   // Tertiary-level feed (design/REDESIGN.md §4): nudge actions are
   // revealed by tapping the row instead of six always-visible buttons per
   // event - the feed reads as quiet rows until you choose to react.
@@ -205,7 +244,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
     setSendingKind(kind);
     try {
       const recipientName = event.profiles?.name ?? 'your friend';
-      const message = await generateNudgeMessage(kind, recipientName, goalTitleFromEvent(event));
+      const message = nudgeCopy(kind, { name: recipientName, goal: goalTitleFromEvent(event) });
       await sendNudge.mutateAsync({ eventId: event.id, userId, kind, message });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } finally {
@@ -277,7 +316,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
               accessibilityLabel={label}
               hitSlop={4}
             >
-              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} />}
+              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} color={theme.colors.primary} />}
             </TouchableOpacity>
           ))}
         </View>
@@ -295,7 +334,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
             <Text style={styles.waterButtonText}>Watering…</Text>
           ) : (
             <View style={styles.waterButtonRow}>
-              <WaterIcon width={14} height={14} />
+              <WaterIcon width={14} height={14} color={theme.colors.primary} />
               <Text style={styles.waterButtonText}>Water their streak</Text>
             </View>
           )}
@@ -336,6 +375,58 @@ export default function TodayScreen() {
     isFetchingNextPage,
   } = useEvents(circleId ?? undefined);
   const events = data?.pages.flat();
+  const { lastReadAt, isLoaded: readStateLoaded } = useMomentsUnread(circleId ?? undefined, userId);
+  const markRead = useMarkMomentsRead(circleId ?? undefined, userId);
+
+  // lastReadAtRef always mirrors the latest lastReadAt from the query, kept
+  // current on every render (not just while focused) so the focus effect
+  // below can read "the value right now" without needing lastReadAt in its
+  // dependency array.
+  const lastReadAtRef = useRef(lastReadAt);
+  lastReadAtRef.current = lastReadAt;
+
+  // Arriving at the screen counts as reading, per the spec - not scrolling.
+  // The stamp captured on focus is held in lastReadAtOnEntry so the "New"
+  // divider stays put while you read, instead of vanishing the instant the
+  // stamp updates.
+  //
+  // markRead.mutate()'s onSuccess invalidates the moments-unread query,
+  // which changes lastReadAt once the refetch lands. If lastReadAt were a
+  // dependency of this callback, that change would re-run the effect while
+  // still focused, stamp again, invalidate again, and loop forever - and
+  // also overwrite lastReadAtOnEntry with the fresh stamp, making the "New"
+  // divider vanish instead of holding still. hasStampedRef guards against
+  // exactly that: it makes the effect body run at most once per focus (using
+  // lastReadAtRef.current, captured before this visit's stamp fires),
+  // regardless of how many times lastReadAt changes while focused, and
+  // resets on blur so the next focus stamps again.
+  const [lastReadAtOnEntry, setLastReadAtOnEntry] = useState<string | null>(null);
+  const hasStampedRef = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      // Wait for the read state to actually load before stamping. lastReadAt
+      // is null while the query is in flight *and* when the member has never
+      // read the feed, so stamping too early would capture null on every
+      // cold start and file the whole feed under "New".
+      if (readStateLoaded && !hasStampedRef.current) {
+        hasStampedRef.current = true;
+        setLastReadAtOnEntry(lastReadAtRef.current);
+        markRead.mutate();
+      }
+      return () => {
+        hasStampedRef.current = false;
+      };
+      // markRead is a stable React Query mutation object; lastReadAtRef is a
+      // ref (its identity never changes) and is always read via .current, so
+      // neither belongs in this dependency array. readStateLoaded does: it
+      // flips false->true once when the query settles, and the effect has to
+      // re-run then or a screen focused before the fetch lands would never
+      // stamp at all. That flip happens once per mount and hasStampedRef
+      // absorbs it, so this still stamps exactly once per focus - unlike
+      // lastReadAt, which changes on every stamp and would loop.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [readStateLoaded]),
+  );
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -351,6 +442,11 @@ export default function TodayScreen() {
           <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
         }
       >
+        {/* The action, not the identity. This used to be the circle's name
+            with a chevron, and nobody found it - a name that happens to be
+            tappable reads as a label. The name itself now sits with the
+            garden it describes, below. */}
+        <CirclePicker />
         <View style={styles.greetingRow}>
           <Text style={styles.greeting}>
             {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'}
@@ -365,12 +461,15 @@ export default function TodayScreen() {
             mood-first order): garden state leads, today's mission is the
             next action, mood check-in follows, shortcuts + feed are
             tertiary - each section sets up the one below it. */}
-        {circleId && <GardenHero circleId={circleId} variant="overview" />}
+        {/* Named right above the thing it belongs to, so "whose garden is
+            this?" is answered where the question gets asked. */}
+        {circleId && <CircleName />}
+        {circleId && <GardenHero circleId={circleId} />}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}
         <QuickActionsRow />
 
-        <Text style={styles.sectionTitle}>Circle Activity</Text>
+        <Text style={styles.sectionTitle}>Moments</Text>
         {isLoading ? (
           <View>
             <EventRowSkeleton />
@@ -379,12 +478,24 @@ export default function TodayScreen() {
           </View>
         ) : events && events.length > 0 ? (
           <View style={styles.list}>
-            {events.map((event) => {
+            {events.map((event, index) => {
               const label = dayLabel(event.created_at);
               const showHeader = label !== lastLabel;
               lastLabel = label;
+              // Shares isUnreadFor with the tab-bar dot rather than
+              // restating the rule, so the divider and the dot can never
+              // disagree about which events are new - including for
+              // buddy_checkin, whose actor is in the payload, not user_id.
+              const isUnread = userId ? isUnreadFor(unreadCandidate(event), lastReadAtOnEntry, userId) : false;
+              const previous = index > 0 ? events[index - 1] : null;
+              const previousUnread =
+                previous !== null &&
+                !!userId &&
+                isUnreadFor(unreadCandidate(previous), lastReadAtOnEntry, userId);
+              const showNewDivider = isUnread && !previousUnread;
               return (
                 <View key={event.id}>
+                  {showNewDivider && <Text style={styles.newDivider}>New</Text>}
                   {showHeader && <Text style={styles.dayHeader}>{label}</Text>}
                   {userId && circleId && <EventRow event={event} circleId={circleId} userId={userId} />}
                 </View>
@@ -429,6 +540,15 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
     list: { gap: 10 },
     dayHeader: { fontSize: 14, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+    newDivider: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.primary,
+      marginTop: 12,
+      marginBottom: 2,
+    },
     loadMoreButton: {
       alignSelf: 'center',
       marginTop: 8,

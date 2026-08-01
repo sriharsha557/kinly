@@ -137,7 +137,7 @@ function AskCard({
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
             >
-              <DeleteIcon width={15} height={15} opacity={0.6} />
+              <DeleteIcon width={15} height={15} color={theme.colors.textSecondary} opacity={0.6} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -218,7 +218,7 @@ export default function ConnectionScreen() {
             <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
           }
         >
-          <Text style={styles.title}>Connection Moments</Text>
+          <Text style={styles.title}>Together</Text>
           <View style={styles.titleHint}>
             <ConceptHint id="connection-moments" text="A daily prompt your circle answers together." />
           </View>

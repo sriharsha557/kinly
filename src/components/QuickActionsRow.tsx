@@ -17,7 +17,10 @@ import CheckIcon from '../../assets/icons/feed/check.svg';
 // feels like moving forward across tabs instead of jumping around.
 const ACTIONS: { label: string; icon: FC<SvgProps>; tab: keyof MainTabParamList }[] = [
   { label: 'Start Challenge', icon: RocketIcon, tab: 'Circle' },
-  { label: 'Check In', icon: CheckIcon, tab: 'Goals' },
+  // "Check In" collided with the mood check-in directly above this row on
+  // Home, and was ambiguous between mood, attendance, daily login and goal
+  // progress. All three labels are verb phrases now.
+  { label: 'Log Progress', icon: CheckIcon, tab: 'Goals' },
   { label: 'Ask Friends', icon: ChatIcon, tab: 'Connection' },
 ];
 
@@ -31,7 +34,7 @@ export function QuickActionsRow() {
       {ACTIONS.map(({ label, icon: Icon, tab }, index) => (
         <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
           <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
-            <Icon width={22} height={22} />
+            <Icon width={22} height={22} color={theme.colors.primary} />
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>
         </Animated.View>

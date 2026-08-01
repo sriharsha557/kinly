@@ -61,7 +61,7 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
   if (!isUnlocked) {
     return (
       <View style={[styles.letterRow, styles.letterRowInline]}>
-        <LockIcon width={14} height={14} />
+        <LockIcon width={14} height={14} color={theme.colors.textSecondary} />
         <Text style={styles.letterMeta}>Sealed until {letter.unlock_date}</Text>
       </View>
     );
@@ -76,7 +76,7 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
           openLetter.mutate(letter.id);
         }}
       >
-        <CelebrateIcon width={16} height={16} />
+        <CelebrateIcon width={16} height={16} color={theme.colors.primary} />
         <Text style={styles.letterReady}>A letter from your past self is ready — tap to read</Text>
       </TouchableOpacity>
     );
@@ -100,7 +100,7 @@ export function FutureSelfCard({ userId }: { userId: string }) {
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <MailIcon width={18} height={18} />
+          <MailIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Future Self</Text>
         </View>
         <TouchableOpacity onPress={() => setWriting(true)}>

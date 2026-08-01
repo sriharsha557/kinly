@@ -111,7 +111,7 @@ function GuessWhoPostRow({
       ) : (
         <View>
           <View style={styles.revealedRow}>
-            <CheckIcon width={14} height={14} />
+            <CheckIcon width={14} height={14} color={theme.colors.primary} />
             <Text style={styles.revealed}>
               It was {members?.find((m) => m.user_id === post.answer_user_id)?.profiles?.name ?? 'someone'}!
             </Text>
@@ -133,7 +133,7 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <MasksIcon width={18} height={18} />
+          <MasksIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Guess Who</Text>
         </View>
         <TouchableOpacity onPress={() => setCreating(true)}>

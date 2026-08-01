@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { FC } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import TodayScreen from '../screens/TodayScreen';
@@ -16,6 +17,11 @@ import {
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
+import { useAuthStore } from '../state/useAuthStore';
+import { useMomentsUnread } from '../hooks/useMomentsUnread';
+import { useGoals } from '../hooks/useGoals';
+import { useSyncStepGoals } from '../hooks/useSyncStepGoals';
+import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { TAB_BAR_HEIGHT } from '../hooks/useTabBarClearance';
 import type { MainTabParamList } from './types';
 
@@ -35,10 +41,16 @@ function TabIcon({
   Icon,
   color,
   focused,
+  showDot,
+  dotColor,
+  dotBorderColor,
 }: {
   Icon: FC<{ size?: number; color: string }>;
   color: string;
   focused: boolean;
+  showDot?: boolean;
+  dotColor: string;
+  dotBorderColor: string;
 }) {
   const scale = useSharedValue(1);
 
@@ -53,6 +65,21 @@ function TabIcon({
   return (
     <Animated.View style={iconStyle}>
       <Icon size={24} color={color} />
+      {showDot && (
+        <View
+          style={{
+            position: 'absolute',
+            top: -2,
+            right: -3,
+            width: 9,
+            height: 9,
+            borderRadius: 4.5,
+            backgroundColor: dotColor,
+            borderWidth: 1.5,
+            borderColor: dotBorderColor,
+          }}
+        />
+      )}
     </Animated.View>
   );
 }
@@ -62,37 +89,67 @@ export default function MainTabs() {
   const theme = useTheme();
   const { colors } = theme;
   const styles = createStyles(theme);
+  const circleId = useAuthStore((state) => state.activeCircleId);
+  const userId = useAuthStore((state) => state.user?.id);
+  const { unreadCount } = useMomentsUnread(circleId ?? undefined, userId);
+  const { data: goals } = useGoals(circleId ?? undefined);
+  // Lives here rather than on the Goals screen so a step goal's progress -
+  // and the garden, mission list and member rows derived from it - is
+  // current whichever tab the app opens on.
+  const { celebration: stepCelebration, dismissCelebration } = useSyncStepGoals(
+    circleId ?? undefined,
+    userId,
+    goals,
+  );
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        // Labels aid discoverability (icon-only nav forces guessing) and
-        // give the active accent a second, readable signal.
-        tabBarShowLabel: true,
-        tabBarLabelStyle: styles.tabBarLabel,
-        tabBarStyle: [
-          styles.tabBar,
-          { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
-        ],
-        tabBarItemStyle: styles.tabBarItem,
-        tabBarIcon: ({ color, focused }) => (
-          <TabIcon Icon={ICONS[route.name]} color={color} focused={focused} />
-        ),
-      })}
-    >
-      <Tab.Screen name="Today" component={TodayScreen} />
-      <Tab.Screen name="Circle" component={CircleScreen} />
-      <Tab.Screen name="Goals" component={GoalsScreen} />
-      <Tab.Screen
-        name="Connection"
-        component={ConnectionScreen}
-        options={{ title: 'Connection Moments', tabBarLabel: 'Moments' }}
-      />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-    </Tab.Navigator>
+    <>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textSecondary,
+          // Labels aid discoverability (icon-only nav forces guessing) and
+          // give the active accent a second, readable signal.
+          tabBarShowLabel: true,
+          tabBarLabelStyle: styles.tabBarLabel,
+          tabBarStyle: [
+            styles.tabBar,
+            { height: TAB_BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom },
+          ],
+          tabBarItemStyle: styles.tabBarItem,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              Icon={ICONS[route.name]}
+              color={color}
+              focused={focused}
+              // Only Today hosts the Moments feed, and a dot on the screen
+              // you are already looking at is noise.
+              showDot={route.name === 'Today' && !focused && unreadCount > 0}
+              dotColor={colors.primary}
+              dotBorderColor={colors.surface}
+            />
+          ),
+        })}
+      >
+        <Tab.Screen name="Today" component={TodayScreen} />
+        <Tab.Screen name="Circle" component={CircleScreen} />
+        <Tab.Screen name="Goals" component={GoalsScreen} />
+        <Tab.Screen
+          name="Connection"
+          component={ConnectionScreen}
+          options={{ title: 'Together', tabBarLabel: 'Together' }}
+        />
+        <Tab.Screen name="Profile" component={ProfileScreen} />
+      </Tab.Navigator>
+      {stepCelebration && (
+        <MilestoneCardModal
+          title={stepCelebration.title}
+          subtitle={stepCelebration.subtitle}
+          onClose={dismissCelebration}
+        />
+      )}
+    </>
   );
 }
 

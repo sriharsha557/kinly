@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { isStepGoal } from '../lib/stepGoal';
+import { useHealthSyncStore } from '../state/useHealthSyncStore';
 import type { Goal, GoalSource, InterestCategory } from '../types/models';
 
 export function useGoals(circleId: string | undefined) {
@@ -27,6 +29,19 @@ interface NewGoal {
   source?: GoalSource;
 }
 
+// An explicit `source` from the caller always wins; otherwise a connected
+// device auto-detects. On a device that never connected every goal is
+// 'manual', so nothing is ever marked for a sync that cannot happen.
+function resolveGoalSource(
+  source: GoalSource | undefined,
+  title: string,
+  target: number,
+): GoalSource {
+  if (source) return source;
+  const connected = useHealthSyncStore.getState().decision === 'connected';
+  return connected && isStepGoal(title, target) ? 'health_steps' : 'manual';
+}
+
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -39,11 +54,26 @@ export function useCreateGoal() {
           title,
           target,
           category: category ?? null,
-          goal_source: source ?? 'manual',
+          goal_source: resolveGoalSource(source, title, target),
         })
         .select()
         .single();
       if (error) throw error;
+
+      // Starting a goal is a moment the circle should see - previously only
+      // *finishing* one produced a feed row, so a friend planting something
+      // new was invisible until they completed it. Feed-only (migration
+      // 0039), so this adds a Moments row and no push. Deliberately not
+      // awaited into the error path: a failed event insert must not roll
+      // back a successfully created goal.
+      const { error: eventError } = await supabase.from('events').insert({
+        circle_id: circleId,
+        user_id: userId,
+        type: 'goal_started',
+        payload: { title, goal_id: (data as Goal).id },
+      });
+      if (eventError) console.warn('goal_started event failed', eventError.message);
+
       return data as Goal;
     },
     onSuccess: (_data, variables) =>
@@ -73,6 +103,30 @@ export function useUpdateGoal() {
         .single();
       if (error) throw error;
       return data as Goal;
+    },
+    onSuccess: (_data, variables) =>
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+  });
+}
+
+// Changes only goal_source. Separate from useUpdateGoal, which writes title
+// and target and would need both to change one field. Used by the Auto
+// badge's undo and by the convert-on-connect pass in useHealthSync.
+export function useSetGoalSource() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      goalId,
+      circleId,
+      source,
+    }: {
+      goalId: string;
+      circleId: string;
+      source: GoalSource;
+    }) => {
+      const { error } = await supabase.from('goals').update({ goal_source: source }).eq('id', goalId);
+      if (error) throw error;
+      return { circleId };
     },
     onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { calendarDaysSince } from '../lib/needsAttention';
 
 export type GardenStage = 'wilted' | 'seed' | 'sprout' | 'tree' | 'bloom';
 
@@ -17,7 +18,13 @@ export interface GardenState {
 
 function stageFor(maxStreak: number, mostRecentDate: string | null): GardenStage {
   if (!mostRecentDate) return 'wilted';
-  const days = Math.floor((Date.now() - new Date(mostRecentDate).getTime()) / 86_400_000);
+  // Shares calendarDaysSince with needsAttention deliberately: this `days > 3`
+  // wilt threshold and that module's "quiet" threshold have to agree, or a
+  // member shows a drooping plant here while being absent from Circle Today.
+  // They can only agree if they count days the same way - the previous
+  // millisecond division against a UTC-parsed date drifted with the viewer's
+  // timezone, so the two could disagree for several hours a day.
+  const days = calendarDaysSince(mostRecentDate, Date.now());
   if (days > 3) return 'wilted';
   if (maxStreak >= 30) return 'bloom';
   if (maxStreak >= 14) return 'tree';

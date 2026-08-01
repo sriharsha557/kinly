@@ -59,7 +59,7 @@ function AddVisionModal({
               <Text style={styles.imagePickerText}>Uploading…</Text>
             ) : (
               <View style={styles.imagePickerRow}>
-                <CameraIcon width={16} height={16} />
+                <CameraIcon width={16} height={16} color={theme.colors.primary} />
                 <Text style={styles.imagePickerText}>Add a photo (optional)</Text>
               </View>
             )}
@@ -91,7 +91,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <GalaxyIcon width={18} height={18} />
+          <GalaxyIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Vision Board</Text>
         </View>
         <TouchableOpacity onPress={() => setAdding(true)}>

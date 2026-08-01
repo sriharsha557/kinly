@@ -9,7 +9,7 @@ import { useAuthStore } from '../state/useAuthStore';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useProfileStats } from '../hooks/useProfileStats';
 import { signOut } from '../lib/auth';
-import { Logo } from '../components/Logo';
+import { AvatarPlaceholder } from '../components/AvatarPlaceholder';
 import { StatTile } from '../components/StatTile';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PillButton } from '../components/PillButton';
@@ -18,6 +18,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { ThemePicker } from '../components/ThemePicker';
+import { HealthSyncRow } from '../components/HealthSyncRow';
 import { useThemeStore } from '../state/useThemeStore';
 import { setThemePrefs } from '../lib/themePrefs';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
@@ -63,7 +64,7 @@ export default function ProfileScreen() {
             {user?.avatar ? (
               <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
             ) : (
-              <Logo size={72} color={colors.onAccent} background={colors.primary} />
+              <AvatarPlaceholder size={72} />
             )}
           </TouchableOpacity>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
@@ -167,6 +168,7 @@ export default function ProfileScreen() {
         {/* setThemePrefs applies to the live theme store first, so the whole
             app restyles on tap - the profile-row sync happens behind it. */}
         <View style={styles.appearanceCard}>
+          <HealthSyncRow />
           <ThemePicker
             accent={themeAccent}
             mode={themeMode}

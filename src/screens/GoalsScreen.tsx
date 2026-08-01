@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
-  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -13,9 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '../hooks/useGoals';
+import { useCreateGoal, useDeleteGoal, useGoals, useSetGoalSource, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
-import { useSyncStepGoals } from '../hooks/useSyncStepGoals';
+import { useHealthSync } from '../hooks/useHealthSync';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
 import { pickAndUploadCheckinPhoto } from '../lib/checkinPhotoUpload';
@@ -95,13 +94,15 @@ function GoalCard({
   const { data: circle } = useCircleDetail(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
   const deleteGoal = useDeleteGoal();
+  const setGoalSource = useSetGoalSource();
+  const { isConnected } = useHealthSync(circleId);
   const { data: hasWaterMark } = useHasWaterMark(goal.id);
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const isComplete = goal.progress >= goal.target;
-  const isStepGoal = goal.goal_source === 'health_steps';
+  const isHealthStepsGoal = goal.goal_source === 'health_steps';
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -127,9 +128,9 @@ function GoalCard({
         <View style={styles.cardHeaderRight}>
           {goal.streak_count > 0 && (
             <View style={styles.streakRow}>
-              <StreakIcon width={14} height={14} />
+              <StreakIcon width={14} height={14} color={theme.colors.textSecondary} />
               <Text style={styles.streak}>{goal.streak_count}</Text>
-              {hasWaterMark && <WaterIcon width={13} height={13} />}
+              {hasWaterMark && <WaterIcon width={13} height={13} color={theme.colors.primary} />}
             </View>
           )}
           <TouchableOpacity
@@ -143,6 +144,23 @@ function GoalCard({
         </View>
       </View>
       <ProgressBar progress={goal.progress} target={goal.target} />
+      {/* Only while connected: a health_steps goal on a disconnected device
+          is not being auto-tracked, so calling it "Auto" would be a lie. */}
+      {isHealthStepsGoal && isConnected && (
+        <View style={styles.autoBadge}>
+          <Text style={styles.autoBadgeText}>Auto · Health Connect</Text>
+          <AnimatedPressable
+            onPress={() =>
+              setGoalSource.mutate({ goalId: goal.id, circleId, source: 'manual' })
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Stop tracking this goal from Health Connect"
+            style={styles.autoBadgeUndo}
+          >
+            <Text style={styles.autoBadgeUndoText}>✕</Text>
+          </AnimatedPressable>
+        </View>
+      )}
       <View style={styles.cardFooter}>
         <Text style={styles.cardMeta}>
           {goal.progress} / {goal.target}
@@ -154,7 +172,7 @@ function GoalCard({
             <ToggleSwitch value onValueChange={() => {}} />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
-        ) : isStepGoal ? (
+        ) : isHealthStepsGoal ? (
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
@@ -165,7 +183,7 @@ function GoalCard({
               accessibilityRole="button"
               accessibilityLabel="Log progress with a photo"
             >
-              <CameraIcon width={18} height={18} />
+              <CameraIcon width={18} height={18} color={theme.colors.primary} />
             </TouchableOpacity>
             <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
               <Text style={styles.logButtonText}>Log progress</Text>
@@ -232,7 +250,6 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const [category, setCategory] = useState<InterestCategory | null>(null);
-  const [trackSteps, setTrackSteps] = useState(false);
   const createGoal = useCreateGoal();
   const theme = useTheme();
   const { colors } = theme;
@@ -247,12 +264,10 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
       title: title.trim(),
       target: targetValue,
       category,
-      source: trackSteps ? 'health_steps' : 'manual',
     });
     setTitle('');
     setTarget('');
     setCategory(null);
-    setTrackSteps(false);
   }
 
   return (
@@ -301,12 +316,6 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           );
         })}
       </View>
-      {Platform.OS === 'android' && (
-        <View style={styles.stepsToggleRow}>
-          <ToggleSwitch value={trackSteps} onValueChange={setTrackSteps} />
-          <Text style={styles.stepsToggleLabel}>Track automatically with Health Connect (steps)</Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -318,11 +327,6 @@ export default function GoalsScreen() {
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { celebration: stepCelebration, dismissCelebration } = useSyncStepGoals(
-    circleId ?? undefined,
-    userId,
-    goals,
-  );
 
   // Everyone who logged anything today, so each goal row can carry a
   // collective signal ("· 3 friends completed today") alongside the owner's
@@ -336,9 +340,6 @@ export default function GoalsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
-      {stepCelebration && (
-        <MilestoneCardModal title={stepCelebration.title} subtitle={stepCelebration.subtitle} onClose={dismissCelebration} />
-      )}
 
       {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
 
@@ -394,8 +395,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 8,
     },
     categoryChipLabel: { fontSize: 14, fontWeight: '600' },
-    stepsToggleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-    stepsToggleLabel: { fontSize: 13, color: colors.textSecondary, flex: 1 },
     input: {
       flex: 1,
       backgroundColor: colors.inputBg,
@@ -425,6 +424,19 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
     optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    autoBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 6,
+      marginTop: 8,
+      paddingLeft: 10,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceSubtle,
+    },
+    autoBadgeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+    autoBadgeUndoText: { fontSize: 13, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardMeta: { fontSize: 13, color: colors.textSecondary },
     doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },

@@ -107,7 +107,7 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
     <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <MeetupIcon width={22} height={22} />
+          <MeetupIcon width={22} height={22} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Meet Up</Text>
         </View>
         <TouchableOpacity onPress={() => setProposing(true)}>
