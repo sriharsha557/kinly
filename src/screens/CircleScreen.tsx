@@ -6,8 +6,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { ReactNode } from 'react';
 import { useAuthStore } from '../state/useAuthStore';
-import { useMyCircles } from '../hooks/useCircles';
-import { GardenHero } from '../components/GardenHero';
 import { BuddyCard } from '../components/BuddyCard';
 import { ChallengesCard } from '../components/ChallengesCard';
 import { VisionBoardCard } from '../components/VisionBoardCard';
@@ -15,6 +13,14 @@ import { MeetUpCard } from '../components/MeetUpCard';
 import { CircleAICard } from '../components/CircleAICard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { DisclosureSection } from '../components/DisclosureSection';
+import { CirclePicker } from '../components/CirclePicker';
+import { CircleHealthCard } from '../components/CircleHealthCard';
+import { CircleTodaySection } from '../components/CircleTodaySection';
+import { CircleMembersSection } from '../components/CircleMembersSection';
+import { useGardenState } from '../hooks/useGarden';
+import { useGoals } from '../hooks/useGoals';
+import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
+import { needsAttention } from '../lib/needsAttention';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import type { RootStackParamList } from '../navigation/types';
@@ -26,81 +32,76 @@ function Reveal({ index, children }: { index: number; children: ReactNode }) {
   return <Animated.View entering={FadeInDown.duration(350).delay(index * 70)}>{children}</Animated.View>;
 }
 
-// Only shown once someone's actually in more than one circle - no point
-// cluttering the header with a single-item switcher, which is most users
-// early on. Tapping a chip drives the same app-wide activeCircleId every
-// other tab already reads from (Today/Goals/Connection/Profile too), not
-// just what this screen shows - see CircleSettingsScreen's own switcher,
-// which this is a faster, more visible way to reach.
-function CircleSwitcher({ activeCircleId, onSwitch }: { activeCircleId: string; onSwitch: (id: string) => void }) {
-  const userId = useAuthStore((state) => state.user?.id);
-  const { data: circles } = useMyCircles(userId);
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const myCircles = (circles ?? []).filter((c) => c.membershipStatus === 'active');
-
-  if (myCircles.length < 2) return null;
-
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.switcherRow}>
-      {myCircles.map((circle) => {
-        const active = circle.id === activeCircleId;
-        return (
-          <TouchableOpacity
-            key={circle.id}
-            style={[styles.switcherChip, active && styles.switcherChipActive]}
-            onPress={() => onSwitch(circle.id)}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: active }}
-          >
-            <Text style={[styles.switcherChipText, active && styles.switcherChipTextActive]} numberOfLines={1}>
-              {circle.name}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  );
-}
-
 export default function CircleScreen() {
   const navigation = useNavigation<Nav>();
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
-  const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const scrollRef = useRef<ScrollView>(null);
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const { data: garden } = useGardenState(circleId ?? undefined);
+  const { data: goals } = useGoals(circleId ?? undefined);
+  const { data: moods } = useTodayMoodCheckins(circleId ?? undefined);
+
+  // The screen owns no rules - needsAttention is the single definition of
+  // all three signals, so this cannot drift from what BuddyCard believes.
+  const attentionRows = useMemo(
+    () =>
+      userId
+        ? needsAttention({
+            members: garden?.members ?? [],
+            goals: goals ?? [],
+            toughToday: (moods ?? []).filter((m) => m.mood === 'tough').map((m) => m.user_id),
+            viewerId: userId,
+            now: Date.now(),
+          })
+        : [],
+    [garden, goals, moods, userId],
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView ref={scrollRef} contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>Circle</Text>
+          <CirclePicker variant="title" />
           <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
             <SettingsIcon width={15} height={15} color={theme.colors.textSecondary} />
             <Text style={styles.settingsLink}>Settings</Text>
           </TouchableOpacity>
         </View>
 
-        {circleId && <CircleSwitcher activeCircleId={circleId} onSwitch={setActiveCircleId} />}
-
-        {/* Primary: the living garden in tend mode — tap a plant to water
-            or check in on that member (design/REDESIGN.md §5.4) */}
         {circleId && (
           <Reveal index={0}>
-            <GardenHero circleId={circleId} variant="tend" />
+            <CircleHealthCard circleId={circleId} needsSupportCount={attentionRows.length} />
           </Reveal>
         )}
         {userId && circleId && (
           <Reveal index={1}>
-            <BuddyCard circleId={circleId} userId={userId} />
+            <CircleTodaySection circleId={circleId} userId={userId} rows={attentionRows} />
           </Reveal>
         )}
         {userId && circleId && (
           <Reveal index={2}>
+            <CircleMembersSection
+              circleId={circleId}
+              userId={userId}
+              excludeUserIds={attentionRows.map((r) => r.userId)}
+            />
+          </Reveal>
+        )}
+        {/* Challenges above Buddy: challenges are collective, a buddy is a
+            pairing, and the collective belongs higher on the screen that
+            answers "how are we". */}
+        {userId && circleId && (
+          <Reveal index={3}>
             <ChallengesCard circleId={circleId} userId={userId} />
+          </Reveal>
+        )}
+        {userId && circleId && (
+          <Reveal index={4}>
+            <BuddyCard circleId={circleId} userId={userId} />
           </Reveal>
         )}
 
@@ -122,25 +123,12 @@ export default function CircleScreen() {
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: 16 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
     settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 48, paddingHorizontal: 8 },
     settingsLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
-    switcherRow: { gap: 8, marginBottom: 16 },
-    switcherChip: {
-      backgroundColor: colors.inputBg,
-      borderRadius: radii.pill,
-      paddingHorizontal: 16,
-      minHeight: 48,
-      justifyContent: 'center',
-      maxWidth: 160,
-    },
-    switcherChipActive: { backgroundColor: colors.primary },
-    switcherChipText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-    switcherChipTextActive: { color: colors.onAccent },
   });
 }
