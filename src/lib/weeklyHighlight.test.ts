@@ -110,3 +110,11 @@ test('every branch returns a non-empty sentence', () => {
     assert.ok(line.length > 0, JSON.stringify(c));
   }
 });
+
+test('a dead week in a circle with health history is still called quiet', () => {
+  // Guarding on "healthWeekAgo === null" instead of "health climbed" sent
+  // this case past every branch and out the bottom as "Something moved this
+  // week" - warm, and false.
+  const line = weeklyHighlight(week({ healthNow: 40, healthWeekAgo: 45 }));
+  assert.equal(line, 'A quiet week. Next one is yours.');
+});

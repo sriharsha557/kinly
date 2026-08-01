@@ -43,6 +43,18 @@ export function weeklyHighlight(stats: WeeklyHighlightStats): string {
   // Every signal, not just the four counters: a lone bestStreak, name, or
   // health delta is still something, and must not be swallowed by the quiet
   // fallback before its own branch gets a chance to fire.
+  // Health can climb in a week with no completions at all: it tracks how
+  // recently people logged anything, while goalsCompleted counts only
+  // finished goals. So a week of steady progress without a single completion
+  // is a real week, and computing this once lets the quiet-week guard below
+  // and the branch further down agree about that.
+  const healthClimbed = healthWeekAgo !== null && healthNow - healthWeekAgo >= HEALTH_CLIMB;
+
+  // Every signal absent - not merely "no health history". Testing
+  // healthWeekAgo === null here instead would drop a genuinely dead week in
+  // a circle that HAS history past every branch and out the bottom as
+  // "Something moved this week", which is exactly the kind of warm-sounding
+  // falsehood this whole module exists to make impossible.
   const nothingHappened =
     goalsCompleted === 0 &&
     streakMilestones === 0 &&
@@ -50,7 +62,7 @@ export function weeklyHighlight(stats: WeeklyHighlightStats): string {
     asksPosted === 0 &&
     bestStreak === 0 &&
     mostWateredFriendName === null &&
-    healthWeekAgo === null;
+    !healthClimbed;
   if (nothingHappened) return 'A quiet week. Next one is yours.';
 
   // Guarded on the name itself, not on a separate count - this is the only
@@ -62,7 +74,7 @@ export function weeklyHighlight(stats: WeeklyHighlightStats): string {
 
   if (bestStreak >= LONG_STREAK) return `A ${bestStreak}-day streak is carrying this circle.`;
 
-  if (healthWeekAgo !== null && healthNow - healthWeekAgo >= HEALTH_CLIMB) {
+  if (healthClimbed) {
     return 'Your garden is greener than it was last week.';
   }
 
