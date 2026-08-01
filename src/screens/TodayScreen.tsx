@@ -17,7 +17,7 @@ import { useSignedCheckinPhotoUrl } from '../hooks/useCheckinPhoto';
 import { generateNudgeMessage } from '../lib/nudgeMessage';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
-import { CirclePicker } from '../components/CirclePicker';
+import { CirclePicker, CircleName } from '../components/CirclePicker';
 import { GardenHero } from '../components/GardenHero';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
@@ -441,9 +441,11 @@ export default function TodayScreen() {
           <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} tintColor={theme.colors.primary} />
         }
       >
-        {/* Which circle the garden below belongs to. Above the greeting and
-            deliberately quiet: it is context, not the screen's headline. */}
-        <CirclePicker variant="chip" />
+        {/* The action, not the identity. This used to be the circle's name
+            with a chevron, and nobody found it - a name that happens to be
+            tappable reads as a label. The name itself now sits with the
+            garden it describes, below. */}
+        <CirclePicker />
         <View style={styles.greetingRow}>
           <Text style={styles.greeting}>
             {timeOfDayGreeting()}, {user?.name?.split(' ')[0] ?? 'there'}
@@ -458,6 +460,9 @@ export default function TodayScreen() {
             mood-first order): garden state leads, today's mission is the
             next action, mood check-in follows, shortcuts + feed are
             tertiary - each section sets up the one below it. */}
+        {/* Named right above the thing it belongs to, so "whose garden is
+            this?" is answered where the question gets asked. */}
+        {circleId && <CircleName />}
         {circleId && <GardenHero circleId={circleId} />}
         {userId && circleId && <TodayGoalsChecklist circleId={circleId} userId={userId} />}
         {userId && circleId && <MoodCheckinCard circleId={circleId} userId={userId} />}

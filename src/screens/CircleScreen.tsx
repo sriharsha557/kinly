@@ -13,7 +13,7 @@ import { MeetUpCard } from '../components/MeetUpCard';
 import { CircleAICard } from '../components/CircleAICard';
 import { WeeklyRecapCard } from '../components/WeeklyRecapCard';
 import { DisclosureSection } from '../components/DisclosureSection';
-import { CirclePicker } from '../components/CirclePicker';
+import { CirclePicker, CircleName } from '../components/CirclePicker';
 import { CircleHealthCard } from '../components/CircleHealthCard';
 import { CircleTodaySection } from '../components/CircleTodaySection';
 import { CircleMembersSection } from '../components/CircleMembersSection';
@@ -110,13 +110,19 @@ export default function CircleScreen() {
           <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={theme.colors.primary} />
         }
       >
+        {/* Same split as Home: the button says what it does, the name heads
+            the thing it describes. The name used to be this screen's title
+            at 26px, which read as a page heading rather than as a label for
+            the health card under it. */}
         <View style={styles.header}>
-          <CirclePicker variant="title" />
+          <CirclePicker />
           <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
             <SettingsIcon width={15} height={15} color={theme.colors.textSecondary} />
             <Text style={styles.settingsLink}>Settings</Text>
           </TouchableOpacity>
         </View>
+
+        {circleId && <CircleName size="sm" />}
 
         {circleId && (
           <Reveal index={0}>
@@ -184,7 +190,17 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: 16 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    settingsRow: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 48, paddingHorizontal: 8 },
+    // marginLeft: auto rather than relying on the row's space-between:
+    // CirclePicker renders nothing when you only belong to one circle, and
+    // with a single child space-between would drop Settings to the left edge.
+    settingsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      minHeight: 48,
+      paddingHorizontal: 8,
+      marginLeft: 'auto',
+    },
     settingsLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
   });
 }

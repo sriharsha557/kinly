@@ -6,48 +6,68 @@ import { useMyCircles } from '../hooks/useCircles';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
 
-// Which circle you are looking at, and how to change it - without leaving
-// the screen you are on. Switching used to mean Home -> Circle -> pick ->
-// back to Home, i.e. leaving the screen in order to change what it shows.
+// Which circle you are looking at is one job; changing it is another. This
+// file does the second only.
 //
-// One control, two sizes: a quiet chip above Home's greeting (context, not
-// a headline - the greeting keeps that job) and the Circle tab's own title,
-// where the circle's real name is more useful than the word "Circle" the
-// tab bar already says.
-export function CirclePicker({ variant }: { variant: 'chip' | 'title' }) {
+// The first version merged them - the control WAS the circle's name, with a
+// chevron beside it - and the affordance disappeared: a name that happens to
+// be tappable reads as a label, so nobody found the switcher. So the button
+// now says what it does, and CircleName renders the identity next to the
+// thing it actually labels (the garden on Home, the health card on Circle).
+
+// Returns the active circle, or null when there isn't one to show. Shared by
+// both components below so the "which circle" question is answered once.
+function useActiveCircle() {
   const userId = useAuthStore((state) => state.user?.id);
   const activeCircleId = useAuthStore((state) => state.activeCircleId);
-  const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
   const { data: circles } = useMyCircles(userId);
-  const [picking, setPicking] = useState(false);
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-
   // Pending members can't see anything circle-scoped yet, so switching to
   // one would land on an empty screen.
   const myCircles = (circles ?? []).filter((c) => c.membershipStatus === 'active');
-  const active = myCircles.find((c) => c.id === activeCircleId);
-  const isTitle = variant === 'title';
+  return { myCircles, active: myCircles.find((c) => c.id === activeCircleId) ?? null };
+}
+
+// The circle's name, as a heading for whatever it describes. Not tappable -
+// that is CirclePicker's job, and a heading that silently does something is
+// the problem this split exists to fix.
+export function CircleName({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  const { active } = useActiveCircle();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (!active) return null;
 
   return (
+    <Text style={size === 'sm' ? styles.nameSm : styles.nameMd} numberOfLines={1}>
+      {active.name}
+    </Text>
+  );
+}
+
+// The switch control. Labelled by its action rather than its current value,
+// and shaped as a pill so it reads as a button at a glance.
+export function CirclePicker() {
+  const setActiveCircleId = useAuthStore((state) => state.setActiveCircleId);
+  const activeCircleId = useAuthStore((state) => state.activeCircleId);
+  const { myCircles, active } = useActiveCircle();
+  const [picking, setPicking] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // One circle has nothing to switch to, and CircleName already says which
+  // one you are in - so the button would be a dead end. Hide it entirely.
+  if (!active || myCircles.length < 2) return null;
+
+  return (
     <>
       <AnimatedPressable
-        style={isTitle ? styles.titleRow : styles.chipRow}
+        style={styles.pill}
         onPress={() => setPicking(true)}
-        // A single circle has nothing to switch to, so the control stays
-        // visible for identity but stops advertising an action.
-        disabled={myCircles.length < 2}
         accessibilityRole="button"
-        accessibilityLabel={`Active circle: ${active.name}. Switch circle.`}
+        accessibilityLabel={`Switch circle. Currently ${active.name}.`}
       >
-        <Text style={isTitle ? styles.titleText : styles.chipText} numberOfLines={1}>
-          {active.name}
-        </Text>
-        {myCircles.length > 1 && (
-          <Text style={isTitle ? styles.titleChevron : styles.chipChevron}>▾</Text>
-        )}
+        <Text style={styles.pillText}>Switch circle</Text>
+        <Text style={styles.pillChevron}>▾</Text>
       </AnimatedPressable>
 
       {picking && (
@@ -67,22 +87,25 @@ export function CirclePicker({ variant }: { variant: 'chip' | 'title' }) {
   );
 }
 
-function createStyles({ colors, radii, spacing }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    chipRow: {
+    // surfaceSubtle, not the accent: this is navigation between contexts, not
+    // the screen's primary action (design/PRINCIPLES.md's one-accent rule).
+    pill: {
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
-      gap: 4,
+      gap: 5,
       minHeight: 48,
-      paddingRight: spacing.sm,
+      paddingHorizontal: 14,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceSubtle,
     },
-    chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    // 13 is the type floor in design/PRINCIPLES.md; the glyph matches
-    // DisclosureSection's, which is the established chevron in this app.
-    chipChevron: { fontSize: 13, color: colors.textSecondary },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, flexShrink: 1 },
-    titleText: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, flexShrink: 1 },
-    titleChevron: { fontSize: 14, color: colors.textSecondary },
+    pillText: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
+    pillChevron: { fontSize: 13, color: colors.textSecondary },
+    // md heads the garden on Home; sm heads the health card on Circle, where
+    // it sits under the header rather than acting as the screen title.
+    nameMd: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
+    nameSm: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
   });
 }
