@@ -118,6 +118,8 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
     rowCopy: { flex: 1, gap: 2 },
     name: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
     detail: { fontSize: 14, color: colors.textSecondary },
-    action: { paddingVertical: 12, paddingHorizontal: 18 },
+    // minHeight keeps this on the 48dp touch-target floor; the row's 56dp
+    // height does not cover it, because the row itself is not tappable.
+    action: { paddingVertical: 12, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
   });
 }

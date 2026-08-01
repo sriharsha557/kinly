@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { needsAttention, isInGraceWindow } from './needsAttention.ts';
+import { needsAttention, isInGraceWindow, calendarDaysSince } from './needsAttention.ts';
 
 // A fixed "now" so expectations never drift with the day the suite runs.
 const NOW = Date.parse('2026-08-01T12:00:00Z');
@@ -152,4 +152,28 @@ test('a member in toughToday who is not in members is ignored', () => {
 
 test('an empty circle produces no rows', () => {
   assert.deepEqual(needsAttention({ members: [], goals: [], toughToday: [], viewerId: ME, now: NOW }), []);
+});
+
+// The old formula divided a UTC-parsed midnight by 86400000 against a local
+// instant, so the answer moved with the viewer's clock: the "water this
+// streak" row appeared and vanished depending on the hour. These pin the
+// count to calendar days, whatever time of day it is asked.
+test('the day count is the same at every hour of the day', () => {
+  const date = '2026-07-30';
+  const atEachHour = Array.from({ length: 24 }, (_, hour) =>
+    calendarDaysSince(date, new Date(2026, 7, 1, hour, 30).getTime()),
+  );
+  assert.deepEqual(new Set(atEachHour), new Set([2]));
+});
+
+test('the grace window holds at every hour of the day', () => {
+  const date = '2026-07-30';
+  for (let hour = 0; hour < 24; hour++) {
+    assert.equal(isInGraceWindow(date, new Date(2026, 7, 1, hour, 30).getTime()), true, `hour ${hour}`);
+  }
+});
+
+test('same calendar day is zero days, tomorrow is one', () => {
+  assert.equal(calendarDaysSince('2026-08-01', new Date(2026, 7, 1, 23, 59).getTime()), 0);
+  assert.equal(calendarDaysSince('2026-07-31', new Date(2026, 7, 1, 0, 1).getTime()), 1);
 });

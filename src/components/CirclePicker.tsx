@@ -78,7 +78,9 @@ function createStyles({ colors, radii, spacing }: ReturnType<typeof useTheme>) {
       paddingRight: spacing.sm,
     },
     chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    chipChevron: { fontSize: 11, color: colors.textSecondary },
+    // 13 is the type floor in design/PRINCIPLES.md; the glyph matches
+    // DisclosureSection's, which is the established chevron in this app.
+    chipChevron: { fontSize: 13, color: colors.textSecondary },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, flexShrink: 1 },
     titleText: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, flexShrink: 1 },
     titleChevron: { fontSize: 14, color: colors.textSecondary },

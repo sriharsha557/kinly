@@ -150,7 +150,10 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
     detail: { fontSize: 14, color: colors.textSecondary },
     // Overrides PillButton's full-width default padding so the action sits
     // as a compact trailing control rather than dominating the row.
-    action: { paddingVertical: 12, paddingHorizontal: 18 },
+    // Compact against PillButton's full-width default, but minHeight keeps
+    // it on the 48dp touch-target floor - the row is not the tappable thing,
+    // so the row's own 56dp height does not cover this.
+    action: { paddingVertical: 12, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
     empty: {
       flexDirection: 'row',
       alignItems: 'center',

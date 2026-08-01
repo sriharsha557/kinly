@@ -31,8 +31,30 @@ export interface AttentionRow {
 
 const DAY_MS = 86_400_000;
 
+// Calendar days between a yyyy-mm-dd date and an instant, both anchored to
+// LOCAL midnight.
+//
+// The obvious version - (now - Date.parse(isoDate)) / DAY_MS, floored - is
+// what this used to be, and it drifts with the viewer's timezone: `new
+// Date('2026-07-30')` parses as UTC midnight while `now` is a local instant,
+// so west of UTC the count ticks over early in the evening and east of it
+// late. That made the "water this streak" row appear and disappear by time
+// of day, in exactly the evening hours someone would reach for it, and let
+// the client disagree with water_streak()'s server-side current_date.
+//
+// Anchoring both sides to local midnight makes the result a stable count of
+// calendar days. Rounding rather than flooring absorbs the 23- and 25-hour
+// days that DST transitions produce.
+export function calendarDaysSince(isoDate: string, now: number): number {
+  const [year, month, day] = isoDate.slice(0, 10).split('-').map(Number);
+  const then = new Date(year, month - 1, day).getTime();
+  const today = new Date(now);
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  return Math.round((todayMidnight - then) / DAY_MS);
+}
+
 function daysSince(isoDate: string, now: number): number {
-  return Math.floor((now - new Date(isoDate).getTime()) / DAY_MS);
+  return calendarDaysSince(isoDate, now);
 }
 
 // The exact single-day grace window water_streak() enforces server-side.
