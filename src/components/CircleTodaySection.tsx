@@ -134,8 +134,6 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
     heading: {
       fontSize: 13,
       fontFamily: fontFamily.bold,
-      letterSpacing: 0.6,
-      textTransform: 'uppercase',
       color: colors.textSecondary,
       marginBottom: 10,
     },

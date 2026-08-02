@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import type { DimensionValue } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
 import { spacing } from '../theme/colors';
 
@@ -19,10 +26,19 @@ export function Skeleton({
 }) {
   const { colors } = useTheme();
   const opacity = useSharedValue(0.4);
+  // Reanimated already drops one-shot animations when the OS asks for reduced
+  // motion, but a withRepeat loop keeps running - it has no end to jump to.
+  // The pulse is decorative (the grey block already reads as "loading"), so
+  // it rests at a flat mid-opacity instead.
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reducedMotion) {
+      opacity.value = 0.7;
+      return;
+    }
     opacity.value = withRepeat(withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) }), -1, true);
-  }, [opacity]);
+  }, [opacity, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 

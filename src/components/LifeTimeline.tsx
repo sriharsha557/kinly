@@ -99,7 +99,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { gap: spacing.xl },
     group: { gap: 10 },
-    monthHeader: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
+    monthHeader: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
     row: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,

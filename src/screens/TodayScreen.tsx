@@ -24,6 +24,7 @@ import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono } from '../components/icons/MonoIcons';
 import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
@@ -321,7 +322,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       {event.user_id !== userId && expanded && (
         <View style={styles.nudgeRow}>
           {NUDGE_KINDS.map(({ kind, Icon: NudgeIcon, label }) => (
-            <TouchableOpacity
+            <AnimatedPressable
               key={kind}
               style={styles.nudgeButton}
               onPress={() => handleNudge(kind)}
@@ -330,14 +331,18 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
               accessibilityLabel={label}
               hitSlop={4}
             >
-              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} color={theme.colors.primary} />}
-            </TouchableOpacity>
+              {sendingKind === kind ? (
+                <LoadingSpinner size={8} />
+              ) : (
+                <NudgeIcon width={18} height={18} color={theme.colors.primary} />
+              )}
+            </AnimatedPressable>
           ))}
         </View>
       )}
 
       {waterableGoalId && (
-        <TouchableOpacity
+        <AnimatedPressable
           style={styles.waterButton}
           onPress={handleWater}
           disabled={waterStreak.isPending}
@@ -345,29 +350,33 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           accessibilityLabel="Water their streak"
         >
           {waterStreak.isPending ? (
-            <Text style={styles.waterButtonText}>Watering…</Text>
+            <View style={styles.waterButtonRow}>
+              <LoadingSpinner size={8} />
+              <Text style={styles.waterButtonText}>Watering</Text>
+            </View>
           ) : (
             <View style={styles.waterButtonRow}>
-              <WaterIcon width={14} height={14} color={theme.colors.primary} />
+              <WaterIcon width={16} height={16} color={theme.colors.primary} />
               <Text style={styles.waterButtonText}>Water their streak</Text>
             </View>
           )}
-        </TouchableOpacity>
+        </AnimatedPressable>
       )}
 
       {event.nudges.length > 0 && (
         <View style={styles.nudgeList}>
           {event.nudges.map((nudge) => (
-            <TouchableOpacity
+            <AnimatedPressable
               key={nudge.id}
               onLongPress={() => handleNudgeOptions(nudge.id, nudge.from_user_id, nudge.profiles?.name ?? 'Someone')}
               delayLongPress={400}
+              accessibilityHint="Press and hold for reporting options"
             >
               <Text style={styles.nudgeMessage}>
                 <Text style={styles.nudgeSender}>{nudge.profiles?.name ?? 'Someone'}: </Text>
                 {nudge.message}
               </Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           ))}
         </View>
       )}
@@ -516,7 +525,7 @@ export default function TodayScreen() {
               );
             })}
             {hasNextPage && (
-              <TouchableOpacity
+              <AnimatedPressable
                 style={styles.loadMoreButton}
                 onPress={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
@@ -528,7 +537,7 @@ export default function TodayScreen() {
                 ) : (
                   <Text style={styles.loadMoreLabel}>Load more</Text>
                 )}
-              </TouchableOpacity>
+              </AnimatedPressable>
             )}
           </View>
         ) : (
@@ -578,7 +587,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     eventCard: {
       paddingVertical: 6,
       gap: 10,
-      borderBottomWidth: 0.5,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
     },
     eventHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
@@ -594,7 +603,6 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
       justifyContent: 'center',
     },
-    nudgeButtonText: { fontSize: 16, fontFamily: fontFamily.regular },
     waterButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,

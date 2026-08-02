@@ -14,7 +14,8 @@ import { PillButton } from './PillButton';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, motion, spacing } from '../theme/colors';
+import { fontFamily, motion, spacing, touch } from '../theme/colors';
+import { AnimatedPressable } from './AnimatedPressable';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 
@@ -249,16 +250,27 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
       <View style={styles.card}>
         <Text style={styles.title}>{"How's today going?"}</Text>
         {!myCheckin ? (
-          <TouchableOpacity onPress={() => setModalOpen(true)} accessibilityRole="button" accessibilityLabel="Check in on today's mood">
+          <AnimatedPressable
+            style={styles.hintTarget}
+            onPress={() => setModalOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Check in on today's mood"
+          >
             <Text style={styles.hint}>Tap to check in</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ) : (
           <Animated.View entering={FadeIn.duration(motion.duration.entrance)}>
             <View style={styles.gridHeader}>
               <Text style={styles.hint}>{MOOD_SENTENCE[myCheckin.mood]}</Text>
-              <TouchableOpacity onPress={() => setModalOpen(true)} accessibilityRole="button" accessibilityLabel="Change your check-in">
+              <AnimatedPressable
+                style={styles.changeTarget}
+                onPress={() => setModalOpen(true)}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel="Change your check-in"
+              >
                 <Text style={styles.changeLink}>Change</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             </View>
             <Text style={styles.sectionCaption}>Circle check-ins today</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gridRow}>
@@ -309,14 +321,17 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     },
     title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: 2 },
     hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    // "Tap to check in" and "Change" are the two most-tapped things on this
+    // card and were bare Text in a Touchable - roughly a 16px tall target.
+    // These give them the standard minimum without moving anything visually.
+    hintTarget: { minHeight: touch.min, justifyContent: 'center' },
+    changeTarget: { minHeight: touch.min, justifyContent: 'center' },
     gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     changeLink: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.primary },
     sectionCaption: {
       fontSize: 13,
       fontFamily: fontFamily.semibold,
       color: colors.shellSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.4,
       marginTop: 14,
       marginBottom: spacing.sm,
     },
