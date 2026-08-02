@@ -53,7 +53,7 @@ WHAT'S INSIDE
 • Today — your one clear answer to "what should I do right now": your circle's health at a glance, today's goals, and what your circle's been up to.
 • Circle — every member's garden, side by side. Pair up with an accountability buddy and take on challenges together.
 • Goals — set a target, log progress, keep the streak alive. Step goals can track automatically through Health Connect, so a walk counts without you logging anything.
-• Connection — one daily prompt for the whole circle, answers hidden until you post your own. Plus two-minute games for lighter days.
+• Together — one daily prompt for the whole circle, answers hidden until you post your own. Plus two-minute games for lighter days.
 • Profile — your streaks, your badges, your story. Mood check-ins that take ten seconds. Future Letters your circle can never read.
 • Nudges — one-tap cheers when a friend's on a streak or gone quiet. A small push, never a lecture.
 

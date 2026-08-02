@@ -20,7 +20,7 @@ These answers reflect what's actually in the app; expected result is **Everyone 
 
 **Controlled substances** — No.
 
-**Gambling themes / simulated gambling / real gambling** — No to all. (The "games" in Connection are prompt/poll party games — no wagering, no casino mechanics.)
+**Gambling themes / simulated gambling / real gambling** — No to all. (The "games" in Together are prompt/poll party games — no wagering, no casino mechanics.)
 
 **Crude humor** — No.
 

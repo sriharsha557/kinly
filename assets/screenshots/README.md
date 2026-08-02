@@ -4,7 +4,8 @@ picks them up automatically, no code changes needed):
 - `today.png`
 - `circle.png`
 - `goals.png`
-- `connection.png`
+- `connection.png` (the tab is labelled "Together" in the app; the filename
+  follows the internal route name, which is still `Connection`)
 - `profile.png`
 
 A raw phone screenshot works fine (displayed at 9:19.5 aspect ratio, cropped to fit).
