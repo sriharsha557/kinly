@@ -176,8 +176,12 @@ export function useSyncStepGoal() {
       if (error) throw error;
       return data as Goal;
     },
-    onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] });
+      // Same reason as useLogGoalProgress: a step sync moves streak_count and
+      // last_logged_date too, so the garden is stale until it is told.
+      queryClient.invalidateQueries({ queryKey: ['garden', variables.circleId] });
+    },
   });
 }
 
@@ -200,7 +204,14 @@ export function useLogGoalProgress() {
       if (error) throw error;
       return data as Goal;
     },
-    onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] });
+      // The garden is derived from these same rows (useGarden reads
+      // streak_count / last_logged_date), but it is a separate query, so
+      // without this the hero sat unchanged after a check-in until some
+      // later refetch happened to run - the one action the product is built
+      // around producing no visible response in the thing that represents it.
+      queryClient.invalidateQueries({ queryKey: ['garden', variables.circleId] });
+    },
   });
 }

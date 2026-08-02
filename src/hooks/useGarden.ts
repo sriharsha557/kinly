@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { calendarDaysSince } from '../lib/needsAttention';
+import { growthVisual } from '../lib/gardenGrowth';
 
 export type GardenStage = 'wilted' | 'seed' | 'sprout' | 'tree' | 'bloom';
 
@@ -26,10 +27,11 @@ function stageFor(maxStreak: number, mostRecentDate: string | null): GardenStage
   // timezone, so the two could disagree for several hours a day.
   const days = calendarDaysSince(mostRecentDate, Date.now());
   if (days > 3) return 'wilted';
-  if (maxStreak >= 30) return 'bloom';
-  if (maxStreak >= 14) return 'tree';
-  if (maxStreak >= 3) return 'sprout';
-  return 'seed';
+  // The 3/14/30 thresholds used to be repeated here, with gardenGrowth.ts
+  // carrying a second copy the two had to keep in step by hand. That module
+  // owns them now; this one keeps only 'wilted', which is a passage of time
+  // rather than a streak and so has no business living in the growth model.
+  return growthVisual(maxStreak).stage;
 }
 
 // Derived entirely from goals.streak_count / last_logged_date - no garden
