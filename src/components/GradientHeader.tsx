@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 48,
+    paddingTop: spacing.s48,
     paddingBottom: spacing.section,
   },
 });

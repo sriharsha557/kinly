@@ -228,7 +228,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     card: {
       ...cardShell,
       padding: spacing.xl,
-      paddingLeft: 18,
+      paddingLeft: spacing.s18,
       marginBottom: spacing.xl,
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
@@ -236,7 +236,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
     newLink: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.primary },
-    challenge: { gap: 6 },
+    challenge: { gap: spacing.s6 },
     challengeTitle: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     challengeMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
@@ -258,11 +258,11 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
       ...type.body, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
+    modalButtons: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xs },
   });
 }

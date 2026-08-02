@@ -42,10 +42,10 @@ export function AvatarPickerModal({
             label="Shuffle"
             variant="outline"
             onPress={() => setSeeds(randomAvatarSeeds())}
-            style={{ marginTop: 14 }}
+            style={{ marginTop: spacing.s14 }}
           />
           <AnimatedPressable
-      accessibilityRole="button" onPress={onClose} style={{ marginTop: 10 }}>
+      accessibilityRole="button" onPress={onClose} style={{ marginTop: spacing.s10 }}>
             <Text style={styles.cancel}>Cancel</Text>
           </AnimatedPressable>
         </View>
@@ -69,8 +69,8 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       alignItems: 'center',
       ...shadow,
     },
-    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 14 },
-    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
+    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.s14 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.s10 },
     avatarWrap: {
       width: 64,
       height: 64,

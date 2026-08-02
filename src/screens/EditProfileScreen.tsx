@@ -109,13 +109,13 @@ export default function EditProfileScreen() {
 function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { padding: spacing.xl, paddingBottom: 60, alignItems: 'center' },
+    content: { padding: spacing.xl, paddingBottom: spacing.s60, alignItems: 'center' },
     avatarWrap: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xxl },
     avatarImage: { width: 88, height: 88, borderRadius: 44 },
     avatarActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     avatarActionsDivider: { color: colors.textSecondary },
     avatarHint: { ...type.caption, color: colors.primary, fontFamily: fontFamily.semibold },
-    form: { width: '100%', gap: 14 },
+    form: { width: '100%', gap: spacing.s14 },
     sectionLabel: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
   });
 }

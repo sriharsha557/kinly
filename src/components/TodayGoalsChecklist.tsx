@@ -158,7 +158,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       borderRadius: radii.card,
       padding: spacing.lg,
       marginBottom: spacing.lg,
-      gap: 10,
+      gap: spacing.s10,
       ...shadow,
     },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -183,7 +183,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     // to the type hierarchy - the token would also impose a lineHeight it
     // has never had, shifting it off-centre in a tight container.
     checkboxLoading: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.primary },
-    rowBody: { flex: 1, gap: 1 },
+    rowBody: { flex: 1, gap: spacing.s2 },
     rowText: { ...type.body, fontFamily: fontFamily.regular, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
     rowContext: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },

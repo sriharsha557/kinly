@@ -122,13 +122,13 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
     sectionTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
     suggestionsSection: { marginBottom: spacing.xl },
-    suggestionsRow: { gap: 10, paddingRight: spacing.lg },
+    suggestionsRow: { gap: spacing.s10, paddingRight: spacing.lg },
     suggestionCard: {
       ...cardShell,
-      padding: 14,
+      padding: spacing.s14,
       width: 160,
       justifyContent: 'space-between',
-      gap: 10,
+      gap: spacing.s10,
     },
     suggestionText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     suggestionAdd: { ...type.caption, fontFamily: fontFamily.bold },
@@ -148,11 +148,11 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
       ...type.body, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
+    modalButtons: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xs },
   });
 }

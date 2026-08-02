@@ -217,7 +217,7 @@ function MoodPickerModal({
                   );
                 })}
               </View>
-              <PillButton label="Done" onPress={handleDone} loading={submitting} style={{ marginTop: 18 }} />
+              <PillButton label="Done" onPress={handleDone} loading={submitting} style={{ marginTop: spacing.s18 }} />
             </>
           )}
         </View>
@@ -316,10 +316,10 @@ function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typ
     card: {
       ...cardShell,
       padding: spacing.xl,
-      paddingLeft: 18,
+      paddingLeft: spacing.s18,
       marginBottom: spacing.lg,
     },
-    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: 2 },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: spacing.s2 },
     hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     // "Tap to check in" and "Change" are the two most-tapped things on this
     // card and were bare Text in a Touchable - roughly a 16px tall target.
@@ -332,10 +332,10 @@ function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typ
       ...type.caption,
       fontFamily: fontFamily.semibold,
       color: colors.shellSecondary,
-      marginTop: 14,
+      marginTop: spacing.s14,
       marginBottom: spacing.sm,
     },
-    gridRow: { gap: 14 },
+    gridRow: { gap: spacing.s14 },
     memberChip: { alignItems: 'center', width: 52 },
     moodBubble: {
       width: 44,
@@ -359,7 +359,7 @@ function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typ
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
       padding: spacing.xxl,
-      paddingBottom: 36,
+      paddingBottom: spacing.s36,
       gap: spacing.xs,
       ...shadow,
     },
@@ -372,15 +372,15 @@ function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typ
       marginBottom: spacing.lg,
     },
     sheetTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.shellTitle, textAlign: 'center' },
-    sheetSubtitle: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: spacing.lg },
-    moodStack: { gap: spacing.md, marginTop: 18 },
+    sheetSubtitle: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: spacing.s2, marginBottom: spacing.lg },
+    moodStack: { gap: spacing.md, marginTop: spacing.s18 },
     moodOption: {
       borderWidth: 1.5,
       borderColor: colors.border,
       borderRadius: 20,
       paddingVertical: spacing.xl,
       alignItems: 'center',
-      gap: 10,
+      gap: spacing.s10,
       ...shadow,
     },
     moodOptionLabel: { ...type.body, fontFamily: fontFamily.semibold, color: colors.shellTitle },
@@ -391,7 +391,7 @@ function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typ
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: radii.pill,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       minHeight: 48,
       justifyContent: 'center',
     },

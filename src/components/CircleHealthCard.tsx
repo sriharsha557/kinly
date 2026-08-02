@@ -71,7 +71,7 @@ function createStyles({ colors, cardShell, type }: ReturnType<typeof useTheme>) 
     // shadow) - design/PRINCIPLES.md's "Shape & space" rule, spread rather
     // than hand-rolled so this card cannot drift from every other one.
     card: { ...cardShell, padding: spacing.xl, gap: spacing.xs, marginBottom: spacing.lg },
-    headline: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.xs },
+    headline: { flexDirection: 'row', alignItems: 'center', gap: spacing.s10, marginBottom: spacing.xs },
     word: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     fact: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.textSecondary },
   });

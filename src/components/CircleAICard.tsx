@@ -89,9 +89,9 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     card: {
       ...cardShell,
       padding: spacing.xl,
-      paddingLeft: 18,
+      paddingLeft: spacing.s18,
       marginBottom: spacing.xl,
-      gap: 10,
+      gap: spacing.s10,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
@@ -100,17 +100,17 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     pill: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      paddingHorizontal: spacing.s10,
+      paddingVertical: spacing.s6,
     },
     pillText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     suggestion: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
-      paddingVertical: 10,
+      paddingVertical: spacing.s10,
       paddingHorizontal: spacing.md,
     },
-    suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+    suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.s6 },
     suggestionDone: { backgroundColor: colors.success },
     suggestionText: { ...type.caption, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center' },
   });

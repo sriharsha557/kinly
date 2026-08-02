@@ -135,7 +135,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       ...type.caption,
       fontFamily: fontFamily.bold,
       color: colors.textSecondary,
-      marginBottom: 10,
+      marginBottom: spacing.s10,
     },
     row: {
       flexDirection: 'row',
@@ -147,7 +147,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    rowCopy: { flex: 1, gap: 2 },
+    rowCopy: { flex: 1, gap: spacing.s2 },
     name: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     detail: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // Overrides PillButton's full-width default padding so the action sits
@@ -155,7 +155,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     // Compact against PillButton's full-width default, but minHeight keeps
     // it on the 48dp touch-target floor - the row is not the tappable thing,
     // so the row's own 56dp height does not cover this.
-    action: { paddingVertical: spacing.md, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
+    action: { paddingVertical: spacing.md, paddingHorizontal: spacing.s18, minHeight: 48, justifyContent: 'center' },
     empty: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -164,7 +164,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       borderRadius: radii.card,
       padding: spacing.lg,
     },
-    emptyCopy: { flex: 1, gap: 2 },
+    emptyCopy: { flex: 1, gap: spacing.s2 },
     emptyTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
     emptyBody: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });

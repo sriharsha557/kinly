@@ -56,7 +56,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       justifyContent: 'space-between',
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      paddingVertical: 15,
+      paddingVertical: spacing.lg,
       paddingHorizontal: spacing.lg,
       ...shadow,
     },

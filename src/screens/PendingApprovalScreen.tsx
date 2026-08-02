@@ -101,7 +101,7 @@ function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
     switchRow: {
       backgroundColor: colors.surface,
       borderRadius: 14,
-      padding: 14,
+      padding: spacing.s14,
     },
     switchRowText: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
   });

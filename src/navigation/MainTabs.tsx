@@ -17,7 +17,7 @@ import {
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
-import { fontFamily, motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import { useAuthStore } from '../state/useAuthStore';
 import { useMomentsUnread } from '../hooks/useMomentsUnread';
 import { useGoals } from '../hooks/useGoals';
@@ -178,7 +178,7 @@ function createStyles({ colors }: Theme) {
       // truncating on narrow devices.
       fontSize: 11,
       fontFamily: fontFamily.semibold,
-      marginTop: 2,
+      marginTop: spacing.s2,
     },
   };
 }

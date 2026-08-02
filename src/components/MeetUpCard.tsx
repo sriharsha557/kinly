@@ -120,7 +120,7 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
       </View>
 
       {meetups && meetups.length > 0 ? (
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: spacing.s10 }}>
           {meetups.map((meetup) => (
             <MeetupRow key={meetup.id} meetup={meetup} circleId={circleId} userId={userId} />
           ))}
@@ -141,7 +141,7 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     card: {
       ...cardShell,
       padding: spacing.xl,
-      paddingLeft: 18,
+      paddingLeft: spacing.s18,
       marginBottom: spacing.xl,
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
@@ -153,12 +153,12 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     meetupTitle: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.textPrimary },
     meetupNote: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     meetupMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
-    rsvpRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
+    rsvpRow: { flexDirection: 'row', gap: spacing.s6, marginTop: spacing.s6 },
     rsvpChip: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      paddingHorizontal: spacing.s10,
+      paddingVertical: spacing.s6,
     },
     rsvpChipActive: { backgroundColor: colors.primary },
     rsvpChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
@@ -179,11 +179,11 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
       ...type.body, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
+    modalButtons: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xs },
   });
 }

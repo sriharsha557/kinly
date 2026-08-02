@@ -90,7 +90,7 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
       ...type.subheading,
       fontFamily: fontFamily.bold,
       color: colors.textPrimary,
-      marginTop: 28,
+      marginTop: spacing.s28,
       marginBottom: spacing.md,
     },
     card: { ...cardShell, padding: spacing.lg },
@@ -101,7 +101,7 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
       gap: spacing.md,
       minHeight: 56,
     },
-    copy: { flex: 1, gap: 2 },
+    copy: { flex: 1, gap: spacing.s2 },
     label: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     fix: {

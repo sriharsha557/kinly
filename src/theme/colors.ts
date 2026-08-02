@@ -183,9 +183,22 @@ export const radii = {
   pill: 999,
 } as const;
 
-// 4pt spacing scale (design/REDESIGN.md §2.1). Components use names, not
-// numbers - `gutter` is the horizontal screen inset, `section` the gap
-// between sections.
+// Spacing scale (design/REDESIGN.md §2.1). Components use names, not numbers.
+//
+// Two vocabularies, and the split is deliberate. The named steps below are the
+// 4pt rhythm a layout should reach for first - `gutter` is the horizontal
+// screen inset, `section` the gap between sections. The `s*` tokens are the
+// 2pt in-betweens that rhythm cannot express: the tight gaps inside a row, the
+// few large paddings above `hero`.
+//
+// The scale used to stop at the named steps, and the app filled the gaps with
+// 179 raw numbers - 6, 10, 14 and 18 alone accounted for 138 of them, while
+// 4, 8, 12, 16, 20 and 24 never appeared raw at all. The grid was real; the
+// scale just did not describe it.
+//
+// One rule holds the two halves together: no value has two names. Every `s*`
+// token is a number the named steps do not already cover, so there is never a
+// choice to make between `spacing.lg` and an `s16`.
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -196,6 +209,16 @@ export const spacing = {
   section: 32,
   hero: 40,
   gutter: 20,
+
+  s2: 2,
+  s6: 6,
+  s10: 10,
+  s14: 14,
+  s18: 18,
+  s28: 28,
+  s36: 36,
+  s48: 48,
+  s60: 60,
 } as const;
 
 // Inter, embedded natively via the expo-font config plugin (see app.json).

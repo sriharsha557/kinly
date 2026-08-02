@@ -98,7 +98,7 @@ export function LifeTimeline({ userId }: { userId: string }) {
 function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { gap: spacing.xl },
-    group: { gap: 10 },
+    group: { gap: spacing.s10 },
     monthHeader: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textSecondary },
     row: {
       backgroundColor: colors.surface,
@@ -117,7 +117,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       justifyContent: 'center',
       backgroundColor: colors.inputBg,
     },
-    rowBody: { flex: 1, gap: 2 },
+    rowBody: { flex: 1, gap: spacing.s2 },
     entryTitle: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     entryDate: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     emptyCard: {
