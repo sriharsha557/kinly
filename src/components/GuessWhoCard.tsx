@@ -161,7 +161,7 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -172,12 +172,12 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
-    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
-    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 6 },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { ...type.caption, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 6 },
     postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: spacing.md, gap: spacing.sm },
-    fact: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, fontStyle: 'italic' },
+    fact: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary, fontStyle: 'italic' },
     memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: {
       backgroundColor: colors.inputBg,
@@ -186,10 +186,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 5,
     },
     chipActive: { backgroundColor: colors.primary },
-    chipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    chipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     chipTextActive: { color: colors.onAccent },
-    revealed: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.success },
-    guessCount: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
+    revealed: { ...type.caption, fontFamily: fontFamily.bold, color: colors.success },
+    guessCount: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -202,16 +202,16 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
-    pickLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    pickLabel: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

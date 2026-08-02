@@ -127,7 +127,7 @@ export function FutureSelfCard({ userId }: { userId: string }) {
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -138,14 +138,14 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    newLink: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
-    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    title: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    newLink: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: spacing.md, gap: spacing.xs },
     letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    letterMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
-    letterReady: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
-    letterContent: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textPrimary, lineHeight: 18 },
+    letterMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    letterReady: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
+    letterContent: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textPrimary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -158,15 +158,15 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    modalHint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalHint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 14, fontFamily: fontFamily.regular,
+      ...type.secondary, fontFamily: fontFamily.regular,
       minHeight: 120,
       textAlignVertical: 'top',
     },

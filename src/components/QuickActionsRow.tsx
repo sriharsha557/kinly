@@ -49,7 +49,7 @@ export function QuickActionsRow() {
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     row: { flexDirection: 'row', gap: 10, marginBottom: spacing.xl },
     action: {
@@ -60,6 +60,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 6,
       ...shadow,
     },
-    label: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, textAlign: 'center' },
+    label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary, textAlign: 'center' },
   });
 }

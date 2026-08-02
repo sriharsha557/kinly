@@ -311,7 +311,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
   );
 }
 
-function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -319,17 +319,17 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       paddingLeft: 18,
       marginBottom: spacing.lg,
     },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: 2 },
-    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: 2 },
+    hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     // "Tap to check in" and "Change" are the two most-tapped things on this
     // card and were bare Text in a Touchable - roughly a 16px tall target.
     // These give them the standard minimum without moving anything visually.
     hintTarget: { minHeight: touch.min, justifyContent: 'center' },
     changeTarget: { minHeight: touch.min, justifyContent: 'center' },
     gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    changeLink: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.primary },
+    changeLink: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.primary },
     sectionCaption: {
-      fontSize: 13,
+      ...type.caption,
       fontFamily: fontFamily.semibold,
       color: colors.shellSecondary,
       marginTop: 14,
@@ -346,8 +346,11 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     },
     moodBubbleFilled: { backgroundColor: colors.inputBg },
     moodBubbleEmpty: { backgroundColor: colors.background },
+    // Raw size on purpose: this is the member's initial filling a fixed-size
+    // bubble, so it is sized to that circle rather than to the type scale -
+    // a token here would change with the scale and stop fitting.
     moodBubbleText: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textSecondary },
-    memberName: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellSecondary, marginTop: spacing.xs },
+    memberName: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.shellSecondary, marginTop: spacing.xs },
 
     overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' },
     overlayDismiss: { ...StyleSheet.absoluteFillObject },
@@ -368,8 +371,8 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignSelf: 'center',
       marginBottom: spacing.lg,
     },
-    sheetTitle: { fontSize: 19, fontFamily: fontFamily.bold, color: colors.shellTitle, textAlign: 'center' },
-    sheetSubtitle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: spacing.lg },
+    sheetTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.shellTitle, textAlign: 'center' },
+    sheetSubtitle: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: spacing.lg },
     moodStack: { gap: spacing.md, marginTop: 18 },
     moodOption: {
       borderWidth: 1.5,
@@ -380,7 +383,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       gap: 10,
       ...shadow,
     },
-    moodOptionLabel: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    moodOptionLabel: { ...type.body, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     moodOptionLabelActive: { color: colors.onAccent },
     tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     tagChip: {
@@ -393,7 +396,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       justifyContent: 'center',
     },
     tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-    tagChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    tagChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     tagChipTextActive: { color: colors.onAccent },
   });
 }

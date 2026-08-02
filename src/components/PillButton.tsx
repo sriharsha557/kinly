@@ -34,7 +34,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     base: {
       borderRadius: radii.pill,
@@ -43,8 +43,8 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     solid: { backgroundColor: colors.primary },
-    solidText: { color: colors.onAccent, fontSize: 16, fontFamily: fontFamily.bold },
+    solidText: { color: colors.onAccent, ...type.body, fontFamily: fontFamily.bold },
     outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
-    outlineText: { color: colors.primary, fontSize: 16, fontFamily: fontFamily.bold },
+    outlineText: { color: colors.primary, ...type.body, fontFamily: fontFamily.bold },
   });
 }

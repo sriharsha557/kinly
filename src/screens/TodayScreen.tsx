@@ -559,13 +559,13 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: spacing.lg },
     greetingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    greeting: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    date: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.lg },
-    sectionTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
+    greeting: { ...type.title, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    date: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.lg },
+    sectionTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
     list: { gap: 10 },
-    dayHeader: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
+    dayHeader: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
     newDivider: {
-      fontSize: 13,
+      ...type.caption,
       fontFamily: fontFamily.bold,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
@@ -582,7 +582,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       borderRadius: radii.pill,
       backgroundColor: colors.inputBg,
     },
-    loadMoreLabel: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
+    loadMoreLabel: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.primary },
     // Tertiary level: no card chrome - quiet rows on the screen background
     // with a hairline separator (design/REDESIGN.md §4).
     eventCard: {
@@ -593,8 +593,8 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     },
     eventHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     eventBody: { flex: 1, gap: 2 },
-    eventText: { fontSize: 16, lineHeight: 22, fontFamily: fontFamily.semibold, color: colors.shellTitle },
-    eventTime: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    eventText: { ...type.body, lineHeight: 22, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    eventTime: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     nudgeRow: { flexDirection: 'row', gap: 6 },
     nudgeButton: {
       backgroundColor: colors.inputBg,
@@ -612,7 +612,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
     },
     waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    waterButtonText: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
+    waterButtonText: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.primary },
     nudgeList: { gap: spacing.xs },
     photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
     photoThumbLoading: { backgroundColor: colors.pillBg, alignItems: 'center', justifyContent: 'center' },
@@ -628,7 +628,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       gap: 6,
       ...shadow,
     },
-    emptyTitle: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
-    emptyBody: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+    emptyTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    emptyBody: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
   });
 }

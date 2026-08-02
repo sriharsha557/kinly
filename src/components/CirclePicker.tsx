@@ -88,7 +88,7 @@ export function CirclePicker() {
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     // surfaceSubtle, not the accent: this is navigation between contexts, not
     // the screen's primary action (design/PRINCIPLES.md's one-accent rule).
@@ -102,11 +102,14 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    pillText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    pillText: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    // Raw size on purpose: a bare glyph, sized to its control rather than
+    // to the type hierarchy - the token would also impose a lineHeight it
+    // has never had, shifting it off-centre in a tight container.
     pillChevron: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // md heads the garden on Home; sm heads the health card on Circle, where
     // it sits under the header rather than acting as the screen title.
-    nameMd: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
-    nameSm: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
+    nameMd: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
+    nameSm: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
   });
 }

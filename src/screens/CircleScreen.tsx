@@ -196,7 +196,7 @@ export default function CircleScreen() {
   );
 }
 
-function createStyles({ colors }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: spacing.lg },
@@ -212,6 +212,6 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
       paddingHorizontal: spacing.sm,
       marginLeft: 'auto',
     },
-    settingsLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    settingsLink: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

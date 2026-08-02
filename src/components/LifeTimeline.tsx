@@ -95,11 +95,11 @@ export function LifeTimeline({ userId }: { userId: string }) {
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { gap: spacing.xl },
     group: { gap: 10 },
-    monthHeader: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    monthHeader: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textSecondary },
     row: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -118,8 +118,8 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.inputBg,
     },
     rowBody: { flex: 1, gap: 2 },
-    entryTitle: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    entryDate: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    entryTitle: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    entryDate: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     emptyCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -127,6 +127,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       ...shadow,
     },
-    emptyText: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
+    emptyText: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
   });
 }

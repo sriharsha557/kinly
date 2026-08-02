@@ -54,12 +54,12 @@ export function ErrorFallback({ resetError }: { resetError: () => void }) {
   );
 }
 
-function createStyles({ colors }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: 10 },
-    title: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm, textAlign: 'center' },
-    body: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+    title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm, textAlign: 'center' },
+    body: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
     actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xxl, width: '100%' },
   });
 }

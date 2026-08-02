@@ -172,6 +172,10 @@ function createStyles({ colors }: Theme) {
       justifyContent: 'center' as const,
     },
     tabBarLabel: {
+      // Below the 13px floor in design/PRINCIPLES.md, and deliberately so:
+      // that floor governs content type, while tab bars are platform chrome
+      // (Apple's HIG sets tab labels at 10pt). At 13px, five labels start
+      // truncating on narrow devices.
       fontSize: 11,
       fontFamily: fontFamily.semibold,
       marginTop: 2,

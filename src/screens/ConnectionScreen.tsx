@@ -321,9 +321,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     page: { padding: spacing.lg },
-    title: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    title: { ...type.title, fontFamily: fontFamily.bold, color: colors.textPrimary },
     titleHint: { marginBottom: spacing.md },
-    sectionTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
+    sectionTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
     composer: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -332,7 +332,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       marginBottom: spacing.lg,
       ...shadow,
     },
-    composerInput: { minHeight: 52, color: colors.textPrimary, fontSize: 16, fontFamily: fontFamily.regular },
+    composerInput: { minHeight: 52, color: colors.textPrimary, ...type.body, fontFamily: fontFamily.regular },
     goalChips: { gap: 6 },
     goalChip: {
       backgroundColor: colors.inputBg,
@@ -343,10 +343,10 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     },
     goalChipActive: { backgroundColor: colors.primary },
     goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    goalChipText: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    goalChipText: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     goalChipTextActive: { color: colors.onAccent },
     goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    goalTag: { fontSize: 13, color: colors.primary, fontFamily: fontFamily.semibold },
+    goalTag: { ...type.caption, color: colors.primary, fontFamily: fontFamily.semibold },
     postButton: {
       alignSelf: 'flex-end',
       backgroundColor: colors.primary,
@@ -355,7 +355,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       minHeight: 48,
       justifyContent: 'center',
     },
-    postButtonText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 14 },
+    postButtonText: { ...type.secondary, color: colors.onAccent, fontFamily: fontFamily.bold },
     list: { gap: spacing.md },
     card: {
       backgroundColor: colors.surface,
@@ -365,13 +365,16 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
-    question: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    question: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    // Raw size on purpose: this renders the "⋯" glyph, not text. Its size is
+    // the affordance's diameter rather than a step in the type hierarchy, so
+    // it has no business following the type scale.
     optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-    meta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    meta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     thread: { marginTop: spacing.md, gap: spacing.sm, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: spacing.md },
     replyRow: { gap: 2 },
-    replyAuthor: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    replyAuthor: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textPrimary },
     replyBody: { ...type.secondary, color: colors.textSecondary },
     replyInputRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
     replyInput: {
@@ -381,7 +384,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingHorizontal: 10,
       minHeight: 48,
       color: colors.textPrimary,
-      fontSize: 13, fontFamily: fontFamily.regular,
+      ...type.caption, fontFamily: fontFamily.regular,
     },
     replySend: {
       backgroundColor: colors.primary,
@@ -390,7 +393,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       minHeight: 48,
       justifyContent: 'center',
     },
-    replySendText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 14 },
+    replySendText: { ...type.secondary, color: colors.onAccent, fontFamily: fontFamily.bold },
     empty: { textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
     gamesSection: { marginTop: spacing.xxl },
     // Sits under the collapsed DisclosureSection header (which owns a 16px

@@ -70,7 +70,7 @@ export function StatTile({ background, textColor, labelColor, outlined, label, v
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     tile: {
       borderRadius: radii.tile,
@@ -80,11 +80,17 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
     tileHalf: { flexBasis: '48%', padding: spacing.lg, minHeight: 140 },
     tileThird: { flexBasis: '31%', padding: spacing.md, minHeight: 116 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    label: { fontSize: 14, fontFamily: fontFamily.semibold },
-    labelThird: { fontSize: 13, fontFamily: fontFamily.regular },
+    label: { ...type.secondary, fontFamily: fontFamily.semibold },
+    labelThird: { ...type.caption, fontFamily: fontFamily.regular },
+    // Raw sizes on purpose: arrow and ctaArrow render the "↗" glyph, whose
+    // size belongs to the affordance rather than to the type hierarchy.
     arrow: { fontSize: 16, fontFamily: fontFamily.regular },
-    value: { fontSize: 32, fontFamily: fontFamily.bold },
-    valueThird: { fontSize: 24, fontFamily: fontFamily.regular },
+    value: { ...type.display, fontFamily: fontFamily.bold },
+    // One step further down the scale than `title` would put it. This
+    // override exists to fit a value into a third-width tile, and 24 - its
+    // old size - has no home in the scale; rounding it up to title (26)
+    // would have worked against the only reason the style exists.
+    valueThird: { ...type.heading, fontFamily: fontFamily.regular },
     deltaRow: { flexDirection: 'row', gap: 6 },
     pill: {
       backgroundColor: colors.pillBg,
@@ -94,9 +100,9 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       flexDirection: 'row',
       gap: spacing.xs,
     },
-    pillValue: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    pillLabel: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    pillValue: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    pillLabel: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     ctaArrow: { fontSize: 20, fontFamily: fontFamily.regular, alignSelf: 'flex-end' },
-    ctaLabel: { fontSize: 20, fontFamily: fontFamily.bold },
+    ctaLabel: { ...type.heading, fontFamily: fontFamily.bold },
   });
 }

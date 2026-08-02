@@ -136,7 +136,7 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -146,13 +146,13 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
-    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { ...type.caption, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     meetupRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: spacing.md, gap: spacing.xs },
-    meetupTitle: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    meetupNote: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
-    meetupMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    meetupTitle: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    meetupNote: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    meetupMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     rsvpRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
     rsvpChip: {
       backgroundColor: colors.inputBg,
@@ -161,7 +161,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 5,
     },
     rsvpChipActive: { backgroundColor: colors.primary },
-    rsvpChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    rsvpChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     rsvpChipTextActive: { color: colors.onAccent },
     modalOverlay: {
       flex: 1,
@@ -175,14 +175,14 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });

@@ -2,7 +2,10 @@ import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { fontFamily, spacing } from '../theme/colors';
+// Aliased because `type` is a modifier keyword in an import clause. This
+// screen has no ThemeProvider above it (it plays before the app mounts), so
+// it reads the scale from the module rather than from useTheme().
+import { fontFamily, spacing, type as typeScale } from '../theme/colors';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const VIDEO_SOURCE = require('../../assets/applaunch.mp4');
@@ -64,5 +67,5 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
-  skipText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontFamily: fontFamily.semibold },
+  skipText: { color: 'rgba(255,255,255,0.9)', ...typeScale.caption, fontFamily: fontFamily.semibold },
 });

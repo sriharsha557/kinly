@@ -62,7 +62,7 @@ export function MilestoneCardModal({
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     overlay: {
       flex: 1,
@@ -77,9 +77,9 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       gap: 10,
     },
-    title: { fontSize: 22, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center', marginTop: spacing.sm },
-    subtitle: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.onAccentMuted, textAlign: 'center' },
-    circle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.onAccentFaint, marginTop: spacing.sm },
+    title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center', marginTop: spacing.sm },
+    subtitle: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.onAccentMuted, textAlign: 'center' },
+    circle: { ...type.caption, fontFamily: fontFamily.regular, color: colors.onAccentFaint, marginTop: spacing.sm },
     actions: { flexDirection: 'row', gap: 10 },
   });
 }
