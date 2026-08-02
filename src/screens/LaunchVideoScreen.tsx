@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { fontFamily, spacing } from '../theme/colors';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const VIDEO_SOURCE = require('../../assets/applaunch.mp4');
 // Fallback in case playback events never fire (e.g. a corrupt/unsupported file) -
@@ -39,7 +40,7 @@ export function LaunchVideoScreen({ onFinish }: { onFinish: () => void }) {
         nativeControls={false}
         allowsFullscreen={false}
       />
-      <TouchableOpacity
+      <AnimatedPressable
         style={[styles.skip, { top: insets.top + 12 }]}
         onPress={onFinish}
         hitSlop={12}
@@ -47,7 +48,7 @@ export function LaunchVideoScreen({ onFinish }: { onFinish: () => void }) {
         accessibilityLabel="Skip intro"
       >
         <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }

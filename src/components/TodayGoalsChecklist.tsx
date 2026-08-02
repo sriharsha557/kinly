@@ -109,6 +109,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
                 layout={LinearTransition.springify()}
               >
                 <AnimatedPressable
+      accessibilityRole="button"
                   style={styles.row}
                   onPress={() => handleLog(goal.id)}
                   disabled={checked || (isPending && loggingId === goal.id)}

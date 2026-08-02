@@ -1,3 +1,4 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -6,9 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -69,7 +68,8 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
         <LoadingSpinner size={10} />
       ) : (
         replies?.map((reply) => (
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             key={reply.id}
             style={styles.replyRow}
             onLongPress={() => handleReplyOptions(reply.id, reply.user_id, reply.profiles?.name ?? 'Someone')}
@@ -77,7 +77,7 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
           >
             <Text style={styles.replyAuthor}>{reply.profiles?.name ?? 'Someone'}</Text>
             <Text style={styles.replyBody}>{reply.body}</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))
       )}
       <View style={styles.replyInputRow}>
@@ -88,9 +88,10 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
           value={body}
           onChangeText={setBody}
         />
-        <TouchableOpacity style={styles.replySend} onPress={handleSend} disabled={createReply.isPending}>
+        <AnimatedPressable
+      accessibilityRole="button" style={styles.replySend} onPress={handleSend} disabled={createReply.isPending}>
           <Text style={styles.replySendText}>Send</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
     </View>
   );
@@ -128,27 +129,28 @@ function AskCard({
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity onPress={onToggle}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={onToggle}>
         <View style={styles.questionRow}>
           <Text style={styles.question}>{post.question}</Text>
           {isMine ? (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={() => setConfirmingDelete(true)}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
             >
               <DeleteIcon width={15} height={15} color={theme.colors.textSecondary} opacity={0.6} />
-            </TouchableOpacity>
+            </AnimatedPressable>
           ) : (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={handleOptions}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={`Options for ${post.profiles?.name ?? 'this'} post`}
             >
               <Text style={styles.optionsButton}>⋯</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           )}
         </View>
         {post.goals?.title && (
@@ -163,7 +165,7 @@ function AskCard({
             {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'} · {expanded ? 'Hide' : 'Discuss'}
           </Text>
         </View>
-      </TouchableOpacity>
+      </AnimatedPressable>
       {expanded && <ReplyThread askPostId={post.id} circleId={circleId} userId={userId} />}
       {confirmingDelete && (
         <ActionSheet
@@ -246,7 +248,8 @@ export default function ConnectionScreen() {
                 {myGoals.map((goal) => {
                   const active = goalId === goal.id;
                   return (
-                    <TouchableOpacity
+                    <AnimatedPressable
+      accessibilityRole="button"
                       key={goal.id}
                       style={[styles.goalChip, active && styles.goalChipActive]}
                       onPress={() => setGoalId(active ? null : goal.id)}
@@ -257,14 +260,15 @@ export default function ConnectionScreen() {
                           {goal.title}
                         </Text>
                       </View>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
                   );
                 })}
               </ScrollView>
             )}
-            <TouchableOpacity style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
+            <AnimatedPressable
+      accessibilityRole="button" style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
               <Text style={styles.postButtonText}>Post</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
 
           {isLoading ? (

@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMeetups, useProposeMeetup, useRsvpMeetup, type MeetupWithRsvps } from '../hooks/useMeetups';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -85,13 +86,14 @@ function MeetupRow({ meetup, circleId, userId }: { meetup: MeetupWithRsvps; circ
       </Text>
       <View style={styles.rsvpRow}>
         {RSVP_OPTIONS.map(({ status, label }) => (
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             key={status}
             style={[styles.rsvpChip, myRsvp === status && styles.rsvpChipActive]}
             onPress={() => rsvpMeetup.mutate({ meetupId: meetup.id, userId, status })}
           >
             <Text style={[styles.rsvpChipText, myRsvp === status && styles.rsvpChipTextActive]}>{label}</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
       </View>
     </View>
@@ -111,9 +113,10 @@ export function MeetUpCard({ circleId, userId }: { circleId: string; userId: str
           <MeetupIcon width={22} height={22} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Meet Up</Text>
         </View>
-        <TouchableOpacity onPress={() => setProposing(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setProposing(true)}>
           <Text style={styles.newLink}>+ Suggest</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {meetups && meetups.length > 0 ? (

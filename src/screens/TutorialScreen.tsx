@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState, type FC } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View, type NativeSyntheticEvent, type NativeScrollEvent } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, View, type NativeSyntheticEvent, type NativeScrollEvent } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PillButton } from '../components/PillButton';
 import { useTheme } from '../theme/ThemeProvider';
 import { CircleScene, GoalScene, ChatScene, RocketScene } from '../components/illustrations/Scenes';
 import { fontFamily, spacing } from '../theme/colors';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -62,14 +63,14 @@ export function TutorialScreen({ onFinish }: { onFinish: () => void }) {
     <SafeAreaView style={styles.container}>
       {/* Absolute children ignore SafeAreaView padding, so the inset is
           applied explicitly - without it, Skip sat under the status bar. */}
-      <TouchableOpacity
+      <AnimatedPressable
         style={[styles.skip, { top: insets.top + 12 }]}
         onPress={onFinish}
         hitSlop={12}
         accessibilityRole="button"
       >
         <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
       <ScrollView
         ref={scrollRef}

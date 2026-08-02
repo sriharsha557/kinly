@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useMyBuddy, useSetBuddy, useCheckInOnBuddy } from '../hooks/useBuddy';
 import { useCircleMembers } from '../hooks/useCircles';
@@ -42,9 +43,10 @@ function PickBuddyModal({
             <Text style={styles.empty}>No other members in this circle yet.</Text>
           ) : (
             others.map((m) => (
-              <TouchableOpacity key={m.user_id} style={styles.memberRow} onPress={() => handlePick(m.user_id)}>
+              <AnimatedPressable
+      accessibilityRole="button" key={m.user_id} style={styles.memberRow} onPress={() => handlePick(m.user_id)}>
                 <Text style={styles.memberName}>{m.profiles?.name ?? 'Member'}</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))
           )}
           <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ marginTop: spacing.sm }} />
@@ -125,9 +127,10 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
               style={{ marginTop: spacing.sm }}
             />
           )}
-          <TouchableOpacity onPress={() => setPicking(true)} style={{ marginTop: spacing.sm }}>
+          <AnimatedPressable
+      accessibilityRole="button" onPress={() => setPicking(true)} style={{ marginTop: spacing.sm }}>
             <Text style={styles.changeLink}>Change buddy</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </>
       ) : (
         <>

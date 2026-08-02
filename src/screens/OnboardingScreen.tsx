@@ -1,3 +1,4 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -7,9 +8,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  Text, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestPasswordReset, signIn, signInWithApple, signInWithGoogle, signUp } from '../lib/auth';
@@ -169,9 +168,10 @@ function AuthStep() {
           loading={resetSubmitting}
           disabled={!email.trim()}
         />
-        <TouchableOpacity onPress={() => setForgotPasswordMode(false)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setForgotPasswordMode(false)}>
           <Text style={styles.link}>Back to sign in</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -198,9 +198,10 @@ function AuthStep() {
       />
 
       {mode === 'signIn' && (
-        <TouchableOpacity onPress={() => setForgotPasswordMode(true)} style={{ alignSelf: 'flex-end' }}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setForgotPasswordMode(true)} style={{ alignSelf: 'flex-end' }}>
           <Text style={styles.link}>Forgot password?</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       )}
 
       {error && <Text style={styles.error}>{error}</Text>}
@@ -235,11 +236,12 @@ function AuthStep() {
         />
       )}
 
-      <TouchableOpacity onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
         <Text style={styles.link}>
           {mode === 'signUp' ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
       {mode === 'signUp' && (
         <Text style={styles.legalNote}>
@@ -277,9 +279,10 @@ function InterestsStep() {
         loading={setInterests.isPending}
         disabled={selected.length === 0}
       />
-      <TouchableOpacity onPress={() => setInterests.mutate([])} disabled={setInterests.isPending}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => setInterests.mutate([])} disabled={setInterests.isPending}>
         <Text style={styles.link}>Skip for now</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }
@@ -316,9 +319,10 @@ function ThemeStep() {
     <View style={styles.form}>
       <ThemePicker accent={accent} mode={mode} onChangeAccent={setAccent} onChangeMode={setMode} />
       <PillButton label="Continue" onPress={() => finish(false)} loading={saving} />
-      <TouchableOpacity onPress={() => finish(true)} disabled={saving}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => finish(true)} disabled={saving}>
         <Text style={styles.link}>Skip for now</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }

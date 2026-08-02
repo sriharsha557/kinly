@@ -205,7 +205,7 @@ function MoodPickerModal({
                 {MOOD_TAGS[selectedMood as MoodValue].map((tag) => {
                   const active = selectedTags.includes(tag);
                   return (
-                    <TouchableOpacity
+                    <AnimatedPressable
                       key={tag}
                       style={[styles.tagChip, active && styles.tagChipActive]}
                       onPress={() => toggleTag(tag)}
@@ -213,7 +213,7 @@ function MoodPickerModal({
                       accessibilityState={{ checked: active }}
                     >
                       <Text style={[styles.tagChipText, active && styles.tagChipTextActive]}>{tag}</Text>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
                   );
                 })}
               </View>

@@ -1,6 +1,7 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCancelJoinRequest, useMyCircles, type CircleWithMembership } from '../hooks/useCircles';
@@ -57,13 +58,14 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
             <View style={styles.switchList}>
               <Text style={styles.switchLabel}>{"Or switch to a circle you're already in:"}</Text>
               {otherActiveCircles.map((c) => (
-                <TouchableOpacity
+                <AnimatedPressable
+      accessibilityRole="button"
                   key={c.id}
                   style={styles.switchRow}
                   onPress={() => setActiveCircleId(c.id)}
                 >
                   <Text style={styles.switchRowText}>{c.name}</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
               ))}
             </View>
           )}

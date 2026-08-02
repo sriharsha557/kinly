@@ -38,7 +38,8 @@ export function QuickActionsRow() {
           entering={FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)}
           style={{ flex: 1 }}
         >
-          <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
+          <AnimatedPressable
+      accessibilityRole="button" style={styles.action} onPress={() => navigation.navigate(tab)}>
             <Icon width={22} height={22} color={theme.colors.primary} />
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>

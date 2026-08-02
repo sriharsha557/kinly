@@ -1,6 +1,7 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -57,7 +58,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: tabBarClearance }]}>
         <View style={styles.header}>
-          <TouchableOpacity
+          <AnimatedPressable
             onPress={() => navigation.navigate('EditProfile')}
             accessibilityRole="button"
             accessibilityLabel="Edit profile picture"
@@ -67,7 +68,7 @@ export default function ProfileScreen() {
             ) : (
               <AvatarPlaceholder size={72} />
             )}
-          </TouchableOpacity>
+          </AnimatedPressable>
           <Text style={styles.name}>{user?.name ?? 'You'}</Text>
           {circle && <Text style={styles.circleName}>{circle.name}</Text>}
           {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
@@ -170,13 +171,14 @@ export default function ProfileScreen() {
         {stats && stats.achievements.length > 0 ? (
           <View style={styles.badgeList}>
             {stats.achievements.map((achievement) => (
-              <TouchableOpacity
+              <AnimatedPressable
+      accessibilityRole="button"
                 key={achievement.id}
                 style={styles.badge}
                 onPress={() => setViewingAchievement(achievement)}
               >
                 <Text style={styles.badgeText}>{achievement.title}</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
         ) : (
@@ -189,18 +191,20 @@ export default function ProfileScreen() {
         <Text style={styles.sectionTitle}>Future Self</Text>
         {user && <FutureSelfCard userId={user.id} />}
 
-        <TouchableOpacity
+        <AnimatedPressable
+      accessibilityRole="button"
           onPress={() => Linking.openURL('https://sriharsha557.github.io/kinly/privacy.html')}
           style={{ marginTop: spacing.section, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}
         >
           <Text style={styles.privacyLink}>Privacy Policy</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: spacing.md }} />
 
-        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: spacing.xl, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setShowDeleteAccount(true)} style={{ marginTop: spacing.xl, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}>
           <Text style={styles.deleteLink}>Delete account</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </ScrollView>
 
       {viewingAchievement && (

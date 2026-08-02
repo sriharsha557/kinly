@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useCreatePoll, useLatestPoll, useVotePoll } from '../hooks/useWouldYouRather';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -71,9 +72,10 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
           <RelationshipsIcon size={16} color={colors.primary} />
           <Text style={styles.title}>Would You Rather</Text>
         </View>
-        <TouchableOpacity onPress={() => setCreating(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {!poll ? (
@@ -81,21 +83,23 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
       ) : (
         <View style={styles.options}>
           <Text style={styles.hint}>{poll.myChoice ? 'Tap the other one to change your vote' : 'Tap an option to vote'}</Text>
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.option, poll.myChoice === 'a' && styles.optionActive]}
             onPress={() => votePoll.mutate({ pollId: poll.id, userId, choice: 'a' })}
           >
             <Text style={styles.optionText}>{poll.option_a}</Text>
             {poll.myChoice && <Text style={styles.optionPct}>{pctA}%</Text>}
-          </TouchableOpacity>
+          </AnimatedPressable>
           <Text style={styles.orDivider}>or</Text>
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.option, poll.myChoice === 'b' && styles.optionActive]}
             onPress={() => votePoll.mutate({ pollId: poll.id, userId, choice: 'b' })}
           >
             <Text style={styles.optionText}>{poll.option_b}</Text>
             {poll.myChoice && <Text style={styles.optionPct}>{pctB}%</Text>}
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       )}
 

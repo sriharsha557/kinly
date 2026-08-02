@@ -97,9 +97,9 @@ function EventPhoto({ path }: { path: string }) {
 
   return (
     <>
-      <TouchableOpacity onPress={() => setViewing(true)} accessibilityRole="button" accessibilityLabel="View photo">
+      <AnimatedPressable onPress={() => setViewing(true)} accessibilityRole="button" accessibilityLabel="View photo">
         <Image source={{ uri: url }} style={styles.photoThumb} />
-      </TouchableOpacity>
+      </AnimatedPressable>
       <Modal visible={viewing} transparent animationType="fade" onRequestClose={() => setViewing(false)}>
         <TouchableOpacity style={styles.photoOverlay} activeOpacity={1} onPress={() => setViewing(false)}>
           <Image source={{ uri: url }} style={styles.photoFull} resizeMode="contain" />
@@ -303,7 +303,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
       }
       style={styles.eventCard}
     >
-      <TouchableOpacity
+      <AnimatedPressable
         style={styles.eventHeader}
         onPress={() => setExpanded((prev) => !prev)}
         disabled={event.user_id === userId}
@@ -315,7 +315,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           <Text style={styles.eventText}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
         </View>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
       {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
@@ -367,6 +367,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
         <View style={styles.nudgeList}>
           {event.nudges.map((nudge) => (
             <AnimatedPressable
+      accessibilityRole="button"
               key={nudge.id}
               onLongPress={() => handleNudgeOptions(nudge.id, nudge.from_user_id, nudge.profiles?.name ?? 'Someone')}
               delayLongPress={400}

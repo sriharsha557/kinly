@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAuthStore } from '../state/useAuthStore';
 import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
@@ -74,11 +75,12 @@ function SuggestionCard({ suggestion, onPress }: { suggestion: GoalSuggestion; o
   const Icon = INTEREST_OPTIONS.find((o) => o.key === suggestion.category)?.Icon;
 
   return (
-    <TouchableOpacity style={styles.suggestionCard} onPress={onPress}>
+    <AnimatedPressable
+      accessibilityRole="button" style={styles.suggestionCard} onPress={onPress}>
       {Icon && <Icon size={16} color={theme.colors.textSecondary} />}
       <Text style={styles.suggestionText}>{suggestion.title}</Text>
       <Text style={[styles.suggestionAdd, { color: theme.colors.primary }]}>+ Add</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 

@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
@@ -67,7 +68,8 @@ export function CircleAICard({
             <Text style={styles.suggestionText}>✓ Started — see Circle Challenges above</Text>
           </View>
         ) : (
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.suggestion, styles.suggestionRow]}
             onPress={handleStartChallenge}
             disabled={createChallenge.isPending}
@@ -76,7 +78,7 @@ export function CircleAICard({
             <Text style={styles.suggestionText}>
               {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
             </Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
     </View>
   );

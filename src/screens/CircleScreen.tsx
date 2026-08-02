@@ -1,5 +1,6 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useCallback, useMemo, useRef } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -125,10 +126,11 @@ export default function CircleScreen() {
             the health card under it. */}
         <View style={styles.header}>
           <CirclePicker />
-          <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
+          <AnimatedPressable
+      accessibilityRole="button" style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
             <SettingsIcon width={15} height={15} color={theme.colors.textSecondary} />
             <Text style={styles.settingsLink}>Settings</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
 
         {circleId && <CircleName size="sm" />}

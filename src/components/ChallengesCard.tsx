@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
   useChallenges,
   useCreateChallenge,
@@ -166,9 +167,10 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
           <RocketIcon width={22} height={22} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Circle Challenges</Text>
         </View>
-        <TouchableOpacity onPress={() => setCreating(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
       <View style={styles.hintWrap}>
         <ConceptHint id="challenges" text="A shared monthly goal your whole circle works toward together." />
@@ -185,9 +187,10 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
                   {challenge.progress} / {challenge.target} · {challenge.contributors}{' '}
                   {challenge.contributors === 1 ? 'member' : 'members'}
                 </Text>
-                <TouchableOpacity onPress={() => setLogging(challenge)}>
+                <AnimatedPressable
+      accessibilityRole="button" onPress={() => setLogging(challenge)}>
                   <Text style={styles.logLink}>Log progress</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
               </View>
             </View>
           ))}

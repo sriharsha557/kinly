@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
@@ -46,7 +47,8 @@ function NewFactModal({
           <Text style={styles.pickLabel}>Who is it about?</Text>
           <View style={styles.memberChips}>
             {members?.filter((m) => m.status === 'active').map((m) => (
-              <TouchableOpacity
+              <AnimatedPressable
+      accessibilityRole="button"
                 key={m.user_id}
                 style={[styles.chip, answerUserId === m.user_id && styles.chipActive]}
                 onPress={() => setAnswerUserId(m.user_id)}
@@ -54,7 +56,7 @@ function NewFactModal({
                 <Text style={[styles.chipText, answerUserId === m.user_id && styles.chipTextActive]}>
                   {m.profiles?.name ?? 'Member'}
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
           <View style={styles.modalButtons}>
@@ -99,13 +101,14 @@ function GuessWhoPostRow({
             {members
               ?.filter((m) => m.user_id !== post.created_by)
               .map((m) => (
-                <TouchableOpacity
+                <AnimatedPressable
+      accessibilityRole="button"
                   key={m.user_id}
                   style={styles.chip}
                   onPress={() => submitGuess.mutate({ postId: post.id, userId, guessedUserId: m.user_id })}
                 >
                   <Text style={styles.chipText}>{m.profiles?.name ?? 'Member'}</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
               ))}
           </View>
         </View>
@@ -137,9 +140,10 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
           <MasksIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Guess Who</Text>
         </View>
-        <TouchableOpacity onPress={() => setCreating(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {posts && posts.length > 0 ? (

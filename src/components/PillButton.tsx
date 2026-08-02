@@ -20,6 +20,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
   const isOutline = variant === 'outline';
   return (
     <AnimatedPressable
+      accessibilityRole="button"
       style={[styles.base, isOutline ? styles.outline : styles.solid, style]}
       onPress={onPress}
       disabled={disabled || loading}

@@ -1,3 +1,4 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -40,7 +41,7 @@ export function ActionSheet({
           {message && <Text style={styles.message}>{message}</Text>}
           <View style={styles.options}>
             {options.map((option) => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={option.label}
                 style={styles.option}
                 onPress={option.onPress}
@@ -49,12 +50,12 @@ export function ActionSheet({
                 <Text style={[styles.optionText, option.destructive && styles.optionTextDestructive]}>
                   {option.label}
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
-          <TouchableOpacity style={[styles.option, styles.cancelOption]} onPress={onCancel} accessibilityRole="button">
+          <AnimatedPressable style={[styles.option, styles.cancelOption]} onPress={onCancel} accessibilityRole="button">
             <Text style={styles.cancelText}>{cancelLabel}</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>

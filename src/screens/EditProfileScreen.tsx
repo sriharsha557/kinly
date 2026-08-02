@@ -1,6 +1,7 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../state/useAuthStore';
@@ -63,13 +64,15 @@ export default function EditProfileScreen() {
             <AvatarPlaceholder size={88} />
           )}
           <View style={styles.avatarActions}>
-            <TouchableOpacity onPress={handlePickAvatar} disabled={uploadingAvatar}>
+            <AnimatedPressable
+      accessibilityRole="button" onPress={handlePickAvatar} disabled={uploadingAvatar}>
               <Text style={styles.avatarHint}>{uploadingAvatar ? 'Uploading…' : 'Upload a photo'}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
             <Text style={styles.avatarActionsDivider}>·</Text>
-            <TouchableOpacity onPress={() => setPickingPreset(true)} disabled={uploadingAvatar}>
+            <AnimatedPressable
+      accessibilityRole="button" onPress={() => setPickingPreset(true)} disabled={uploadingAvatar}>
               <Text style={styles.avatarHint}>Choose an avatar</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
         </View>
 

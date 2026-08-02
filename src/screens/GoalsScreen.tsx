@@ -6,9 +6,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -141,14 +139,14 @@ function GoalCard({
             </View>
           )}
           {isMine && (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={() => setMenuOpen(true)}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={`Options for ${goal.title}`}
             >
               <Text style={styles.optionsButton}>⋯</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           )}
         </View>
       </View>
@@ -191,7 +189,7 @@ function GoalCard({
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={handleLogWithPhoto}
               disabled={isPending}
               hitSlop={13}
@@ -199,8 +197,9 @@ function GoalCard({
               accessibilityLabel="Log progress with a photo"
             >
               <CameraIcon width={18} height={18} color={theme.colors.primary} />
-            </TouchableOpacity>
-            <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
+            </AnimatedPressable>
+            <AnimatedPressable
+      accessibilityRole="button" style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
               <Text style={styles.logButtonText}>Log progress</Text>
             </AnimatedPressable>
           </View>
@@ -324,7 +323,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           value={target}
           onChangeText={setTarget}
         />
-        <TouchableOpacity
+        <AnimatedPressable
           style={[styles.addButton, !canAdd && styles.addButtonDisabled]}
           onPress={handleAdd}
           disabled={!canAdd}
@@ -335,7 +334,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           <Text style={[styles.addButtonText, !canAdd && styles.addButtonTextDisabled]}>
             {createGoal.isPending ? 'Adding…' : 'Add goal'}
           </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
       {/* One-accent rule: resting chips are neutral with monochrome icons;
           only the selected chip takes the user's accent. */}

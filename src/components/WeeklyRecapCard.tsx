@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Share, StyleSheet, Text, View } from 'react-native';
 import { useWeeklyRecap } from '../hooks/useWeeklyRecap';
 import { useCircleDetail } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
 import { RobotIcon, SproutIcon } from './icons/MonoIcons';
 import { HealthIcon } from './icons/PillarIcons';
 import { fontFamily, spacing } from '../theme/colors';
+import { AnimatedPressable } from './AnimatedPressable';
 
 function healthDeltaLabel(now: number, weekAgo: number | null): string | null {
   if (weekAgo === null) return null;
@@ -57,9 +58,9 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
           <RobotIcon size={18} color={theme.colors.primary} />
           <Text style={styles.title}>This Week in Your Circle</Text>
         </View>
-        <TouchableOpacity onPress={handleShare} accessibilityRole="button" accessibilityLabel="Share weekly scorecard">
+        <AnimatedPressable onPress={handleShare} accessibilityRole="button" accessibilityLabel="Share weekly scorecard">
           <Text style={styles.shareLink}>Share</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
       {data.highlight ? <Text style={styles.highlight}>{data.highlight}</Text> : null}
       {hasActivity && (

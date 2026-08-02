@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMyLetters, useOpenLetter, useWriteLetter } from '../hooks/useFutureSelf';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -70,7 +71,8 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
 
   if (!letter.opened_at && !revealed) {
     return (
-      <TouchableOpacity
+      <AnimatedPressable
+      accessibilityRole="button"
         style={[styles.letterRow, styles.letterRowInline]}
         onPress={() => {
           setRevealed(true);
@@ -79,7 +81,7 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
       >
         <CelebrateIcon width={16} height={16} color={theme.colors.primary} />
         <Text style={styles.letterReady}>A letter from your past self is ready — tap to read</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 
@@ -104,9 +106,10 @@ export function FutureSelfCard({ userId }: { userId: string }) {
           <MailIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Future Self</Text>
         </View>
-        <TouchableOpacity onPress={() => setWriting(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setWriting(true)}>
           <Text style={styles.newLink}>+ Write</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {letters && letters.length > 0 ? (

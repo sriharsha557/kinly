@@ -1,3 +1,4 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import {
@@ -6,9 +7,7 @@ import {
   Share,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
@@ -52,13 +51,14 @@ function RoleChip({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
-    <TouchableOpacity
+    <AnimatedPressable
+      accessibilityRole="button"
       style={[styles.roleChip, active && styles.roleChipActive]}
       onPress={onPress}
       disabled={!onPress}
     >
       <Text style={[styles.roleChipText, active && styles.roleChipTextActive]}>{role}</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
@@ -159,9 +159,10 @@ function JoinOrCreateModal({
             disabled={!inviteCode.trim()}
           />
           {error && <Text style={styles.error}>{error}</Text>}
-          <TouchableOpacity onPress={onClose} style={{ marginTop: spacing.xs }}>
+          <AnimatedPressable
+      accessibilityRole="button" onPress={onClose} style={{ marginTop: spacing.xs }}>
             <Text style={styles.cancelLink}>Cancel</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>
@@ -299,7 +300,8 @@ export default function CircleSettingsScreen() {
             <Text style={styles.sectionTitle}>Your Circles</Text>
             <View style={styles.memberList}>
               {myCircles.map((c) => (
-                <TouchableOpacity
+                <AnimatedPressable
+      accessibilityRole="button"
                   key={c.id}
                   style={[styles.circleRow, c.id === circleId && styles.circleRowActive]}
                   onPress={() => setActiveCircleId(c.id)}
@@ -310,7 +312,7 @@ export default function CircleSettingsScreen() {
                     {c.name}
                   </Text>
                   {c.id === circleId && <Text style={styles.circleRowActiveTag}>Active</Text>}
-                </TouchableOpacity>
+                </AnimatedPressable>
               ))}
             </View>
           </>

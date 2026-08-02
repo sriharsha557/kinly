@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
 import { pickAndUploadVisionImage } from '../lib/visionImageUpload';
 import { PillButton } from './PillButton';
@@ -53,7 +54,8 @@ function AddVisionModal({
             placeholder="e.g. Launch my first startup"
             placeholderTextColor={theme.colors.textSecondary}
           />
-          <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage} disabled={uploading}>
+          <AnimatedPressable
+      accessibilityRole="button" style={styles.imagePicker} onPress={handlePickImage} disabled={uploading}>
             {imageUrl ? (
               <Image source={{ uri: imageUrl }} style={styles.imagePreview} />
             ) : uploading ? (
@@ -64,7 +66,7 @@ function AddVisionModal({
                 <Text style={styles.imagePickerText}>Add a photo (optional)</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </AnimatedPressable>
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
             <PillButton label="Add" onPress={handleAdd} loading={addItem.isPending} disabled={!title.trim()} style={{ flex: 1 }} />
@@ -95,15 +97,17 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
           <GalaxyIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Vision Board</Text>
         </View>
-        <TouchableOpacity onPress={() => setAdding(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setAdding(true)}>
           <Text style={styles.newLink}>+ Add</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {items && items.length > 0 ? (
         <View style={styles.grid}>
           {items.map((item) => (
-            <TouchableOpacity
+            <AnimatedPressable
+      accessibilityRole="button"
               key={item.id}
               style={styles.itemCard}
               onLongPress={() => handleLongPress(item.id, item.user_id === userId)}
@@ -111,7 +115,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
               {item.image_url && <Image source={{ uri: item.image_url }} style={styles.itemImage} />}
               <Text style={styles.itemTitle}>{item.title}</Text>
               <Text style={styles.itemOwner}>{item.profiles?.name ?? 'Someone'}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           ))}
         </View>
       ) : (

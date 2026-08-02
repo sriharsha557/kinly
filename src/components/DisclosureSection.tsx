@@ -26,7 +26,8 @@ export function DisclosureSection({
 
   return (
     <Animated.View layout={LinearTransition.springify()} style={styles.wrap}>
-      <AnimatedPressable style={styles.header} onPress={() => setOpen((prev) => !prev)}>
+      <AnimatedPressable
+      accessibilityRole="button" style={styles.header} onPress={() => setOpen((prev) => !prev)}>
         <View style={styles.labelRow}>
           {Icon && <Icon width={18} height={18} />}
           <Text style={styles.label}>{label}</Text>

@@ -1,5 +1,6 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { ACCENT_OPTIONS, accents, fontFamily, spacing, type AccentId, type ThemeMode } from '../theme/colors';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -33,7 +34,7 @@ export function ThemePicker({
         {ACCENT_OPTIONS.map(({ id, label }) => {
           const active = accent === id;
           return (
-            <TouchableOpacity
+            <AnimatedPressable
               key={id}
               style={styles.swatchItem}
               onPress={() => onChangeAccent(id)}
@@ -45,7 +46,7 @@ export function ThemePicker({
                 <View style={[styles.swatch, { backgroundColor: accents[id].primary }]} />
               </View>
               <Text style={[styles.swatchLabel, active && styles.swatchLabelActive]}>{label}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           );
         })}
       </View>
@@ -55,7 +56,7 @@ export function ThemePicker({
         {MODE_OPTIONS.map(({ id, label }) => {
           const active = mode === id;
           return (
-            <TouchableOpacity
+            <AnimatedPressable
               key={id}
               style={[styles.modeChip, active && styles.modeChipActive]}
               onPress={() => onChangeMode(id)}
@@ -64,7 +65,7 @@ export function ThemePicker({
               accessibilityLabel={`${label} appearance`}
             >
               <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>{label}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           );
         })}
       </View>

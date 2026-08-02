@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useUxHintsStore } from '../state/useUxHintsStore';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -30,14 +31,14 @@ export function ConceptHint({
   return (
     <View style={styles.row}>
       <Text style={[styles.text, onGradient && styles.textOnGradient]}>{text}</Text>
-      <TouchableOpacity
+      <AnimatedPressable
         onPress={() => dismissHint(id)}
         hitSlop={14}
         accessibilityRole="button"
         accessibilityLabel="Dismiss this explanation"
       >
         <Text style={[styles.close, onGradient && styles.closeOnGradient]}>✕</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }

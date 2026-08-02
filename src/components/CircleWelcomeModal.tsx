@@ -1,3 +1,4 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useRef, useState } from 'react';
 import {
@@ -5,9 +6,7 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  Text, View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -89,14 +88,14 @@ export function CircleWelcomeModal() {
       <SafeAreaView style={styles.container}>
         {/* Absolute children ignore SafeAreaView padding, so the inset is
             applied explicitly - without it, Skip sat under the status bar. */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={[styles.skip, { top: insets.top + 12 }]}
           onPress={finish}
           hitSlop={12}
           accessibilityRole="button"
         >
           <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         <ScrollView
           ref={scrollRef}
