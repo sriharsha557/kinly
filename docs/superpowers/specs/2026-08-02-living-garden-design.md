@@ -1,7 +1,7 @@
 # Making the Garden feel alive — design
 
 **Date:** 2026-08-02
-**Status:** approved, not yet implemented
+**Status:** implemented (branch `living-garden-feedback`), not yet verified on a device
 **Surface:** `GardenHero`, rendered only on Home (`TodayScreen.tsx:491`)
 
 ## Problem
@@ -169,10 +169,24 @@ fixed nature hues — the exception `PRINCIPLES.md` already sanctions. No raw he
 in components.
 
 Day being transparent means the common midday case renders pixel-identically to
-today. Contrast must still be verified for the two worst cases — night overlay
-in the light scheme, dusk overlay in the dark scheme — against `plantName` and
-`plantStreak`, to the 4.5:1 body floor. The footer sits on opaque
-`colors.surface`, so its text is unaffected in every phase.
+today.
+
+Contrast, measured rather than assumed. `textPrimary` stays above 11:1 in every
+phase and scheme. The worst case for `textSecondary` — which is what
+`plantStreak` uses — is the night wash in the light scheme:
+
+| Position in the wash | Alpha | Contrast |
+| --- | --- | --- |
+| top stop | 0.120 | 4.26 |
+| plant labels, ~70% down | 0.071 | 4.61 |
+| bottom stop | 0.050 | 4.76 |
+
+The labels clear 4.5:1 where they actually sit. The 4.26 figure occurs only at
+the top of the hero, where the sky is and no text is. Unwashed, the same pair
+is 5.15, so the night sky costs roughly half a point of contrast.
+
+The footer sits on opaque `colors.surface` above the wash, so its text is
+unaffected in every phase.
 
 ### Sway
 
@@ -220,7 +234,8 @@ running the app.
 ## Files
 
 **New:** `src/components/garden/{GardenHero,SkyGradient,PlantRow,Plant,GardenFooter}.tsx`,
-`src/lib/daylight.ts`, `src/lib/swayProfile.ts`, and the two new test files.
+`src/hooks/useDaylight.ts`, `src/lib/daylight.ts`, `src/lib/swayProfile.ts`, and
+the two new test files.
 
 **Modified:** `src/lib/gardenGrowth.ts` (+ its test), `src/hooks/useGarden.ts`
 (`stageFor` delegates, `MemberGardenState` unchanged), `src/hooks/useGoals.ts`
@@ -233,3 +248,36 @@ running the app.
 hero — `CircleHealthCard` and `CircleMembersSection` both render it on the
 Circle screen — so it is not a garden-hero internal. Those two callers pass a
 stage only and are unaffected by the scale curve.
+
+## What changed during implementation
+
+Three departures from the design above, recorded so the spec matches what
+shipped.
+
+**`useSyncStepGoal` got the garden invalidation too.** The design named only
+`useLogGoalProgress`, but the health-step sync writes the same `streak_count`
+and `last_logged_date` columns through a different RPC, so it had the identical
+staleness bug by a second route.
+
+**The plant art pivots at `transformOrigin: 'bottom center'`.** Not in the
+design, and wrong without it: both the lean and the growth spring otherwise
+pivot about the art's centre, so a plant leans from its waist and grows
+downward into the soil as much as upward.
+
+**The sway hash needed an avalanche finalizer.** Plain FNV-1a ends in a
+multiply, which only propagates a change upward through the word, so ids
+differing in their final character — which circle members' UUIDs routinely do —
+came out about 1/255 apart in the byte feeding `period`. That is a 5ms spread
+across a 1200ms range: the near-lockstep the module exists to break. With
+MurmurHash3's fmix32 appended, the mean spread between adjacent ids goes from
+0.059 to 0.367 of the range, against the ~0.33 a uniform spread gives.
+
+## Verification status
+
+`npm test` passes 111/111, and `tsc --noEmit` and `expo lint` are clean.
+
+Not verified: nothing in this change has been seen running. The growth spring,
+the sway variation and the four skies are unexercised on a device — the
+component behavior the Testing section above explicitly leaves to running the
+app. No emulator or connected device was available, and reaching the Garden
+also requires signing in as a user who belongs to a circle.
