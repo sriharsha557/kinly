@@ -5,6 +5,8 @@
 // { accent, scheme } into the same theme shape every screen already
 // consumes via useTheme().
 
+import type { DaylightPhase } from '../lib/daylight';
+
 // 'dusk' is the default (the calm muted indigo the app opens on); 'ember'
 // is the original orange, kept as a choice rather than the starting point.
 export type AccentId = 'ember' | 'garden' | 'dusk';
@@ -320,6 +322,30 @@ const gardenByScheme: Record<
   },
 };
 
+// The time-of-day wash that sits *over* the hero's accent gradient rather
+// than replacing it. REDESIGN.md fixes the accent as the sky's tint and the
+// only place the accent touches the garden, so swapping in fixed dawn/dusk
+// hues would delete the accent's one expression there. Layering keeps both.
+//
+// Two stops, strongest at the top and fading toward the soil, which is how
+// sky light actually falls. Alphas are deliberately low - the garden should
+// read as peaceful, not as a filter - and 'day' is fully transparent so the
+// commonest case renders exactly as it did before this existed.
+const skyByScheme: Record<ResolvedScheme, Record<DaylightPhase, readonly [string, string]>> = {
+  light: {
+    dawn: ['rgba(232,160,140,0.08)', 'rgba(232,160,140,0.03)'],
+    day: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
+    dusk: ['rgba(224,150,80,0.10)', 'rgba(224,150,80,0.04)'],
+    night: ['rgba(60,70,120,0.12)', 'rgba(60,70,120,0.05)'],
+  },
+  dark: {
+    dawn: ['rgba(214,150,132,0.08)', 'rgba(214,150,132,0.03)'],
+    day: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
+    dusk: ['rgba(208,140,76,0.10)', 'rgba(208,140,76,0.04)'],
+    night: ['rgba(70,84,140,0.12)', 'rgba(70,84,140,0.05)'],
+  },
+};
+
 export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
   const accent = accents[accentId];
   const n = neutrals[scheme];
@@ -361,7 +387,7 @@ export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
       amber: n.amber,
     },
     categoryColors: categoryColorsByScheme[scheme],
-    garden: gardenByScheme[scheme],
+    garden: { ...gardenByScheme[scheme], sky: skyByScheme[scheme] },
     spacing,
     type,
     touch,

@@ -18,7 +18,7 @@ import { useNudgeCopy } from '../hooks/useNudgeCopy';
 import { timeOfDayGreeting, todayDateLabel } from '../lib/greeting';
 import { CircleWelcomeModal } from '../components/CircleWelcomeModal';
 import { CirclePicker, CircleName } from '../components/CirclePicker';
-import { GardenHero } from '../components/GardenHero';
+import { GardenHero } from '../components/garden/GardenHero';
 import { MoodCheckinCard } from '../components/MoodCheckinCard';
 import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
