@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useCreatePoll, useLatestPoll, useVotePoll } from '../hooks/useWouldYouRather';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -70,9 +72,10 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
           <RelationshipsIcon size={16} color={colors.primary} />
           <Text style={styles.title}>Would You Rather</Text>
         </View>
-        <TouchableOpacity onPress={() => setCreating(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {!poll ? (
@@ -80,21 +83,23 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
       ) : (
         <View style={styles.options}>
           <Text style={styles.hint}>{poll.myChoice ? 'Tap the other one to change your vote' : 'Tap an option to vote'}</Text>
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.option, poll.myChoice === 'a' && styles.optionActive]}
             onPress={() => votePoll.mutate({ pollId: poll.id, userId, choice: 'a' })}
           >
             <Text style={styles.optionText}>{poll.option_a}</Text>
             {poll.myChoice && <Text style={styles.optionPct}>{pctA}%</Text>}
-          </TouchableOpacity>
+          </AnimatedPressable>
           <Text style={styles.orDivider}>or</Text>
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.option, poll.myChoice === 'b' && styles.optionActive]}
             onPress={() => votePoll.mutate({ pollId: poll.id, userId, choice: 'b' })}
           >
             <Text style={styles.optionText}>{poll.option_b}</Text>
             {poll.myChoice && <Text style={styles.optionPct}>{pctB}%</Text>}
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       )}
 
@@ -107,52 +112,52 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-    empty: { fontSize: 13, color: colors.shellSecondary },
-    hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 2 },
-    options: { gap: 8 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 2 },
+    options: { gap: spacing.sm },
     option: {
       backgroundColor: colors.surface,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
     optionActive: { borderWidth: 1.5, borderColor: colors.primary },
-    optionText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-    optionPct: { fontSize: 13, fontWeight: '800', color: colors.primary },
-    orDivider: { textAlign: 'center', fontSize: 11, color: colors.textSecondary },
+    optionText: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    optionPct: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    orDivider: { textAlign: 'center', fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
     orText: { textAlign: 'center', color: colors.textSecondary },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

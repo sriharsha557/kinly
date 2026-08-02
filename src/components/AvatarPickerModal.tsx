@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, View } from 'react-native';
 import { PillButton } from './PillButton';
 import { diceBearAvatarUrl, randomAvatarSeeds } from '../lib/avatarPresets';
 import { useTheme } from '../theme/ThemeProvider';
@@ -24,7 +26,7 @@ export function AvatarPickerModal({
             {seeds.map((seed, index) => {
               const url = diceBearAvatarUrl(seed);
               return (
-                <TouchableOpacity
+                <AnimatedPressable
                   key={seed}
                   onPress={() => onSelect(url)}
                   style={styles.avatarWrap}
@@ -32,7 +34,7 @@ export function AvatarPickerModal({
                   accessibilityLabel={`Avatar option ${index + 1}`}
                 >
                   <Image source={{ uri: url }} style={styles.avatarImage} />
-                </TouchableOpacity>
+                </AnimatedPressable>
               );
             })}
           </View>
@@ -42,9 +44,10 @@ export function AvatarPickerModal({
             onPress={() => setSeeds(randomAvatarSeeds())}
             style={{ marginTop: 14 }}
           />
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 10 }}>
+          <AnimatedPressable
+      accessibilityRole="button" onPress={onClose} style={{ marginTop: 10 }}>
             <Text style={styles.cancel}>Cancel</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>
@@ -57,16 +60,16 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       alignItems: 'center',
       ...shadow,
     },
-    title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 14 },
+    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 14 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
     avatarWrap: {
       width: 64,
@@ -76,6 +79,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.inputBg,
     },
     avatarImage: { width: 64, height: 64 },
-    cancel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    cancel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

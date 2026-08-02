@@ -1,3 +1,4 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -6,9 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -34,6 +33,7 @@ import { AskCardSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
 import DeleteIcon from '../../assets/icons/feed/delete.svg';
@@ -68,7 +68,8 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
         <LoadingSpinner size={10} />
       ) : (
         replies?.map((reply) => (
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             key={reply.id}
             style={styles.replyRow}
             onLongPress={() => handleReplyOptions(reply.id, reply.user_id, reply.profiles?.name ?? 'Someone')}
@@ -76,7 +77,7 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
           >
             <Text style={styles.replyAuthor}>{reply.profiles?.name ?? 'Someone'}</Text>
             <Text style={styles.replyBody}>{reply.body}</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))
       )}
       <View style={styles.replyInputRow}>
@@ -87,9 +88,10 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
           value={body}
           onChangeText={setBody}
         />
-        <TouchableOpacity style={styles.replySend} onPress={handleSend} disabled={createReply.isPending}>
+        <AnimatedPressable
+      accessibilityRole="button" style={styles.replySend} onPress={handleSend} disabled={createReply.isPending}>
           <Text style={styles.replySendText}>Send</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
     </View>
   );
@@ -127,27 +129,28 @@ function AskCard({
 
   return (
     <View style={styles.card}>
-      <TouchableOpacity onPress={onToggle}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={onToggle}>
         <View style={styles.questionRow}>
           <Text style={styles.question}>{post.question}</Text>
           {isMine ? (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={() => setConfirmingDelete(true)}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel="Delete this post"
             >
               <DeleteIcon width={15} height={15} color={theme.colors.textSecondary} opacity={0.6} />
-            </TouchableOpacity>
+            </AnimatedPressable>
           ) : (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={handleOptions}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={`Options for ${post.profiles?.name ?? 'this'} post`}
             >
               <Text style={styles.optionsButton}>⋯</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           )}
         </View>
         {post.goals?.title && (
@@ -162,7 +165,7 @@ function AskCard({
             {post.reply_count} {post.reply_count === 1 ? 'reply' : 'replies'} · {expanded ? 'Hide' : 'Discuss'}
           </Text>
         </View>
-      </TouchableOpacity>
+      </AnimatedPressable>
       {expanded && <ReplyThread askPostId={post.id} circleId={circleId} userId={userId} />}
       {confirmingDelete && (
         <ActionSheet
@@ -225,7 +228,7 @@ export default function ConnectionScreen() {
 
           {/* Support: daily check-in + advice from your circle */}
           {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350)}>
+            <Animated.View entering={FadeInDown.duration(motion.duration.entrance)}>
               <DailyCircleCard circleId={circleId} userId={userId} />
             </Animated.View>
           )}
@@ -245,7 +248,8 @@ export default function ConnectionScreen() {
                 {myGoals.map((goal) => {
                   const active = goalId === goal.id;
                   return (
-                    <TouchableOpacity
+                    <AnimatedPressable
+      accessibilityRole="button"
                       key={goal.id}
                       style={[styles.goalChip, active && styles.goalChipActive]}
                       onPress={() => setGoalId(active ? null : goal.id)}
@@ -256,14 +260,15 @@ export default function ConnectionScreen() {
                           {goal.title}
                         </Text>
                       </View>
-                    </TouchableOpacity>
+                    </AnimatedPressable>
                   );
                 })}
               </ScrollView>
             )}
-            <TouchableOpacity style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
+            <AnimatedPressable
+      accessibilityRole="button" style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
               <Text style={styles.postButtonText}>Post</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           </View>
 
           {isLoading ? (
@@ -275,7 +280,12 @@ export default function ConnectionScreen() {
             <View style={styles.list}>
               {posts.map((post, index) =>
                 userId && circleId ? (
-                  <Animated.View key={post.id} entering={FadeInDown.duration(300).delay(Math.min(index, 6) * 50)}>
+                  <Animated.View
+                key={post.id}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(
+                  Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+                )}
+              >
                     <AskCard
                       post={post}
                       circleId={circleId}
@@ -310,60 +320,60 @@ export default function ConnectionScreen() {
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    page: { padding: 16 },
-    title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
-    titleHint: { marginBottom: 12 },
-    sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
+    page: { padding: spacing.lg },
+    title: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    titleHint: { marginBottom: spacing.md },
+    sectionTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
     composer: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 12,
-      gap: 8,
-      marginBottom: 16,
+      padding: spacing.md,
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
       ...shadow,
     },
-    composerInput: { minHeight: 52, color: colors.textPrimary, fontSize: 16 },
+    composerInput: { minHeight: 52, color: colors.textPrimary, fontSize: 16, fontFamily: fontFamily.regular },
     goalChips: { gap: 6 },
     goalChip: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       minHeight: 44,
       justifyContent: 'center',
     },
     goalChipActive: { backgroundColor: colors.primary },
     goalChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    goalChipText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
+    goalChipText: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     goalChipTextActive: { color: colors.onAccent },
     goalTagRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    goalTag: { fontSize: 12, color: colors.primary, fontWeight: '600' },
+    goalTag: { fontSize: 13, color: colors.primary, fontFamily: fontFamily.semibold },
     postButton: {
       alignSelf: 'flex-end',
       backgroundColor: colors.primary,
       borderRadius: radii.pill,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
     },
-    postButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 14 },
-    list: { gap: 12 },
+    postButtonText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 14 },
+    list: { gap: spacing.md },
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 16,
-      gap: 8,
+      padding: spacing.lg,
+      gap: spacing.sm,
       ...shadow,
     },
-    questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
-    question: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-    optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    questionRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
+    question: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-    meta: { fontSize: 13, color: colors.textSecondary },
-    thread: { marginTop: 12, gap: 8, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: 12 },
+    meta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    thread: { marginTop: spacing.md, gap: spacing.sm, borderTopWidth: 1, borderTopColor: colors.inputBg, paddingTop: spacing.md },
     replyRow: { gap: 2 },
-    replyAuthor: { fontSize: 13, fontWeight: '700', color: colors.textPrimary },
-    replyBody: { fontSize: 14, lineHeight: 20, color: colors.textSecondary },
-    replyInputRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
+    replyAuthor: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    replyBody: { ...type.secondary, color: colors.textSecondary },
+    replyInputRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
     replyInput: {
       flex: 1,
       backgroundColor: colors.inputBg,
@@ -371,20 +381,20 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingHorizontal: 10,
       minHeight: 48,
       color: colors.textPrimary,
-      fontSize: 13,
+      fontSize: 13, fontFamily: fontFamily.regular,
     },
     replySend: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
     },
-    replySendText: { color: colors.onAccent, fontWeight: '700', fontSize: 14 },
-    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
-    gamesSection: { marginTop: 24 },
+    replySendText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 14 },
+    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
+    gamesSection: { marginTop: spacing.xxl },
     // Sits under the collapsed DisclosureSection header (which owns a 16px
     // bottom margin), so pull the hint back up toward its label.
-    gamesHint: { marginTop: -10, paddingHorizontal: 16 },
+    gamesHint: { marginTop: -10, paddingHorizontal: spacing.lg },
   });
 }

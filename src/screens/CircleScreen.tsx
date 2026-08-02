@@ -1,5 +1,6 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useCallback, useMemo, useRef } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,13 +24,22 @@ import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import SettingsIcon from '../../assets/brand/settings.svg';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 function Reveal({ index, children }: { index: number; children: ReactNode }) {
-  return <Animated.View entering={FadeInDown.duration(350).delay(index * 70)}>{children}</Animated.View>;
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(motion.duration.entrance).delay(
+        Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+      )}
+    >
+      {children}
+    </Animated.View>
+  );
 }
 
 export default function CircleScreen() {
@@ -116,10 +126,11 @@ export default function CircleScreen() {
             the health card under it. */}
         <View style={styles.header}>
           <CirclePicker />
-          <TouchableOpacity style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
+          <AnimatedPressable
+      accessibilityRole="button" style={styles.settingsRow} onPress={() => navigation.navigate('CircleSettings')}>
             <SettingsIcon width={15} height={15} color={theme.colors.textSecondary} />
             <Text style={styles.settingsLink}>Settings</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
 
         {circleId && <CircleName size="sm" />}
@@ -188,8 +199,8 @@ export default function CircleScreen() {
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    page: { padding: 16 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    page: { padding: spacing.lg },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
     // marginLeft: auto rather than relying on the row's space-between:
     // CirclePicker renders nothing when you only belong to one circle, and
     // with a single child space-between would drop Settings to the left edge.
@@ -198,9 +209,9 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       gap: 5,
       minHeight: 48,
-      paddingHorizontal: 8,
+      paddingHorizontal: spacing.sm,
       marginLeft: 'auto',
     },
-    settingsLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
+    settingsLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

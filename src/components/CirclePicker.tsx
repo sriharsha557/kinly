@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -101,11 +102,11 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    pillText: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
-    pillChevron: { fontSize: 13, color: colors.textSecondary },
+    pillText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    pillChevron: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // md heads the garden on Home; sm heads the health card on Circle, where
     // it sits under the header rather than acting as the screen title.
-    nameMd: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
-    nameSm: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
+    nameMd: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
+    nameSm: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.sm },
   });
 }

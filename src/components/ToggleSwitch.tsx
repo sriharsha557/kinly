@@ -51,7 +51,24 @@ function Spark({ tx, ty, burst }: { tx: number; ty: number; burst: SharedValue<n
 // sliding-dot switch - a specific Uiverse.io reference the user picked
 // (heart checkbox, recolored orange). Outline heart when off, filled +
 // stroked orange when on; color alone (not fill) carries the on/off state.
-export function ToggleSwitch({ value, onValueChange }: { value: boolean; onValueChange: (next: boolean) => void }) {
+// `decorative` is for the one place this is a celebration rather than a
+// control: a completed goal's badge, where the heart pops to mark hitting a
+// target and the adjacent "Completed" text carries the meaning. It rendered
+// identically before, but as a real Pressable declaring
+// accessibilityRole="switch" with a no-op handler - so a screen reader
+// announced "switch, on, double tap to toggle" for something that could not
+// be toggled, and sighted users got a control that invited a tap and did
+// nothing. Decorative drops the role and the handler; the visuals are
+// untouched.
+export function ToggleSwitch({
+  value,
+  onValueChange,
+  decorative = false,
+}: {
+  value: boolean;
+  onValueChange?: (next: boolean) => void;
+  decorative?: boolean;
+}) {
   const theme = useTheme();
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -82,29 +99,44 @@ export function ToggleSwitch({ value, onValueChange }: { value: boolean; onValue
 
   const heartStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
+  const heart = (
+    <View style={styles.wrap}>
+      {SPARKS.map((s, i) => (
+        <Spark key={i} tx={s.tx} ty={s.ty} burst={burst} />
+      ))}
+      <Animated.View style={heartStyle}>
+        <Svg width={SIZE} height={SIZE} viewBox="0 0 24 24">
+          <AnimatedPath
+            d={HEART_PATH}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            animatedProps={heartProps}
+          />
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+
+  // importantForAccessibility/accessibilityElementsHidden keep the heart out
+  // of the screen-reader tree entirely when decorative, so the row announces
+  // as just its label rather than as a control with no behaviour.
+  if (decorative) {
+    return (
+      <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+        {heart}
+      </View>
+    );
+  }
+
   return (
     <Pressable
-      onPress={() => onValueChange(!value)}
+      onPress={() => onValueChange?.(!value)}
       hitSlop={8}
       accessibilityRole="switch"
       accessibilityState={{ checked: value }}
     >
-      <View style={styles.wrap}>
-        {SPARKS.map((s, i) => (
-          <Spark key={i} tx={s.tx} ty={s.ty} burst={burst} />
-        ))}
-        <Animated.View style={heartStyle}>
-          <Svg width={SIZE} height={SIZE} viewBox="0 0 24 24">
-            <AnimatedPath
-              d={HEART_PATH}
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              animatedProps={heartProps}
-            />
-          </Svg>
-        </Animated.View>
-      </View>
+      {heart}
     </Pressable>
   );
 }

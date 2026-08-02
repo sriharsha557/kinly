@@ -22,6 +22,7 @@ import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import SunIcon from '../../assets/illustrations/kinly-ill-sun.svg';
 import SunCloudIcon from '../../assets/illustrations/kinly-ill-sun-cloud.svg';
@@ -120,7 +121,7 @@ function Plant({
       <Animated.View style={[swayStyle, wilted && styles.plantWilted]}>
         <Animated.View
           key={member.stage}
-          entering={stageChanged && !reducedMotion ? ZoomIn.springify().damping(12) : undefined}
+          entering={stageChanged && !reducedMotion ? ZoomIn.springify().damping(motion.damping.pop) : undefined}
         >
           <GardenStageArt stage={member.stage} size={artSize} />
         </Animated.View>
@@ -188,7 +189,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
         <Animated.View
           key={state}
           style={styles.weather}
-          entering={reducedMotion ? undefined : ZoomIn.springify().damping(12)}
+          entering={reducedMotion ? undefined : ZoomIn.springify().damping(motion.damping.pop)}
         >
           <Weather width={44} height={44} />
         </Animated.View>
@@ -210,7 +211,11 @@ export function GardenHero({ circleId }: { circleId: string }) {
             // first render instead of appearing all at once.
             <Animated.View
               key={member.userId}
-              entering={reducedMotion ? undefined : FadeInDown.duration(350).delay(index * 70)}
+              entering={
+                reducedMotion
+                  ? undefined
+                  : FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)
+              }
             >
               <Plant
                 member={member}
@@ -236,7 +241,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
   );
 
   return (
-    <Animated.View entering={FadeInDown.duration(400)}>
+    <Animated.View entering={FadeInDown.duration(motion.duration.entrance)}>
       <AnimatedPressable
         onPress={() => navigation.navigate('Circle')}
         accessibilityRole="button"
@@ -280,12 +285,14 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
     plantWilted: { opacity: 0.7 },
     plantName: {
       ...type.caption,
-      fontWeight: '600',
+      fontFamily: fontFamily.medium,
       color: colors.textPrimary,
       marginTop: spacing.xs,
       maxWidth: 72,
     },
-    plantNameSelf: { fontWeight: '800', color: colors.primary },
+    // Your own plant is named in bold - the one place in the row that has to
+    // read as "you" at a glance.
+    plantNameSelf: { fontFamily: fontFamily.bold, color: colors.primary },
     plantStreak: { ...type.caption, color: colors.textSecondary, fontVariant: ['tabular-nums'] },
     // A soft ground shadow instead of the old edge-to-edge 14px brown bar,
     // which split the card into disconnected slabs.
@@ -303,8 +310,8 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
       paddingTop: spacing.lg,
       gap: spacing.xs,
     },
-    title: { ...type.subheading, fontWeight: '700', color: colors.textPrimary },
+    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     status: { ...type.body, color: colors.textPrimary },
-    statusMeta: { ...type.secondary, fontWeight: '600', color: colors.textSecondary },
+    statusMeta: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.textSecondary },
   });
 }

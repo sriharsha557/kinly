@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, spacing } from '../theme/colors';
 
 interface Delta {
   label: string;
@@ -76,26 +77,26 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       justifyContent: 'space-between',
     },
     tileOutlined: { borderWidth: 1, borderColor: colors.border },
-    tileHalf: { flexBasis: '48%', padding: 16, minHeight: 140 },
-    tileThird: { flexBasis: '31%', padding: 12, minHeight: 116 },
+    tileHalf: { flexBasis: '48%', padding: spacing.lg, minHeight: 140 },
+    tileThird: { flexBasis: '31%', padding: spacing.md, minHeight: 116 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    label: { fontSize: 14, fontWeight: '600' },
-    labelThird: { fontSize: 12 },
-    arrow: { fontSize: 16 },
-    value: { fontSize: 32, fontWeight: '700' },
-    valueThird: { fontSize: 24 },
+    label: { fontSize: 14, fontFamily: fontFamily.semibold },
+    labelThird: { fontSize: 13, fontFamily: fontFamily.regular },
+    arrow: { fontSize: 16, fontFamily: fontFamily.regular },
+    value: { fontSize: 32, fontFamily: fontFamily.bold },
+    valueThird: { fontSize: 24, fontFamily: fontFamily.regular },
     deltaRow: { flexDirection: 'row', gap: 6 },
     pill: {
       backgroundColor: colors.pillBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
       flexDirection: 'row',
-      gap: 4,
+      gap: spacing.xs,
     },
-    pillValue: { fontSize: 11, fontWeight: '700', color: colors.textPrimary },
-    pillLabel: { fontSize: 11, color: colors.textSecondary },
-    ctaArrow: { fontSize: 20, alignSelf: 'flex-end' },
-    ctaLabel: { fontSize: 20, fontWeight: '800' },
+    pillValue: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    pillLabel: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    ctaArrow: { fontSize: 20, fontFamily: fontFamily.regular, alignSelf: 'flex-end' },
+    ctaLabel: { fontSize: 20, fontFamily: fontFamily.bold },
   });
 }

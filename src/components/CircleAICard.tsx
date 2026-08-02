@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useCircleAI } from '../hooks/useCircleAI';
 import { useCreateChallenge } from '../hooks/useChallenges';
@@ -66,7 +68,8 @@ export function CircleAICard({
             <Text style={styles.suggestionText}>✓ Started — see Circle Challenges above</Text>
           </View>
         ) : (
-          <TouchableOpacity
+          <AnimatedPressable
+      accessibilityRole="button"
             style={[styles.suggestion, styles.suggestionRow]}
             onPress={handleStartChallenge}
             disabled={createChallenge.isPending}
@@ -75,7 +78,7 @@ export function CircleAICard({
             <Text style={styles.suggestionText}>
               {createChallenge.isPending ? 'Starting…' : `Try: ${data.suggestedChallenge}`}
             </Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         ))}
     </View>
   );
@@ -85,30 +88,30 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
       gap: 10,
     },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    message: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    message: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 18 },
+    pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     pill: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
       paddingHorizontal: 10,
       paddingVertical: 5,
     },
-    pillText: { fontSize: 11, fontWeight: '600', color: colors.textPrimary },
+    pillText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     suggestion: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
       paddingVertical: 10,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
     },
     suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
     suggestionDone: { backgroundColor: colors.success },
-    suggestionText: { fontSize: 13, fontWeight: '700', color: colors.onAccent, textAlign: 'center' },
+    suggestionText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center' },
   });
 }

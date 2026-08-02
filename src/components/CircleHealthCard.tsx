@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GardenStageArt } from './GardenStageArt';
@@ -69,9 +70,9 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
     // cardShell is the shared flat card treatment (1px border hairline, no
     // shadow) - design/PRINCIPLES.md's "Shape & space" rule, spread rather
     // than hand-rolled so this card cannot drift from every other one.
-    card: { ...cardShell, padding: 20, gap: 4, marginBottom: 16 },
-    headline: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
-    word: { fontSize: 20, fontWeight: '700', color: colors.textPrimary },
-    fact: { fontSize: 14, fontWeight: '500', color: colors.textSecondary },
+    card: { ...cardShell, padding: spacing.xl, gap: spacing.xs, marginBottom: spacing.lg },
+    headline: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.xs },
+    word: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    fact: { fontSize: 14, fontFamily: fontFamily.medium, color: colors.textSecondary },
   });
 }

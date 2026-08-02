@@ -1,12 +1,12 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  Text, View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
@@ -88,14 +88,14 @@ export function CircleWelcomeModal() {
       <SafeAreaView style={styles.container}>
         {/* Absolute children ignore SafeAreaView padding, so the inset is
             applied explicitly - without it, Skip sat under the status bar. */}
-        <TouchableOpacity
+        <AnimatedPressable
           style={[styles.skip, { top: insets.top + 12 }]}
           onPress={finish}
           hitSlop={12}
           accessibilityRole="button"
         >
           <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
 
         <ScrollView
           ref={scrollRef}
@@ -139,17 +139,17 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       minHeight: 44,
       justifyContent: 'center',
       paddingHorizontal: 14,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    skipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    slide: { alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
-    stepLabel: { fontSize: 12, fontWeight: '700', color: colors.primary, marginTop: 8, letterSpacing: 0.5 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
-    body: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-    footer: { padding: 24, paddingTop: 8, gap: 20 },
-    dots: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+    skipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    slide: { alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: spacing.md },
+    stepLabel: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary, marginTop: spacing.sm, letterSpacing: 0.5 },
+    title: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    body: { fontSize: 15, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+    footer: { padding: spacing.xxl, paddingTop: spacing.sm, gap: spacing.xl },
+    dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     dotActive: { backgroundColor: colors.primary, width: 20 },
   });

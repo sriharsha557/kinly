@@ -24,10 +24,12 @@ import { TodayGoalsChecklist } from '../components/TodayGoalsChecklist';
 import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { AnimatedPressable } from '../components/AnimatedPressable';
 import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono } from '../components/icons/MonoIcons';
 import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -95,9 +97,9 @@ function EventPhoto({ path }: { path: string }) {
 
   return (
     <>
-      <TouchableOpacity onPress={() => setViewing(true)} accessibilityRole="button" accessibilityLabel="View photo">
+      <AnimatedPressable onPress={() => setViewing(true)} accessibilityRole="button" accessibilityLabel="View photo">
         <Image source={{ uri: url }} style={styles.photoThumb} />
-      </TouchableOpacity>
+      </AnimatedPressable>
       <Modal visible={viewing} transparent animationType="fade" onRequestClose={() => setViewing(false)}>
         <TouchableOpacity style={styles.photoOverlay} activeOpacity={1} onPress={() => setViewing(false)}>
           <Image source={{ uri: url }} style={styles.photoFull} resizeMode="contain" />
@@ -294,10 +296,14 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
 
   return (
     <Animated.View
-      entering={isCelebration ? ZoomIn.springify().damping(14) : FadeInDown.duration(350)}
+      entering={
+        isCelebration
+          ? ZoomIn.springify().damping(motion.damping.pop)
+          : FadeInDown.duration(motion.duration.entrance)
+      }
       style={styles.eventCard}
     >
-      <TouchableOpacity
+      <AnimatedPressable
         style={styles.eventHeader}
         onPress={() => setExpanded((prev) => !prev)}
         disabled={event.user_id === userId}
@@ -309,14 +315,14 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           <Text style={styles.eventText}>{describeEvent(event)}</Text>
           <Text style={styles.eventTime}>{time}</Text>
         </View>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
       {typeof payload.photo_path === 'string' && <EventPhoto path={payload.photo_path} />}
 
       {event.user_id !== userId && expanded && (
         <View style={styles.nudgeRow}>
           {NUDGE_KINDS.map(({ kind, Icon: NudgeIcon, label }) => (
-            <TouchableOpacity
+            <AnimatedPressable
               key={kind}
               style={styles.nudgeButton}
               onPress={() => handleNudge(kind)}
@@ -325,14 +331,18 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
               accessibilityLabel={label}
               hitSlop={4}
             >
-              {sendingKind === kind ? <Text style={styles.nudgeButtonText}>…</Text> : <NudgeIcon width={18} height={18} color={theme.colors.primary} />}
-            </TouchableOpacity>
+              {sendingKind === kind ? (
+                <LoadingSpinner size={8} />
+              ) : (
+                <NudgeIcon width={18} height={18} color={theme.colors.primary} />
+              )}
+            </AnimatedPressable>
           ))}
         </View>
       )}
 
       {waterableGoalId && (
-        <TouchableOpacity
+        <AnimatedPressable
           style={styles.waterButton}
           onPress={handleWater}
           disabled={waterStreak.isPending}
@@ -340,29 +350,34 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
           accessibilityLabel="Water their streak"
         >
           {waterStreak.isPending ? (
-            <Text style={styles.waterButtonText}>Watering…</Text>
+            <View style={styles.waterButtonRow}>
+              <LoadingSpinner size={8} />
+              <Text style={styles.waterButtonText}>Watering</Text>
+            </View>
           ) : (
             <View style={styles.waterButtonRow}>
-              <WaterIcon width={14} height={14} color={theme.colors.primary} />
+              <WaterIcon width={16} height={16} color={theme.colors.primary} />
               <Text style={styles.waterButtonText}>Water their streak</Text>
             </View>
           )}
-        </TouchableOpacity>
+        </AnimatedPressable>
       )}
 
       {event.nudges.length > 0 && (
         <View style={styles.nudgeList}>
           {event.nudges.map((nudge) => (
-            <TouchableOpacity
+            <AnimatedPressable
+      accessibilityRole="button"
               key={nudge.id}
               onLongPress={() => handleNudgeOptions(nudge.id, nudge.from_user_id, nudge.profiles?.name ?? 'Someone')}
               delayLongPress={400}
+              accessibilityHint="Press and hold for reporting options"
             >
               <Text style={styles.nudgeMessage}>
                 <Text style={styles.nudgeSender}>{nudge.profiles?.name ?? 'Someone'}: </Text>
                 {nudge.message}
               </Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           ))}
         </View>
       )}
@@ -511,7 +526,7 @@ export default function TodayScreen() {
               );
             })}
             {hasNextPage && (
-              <TouchableOpacity
+              <AnimatedPressable
                 style={styles.loadMoreButton}
                 onPress={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
@@ -523,7 +538,7 @@ export default function TodayScreen() {
                 ) : (
                   <Text style={styles.loadMoreLabel}>Load more</Text>
                 )}
-              </TouchableOpacity>
+              </AnimatedPressable>
             )}
           </View>
         ) : (
@@ -542,44 +557,44 @@ export default function TodayScreen() {
 function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    page: { padding: 16 },
-    greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    greeting: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
-    date: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
-    sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
+    page: { padding: spacing.lg },
+    greetingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    greeting: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    date: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.lg },
+    sectionTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
     list: { gap: 10 },
-    dayHeader: { fontSize: 14, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+    dayHeader: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
     newDivider: {
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: 13,
+      fontFamily: fontFamily.bold,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
       color: colors.primary,
-      marginTop: 12,
+      marginTop: spacing.md,
       marginBottom: 2,
     },
     loadMoreButton: {
       alignSelf: 'center',
-      marginTop: 8,
-      paddingHorizontal: 16,
+      marginTop: spacing.sm,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
       borderRadius: radii.pill,
       backgroundColor: colors.inputBg,
     },
-    loadMoreLabel: { fontSize: 14, fontWeight: '700', color: colors.primary },
+    loadMoreLabel: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
     // Tertiary level: no card chrome - quiet rows on the screen background
     // with a hairline separator (design/REDESIGN.md §4).
     eventCard: {
       paddingVertical: 6,
       gap: 10,
-      borderBottomWidth: 0.5,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
     },
-    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
+    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     eventBody: { flex: 1, gap: 2 },
-    eventText: { fontSize: 16, lineHeight: 22, fontWeight: '600', color: colors.shellTitle },
-    eventTime: { fontSize: 13, color: colors.textSecondary },
+    eventText: { fontSize: 16, lineHeight: 22, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    eventTime: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     nudgeRow: { flexDirection: 'row', gap: 6 },
     nudgeButton: {
       backgroundColor: colors.inputBg,
@@ -589,7 +604,6 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
       justifyContent: 'center',
     },
-    nudgeButtonText: { fontSize: 16 },
     waterButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
@@ -598,23 +612,23 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
     },
     waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    waterButtonText: { fontSize: 14, fontWeight: '700', color: colors.primary },
-    nudgeList: { gap: 4 },
+    waterButtonText: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
+    nudgeList: { gap: spacing.xs },
     photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
     photoThumbLoading: { backgroundColor: colors.pillBg, alignItems: 'center', justifyContent: 'center' },
     photoOverlay: { flex: 1, backgroundColor: colors.overlayStrong, alignItems: 'center', justifyContent: 'center' },
     photoFull: { width: '100%', height: '80%' },
-    nudgeMessage: { fontSize: 14, lineHeight: 20, color: colors.textPrimary },
-    nudgeSender: { fontWeight: '700' },
+    nudgeMessage: { ...type.secondary, color: colors.textPrimary },
+    nudgeSender: { fontFamily: fontFamily.bold },
     emptyCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 24,
+      padding: spacing.xxl,
       alignItems: 'center',
       gap: 6,
       ...shadow,
     },
-    emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
-    emptyBody: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+    emptyTitle: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    emptyBody: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
   });
 }

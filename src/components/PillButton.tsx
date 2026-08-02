@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { StyleSheet, Text, ViewStyle } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -19,6 +20,7 @@ export function PillButton({ label, onPress, loading, disabled, variant = 'solid
   const isOutline = variant === 'outline';
   return (
     <AnimatedPressable
+      accessibilityRole="button"
       style={[styles.base, isOutline ? styles.outline : styles.solid, style]}
       onPress={onPress}
       disabled={disabled || loading}
@@ -36,13 +38,13 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     base: {
       borderRadius: radii.pill,
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       alignItems: 'center',
       justifyContent: 'center',
     },
     solid: { backgroundColor: colors.primary },
-    solidText: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
+    solidText: { color: colors.onAccent, fontSize: 16, fontFamily: fontFamily.bold },
     outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
-    outlineText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
+    outlineText: { color: colors.primary, fontSize: 16, fontFamily: fontFamily.bold },
   });
 }

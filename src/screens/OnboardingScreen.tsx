@@ -1,3 +1,5 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Image,
@@ -6,9 +8,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  Text, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { requestPasswordReset, signIn, signInWithApple, signInWithGoogle, signUp } from '../lib/auth';
@@ -168,9 +168,10 @@ function AuthStep() {
           loading={resetSubmitting}
           disabled={!email.trim()}
         />
-        <TouchableOpacity onPress={() => setForgotPasswordMode(false)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setForgotPasswordMode(false)}>
           <Text style={styles.link}>Back to sign in</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
     );
   }
@@ -197,9 +198,10 @@ function AuthStep() {
       />
 
       {mode === 'signIn' && (
-        <TouchableOpacity onPress={() => setForgotPasswordMode(true)} style={{ alignSelf: 'flex-end' }}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setForgotPasswordMode(true)} style={{ alignSelf: 'flex-end' }}>
           <Text style={styles.link}>Forgot password?</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       )}
 
       {error && <Text style={styles.error}>{error}</Text>}
@@ -208,7 +210,7 @@ function AuthStep() {
         label={mode === 'signUp' ? 'Sign up' : 'Sign in'}
         onPress={handleSubmit}
         loading={submitting}
-        style={{ marginTop: 8 }}
+        style={{ marginTop: spacing.sm }}
       />
 
       <Text style={styles.orDivider}>or</Text>
@@ -234,11 +236,12 @@ function AuthStep() {
         />
       )}
 
-      <TouchableOpacity onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => setMode(mode === 'signUp' ? 'signIn' : 'signUp')}>
         <Text style={styles.link}>
           {mode === 'signUp' ? 'Already have an account? Sign in' : 'New here? Create an account'}
         </Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
 
       {mode === 'signUp' && (
         <Text style={styles.legalNote}>
@@ -276,9 +279,10 @@ function InterestsStep() {
         loading={setInterests.isPending}
         disabled={selected.length === 0}
       />
-      <TouchableOpacity onPress={() => setInterests.mutate([])} disabled={setInterests.isPending}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => setInterests.mutate([])} disabled={setInterests.isPending}>
         <Text style={styles.link}>Skip for now</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }
@@ -315,9 +319,10 @@ function ThemeStep() {
     <View style={styles.form}>
       <ThemePicker accent={accent} mode={mode} onChangeAccent={setAccent} onChangeMode={setMode} />
       <PillButton label="Continue" onPress={() => finish(false)} loading={saving} />
-      <TouchableOpacity onPress={() => finish(true)} disabled={saving}>
+      <AnimatedPressable
+      accessibilityRole="button" onPress={() => finish(true)} disabled={saving}>
         <Text style={styles.link}>Skip for now</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     </View>
   );
 }
@@ -549,29 +554,29 @@ export default function OnboardingScreen() {
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    body: { padding: 24, paddingTop: 28 },
+    body: { padding: spacing.xxl, paddingTop: 28 },
     form: { gap: 14 },
-    confirmTitle: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' },
-    confirmBody: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+    confirmTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    confirmBody: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
     inviteCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       alignItems: 'center',
       ...shadow,
     },
-    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-    inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
-    title: { fontSize: 28, fontWeight: '800', color: colors.onAccent, marginTop: 12 },
-    subtitle: { fontSize: 14, color: colors.onAccentMuted, marginTop: 4 },
-    link: { textAlign: 'center', marginTop: 4, color: colors.primary, fontWeight: '600' },
-    legalNote: { textAlign: 'center', marginTop: 16, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
-    legalLink: { color: colors.primary, fontWeight: '600', textDecorationLine: 'underline' },
+    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontFamily: fontFamily.semibold },
+    inviteCode: { fontSize: 28, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    title: { fontSize: 28, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md },
+    subtitle: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.onAccentMuted, marginTop: spacing.xs },
+    link: { textAlign: 'center', marginTop: spacing.xs, color: colors.primary, fontFamily: fontFamily.semibold },
+    legalNote: { textAlign: 'center', marginTop: spacing.lg, fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 17 },
+    legalLink: { color: colors.primary, fontFamily: fontFamily.semibold, textDecorationLine: 'underline' },
     orDivider: { textAlign: 'center', color: colors.textSecondary },
     appleButton: { height: 50, marginTop: -2 },
-    soloNote: { textAlign: 'center', fontSize: 12, color: colors.textSecondary, marginTop: -6 },
+    soloNote: { textAlign: 'center', fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: -6 },
     error: { color: colors.danger, textAlign: 'center' },
-    stepDots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 24 },
+    stepDots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.xxl },
     stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     stepDotActive: { backgroundColor: colors.primary, width: 20 },
   });

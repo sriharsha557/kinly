@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMyLetters, useOpenLetter, useWriteLetter } from '../hooks/useFutureSelf';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -69,7 +71,8 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
 
   if (!letter.opened_at && !revealed) {
     return (
-      <TouchableOpacity
+      <AnimatedPressable
+      accessibilityRole="button"
         style={[styles.letterRow, styles.letterRowInline]}
         onPress={() => {
           setRevealed(true);
@@ -78,7 +81,7 @@ function LetterRow({ letter, userId }: { letter: FutureLetter; userId: string })
       >
         <CelebrateIcon width={16} height={16} color={theme.colors.primary} />
         <Text style={styles.letterReady}>A letter from your past self is ready — tap to read</Text>
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   }
 
@@ -103,13 +106,14 @@ export function FutureSelfCard({ userId }: { userId: string }) {
           <MailIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Future Self</Text>
         </View>
-        <TouchableOpacity onPress={() => setWriting(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setWriting(true)}>
           <Text style={styles.newLink}>+ Write</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {letters && letters.length > 0 ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: spacing.sm }}>
           {letters.map((letter) => (
             <LetterRow key={letter.id} letter={letter} userId={userId} />
           ))}
@@ -127,45 +131,45 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 16,
+      padding: spacing.lg,
       paddingLeft: 14,
-      marginTop: 12,
+      marginTop: spacing.md,
       gap: 10,
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
-    newLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
-    empty: { fontSize: 12, color: colors.textSecondary },
-    letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
-    letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    letterMeta: { fontSize: 11, color: colors.textSecondary },
-    letterReady: { fontSize: 13, fontWeight: '700', color: colors.primary },
-    letterContent: { fontSize: 13, color: colors.textPrimary, lineHeight: 18 },
+    title: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    newLink: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    letterRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: spacing.md, gap: spacing.xs },
+    letterRowInline: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    letterMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    letterReady: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    letterContent: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textPrimary, lineHeight: 18 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 18, fontWeight: '800', color: colors.textPrimary },
-    modalHint: { fontSize: 12, color: colors.textSecondary },
+    modalTitle: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalHint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 14,
+      fontSize: 14, fontFamily: fontFamily.regular,
       minHeight: 120,
       textAlignVertical: 'top',
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

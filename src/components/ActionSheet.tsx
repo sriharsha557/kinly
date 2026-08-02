@@ -1,3 +1,5 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
@@ -39,7 +41,7 @@ export function ActionSheet({
           {message && <Text style={styles.message}>{message}</Text>}
           <View style={styles.options}>
             {options.map((option) => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={option.label}
                 style={styles.option}
                 onPress={option.onPress}
@@ -48,12 +50,12 @@ export function ActionSheet({
                 <Text style={[styles.optionText, option.destructive && styles.optionTextDestructive]}>
                   {option.label}
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
-          <TouchableOpacity style={[styles.option, styles.cancelOption]} onPress={onCancel} accessibilityRole="button">
+          <AnimatedPressable style={[styles.option, styles.cancelOption]} onPress={onCancel} accessibilityRole="button">
             <Text style={styles.cancelText}>{cancelLabel}</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>
@@ -68,9 +70,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.background,
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
-      padding: 24,
+      padding: spacing.xxl,
       paddingBottom: 36,
-      gap: 4,
+      gap: spacing.xs,
       ...shadow,
     },
     sheetHandle: {
@@ -79,19 +81,19 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       borderRadius: 2,
       backgroundColor: colors.border,
       alignSelf: 'center',
-      marginBottom: 16,
+      marginBottom: spacing.lg,
     },
-    title: { fontSize: 17, fontWeight: '700', color: colors.shellTitle, textAlign: 'center' },
-    message: { fontSize: 13, color: colors.shellSecondary, textAlign: 'center', marginTop: 4 },
-    options: { marginTop: 16, gap: 4 },
+    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.shellTitle, textAlign: 'center' },
+    message: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: spacing.xs },
+    options: { marginTop: spacing.lg, gap: spacing.xs },
     option: {
       borderRadius: radii.input,
       paddingVertical: 14,
       alignItems: 'center',
     },
-    optionText: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
+    optionText: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     optionTextDestructive: { color: colors.danger },
     cancelOption: { marginTop: 10, backgroundColor: colors.inputBg },
-    cancelText: { fontSize: 16, fontWeight: '600', color: colors.textSecondary },
+    cancelText: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

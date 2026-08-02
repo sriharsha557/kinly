@@ -7,6 +7,7 @@ import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoal
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -93,7 +94,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
       ) : pending.length === 0 ? (
-        <Animated.Text entering={ZoomIn.springify().damping(14)} style={styles.done}>
+        <Animated.Text entering={ZoomIn.springify().damping(motion.damping.pop)} style={styles.done}>
           ✓ Everything logged for today. Nice work.
         </Animated.Text>
       ) : (
@@ -103,18 +104,22 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
             return (
               <Animated.View
                 key={goal.id}
-                entering={FadeInDown.duration(300).delay(index * 50)}
-                exiting={FadeOutRight.duration(250)}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)}
+                exiting={FadeOutRight.duration(motion.duration.quick)}
                 layout={LinearTransition.springify()}
               >
                 <AnimatedPressable
+      accessibilityRole="button"
                   style={styles.row}
                   onPress={() => handleLog(goal.id)}
                   disabled={checked || (isPending && loggingId === goal.id)}
                 >
                   <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
                     {checked ? (
-                      <Animated.Text entering={ZoomIn.springify().damping(9)} style={styles.checkmark}>
+                      <Animated.Text
+                        entering={ZoomIn.springify().damping(motion.damping.celebrate)}
+                        style={styles.checkmark}
+                      >
                         ✓
                       </Animated.Text>
                     ) : (
@@ -151,18 +156,18 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 16,
-      marginBottom: 16,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
       gap: 10,
       ...shadow,
     },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-    progressCount: { fontSize: 13, fontWeight: '700', color: colors.primary },
-    empty: { fontSize: 14, lineHeight: 20, color: colors.textSecondary },
-    done: { fontSize: 14, fontWeight: '600', color: colors.success },
-    list: { gap: 8 },
-    row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
+    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    progressCount: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    empty: { ...type.secondary, color: colors.textSecondary },
+    done: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.success },
+    list: { gap: spacing.sm },
+    row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     checkbox: {
       width: 28,
       height: 28,
@@ -173,11 +178,11 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-    checkmark: { color: colors.onAccent, fontSize: 13, fontWeight: '800' },
-    checkboxLoading: { fontSize: 12, color: colors.primary },
+    checkmark: { color: colors.onAccent, fontSize: 13, fontFamily: fontFamily.bold },
+    checkboxLoading: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.primary },
     rowBody: { flex: 1, gap: 1 },
-    rowText: { fontSize: 16, color: colors.textPrimary },
+    rowText: { fontSize: 16, fontFamily: fontFamily.regular, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
-    rowContext: { fontSize: 13, color: colors.textSecondary },
+    rowContext: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }

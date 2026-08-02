@@ -7,6 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
@@ -32,8 +33,13 @@ export function QuickActionsRow() {
   return (
     <View style={styles.row}>
       {ACTIONS.map(({ label, icon: Icon, tab }, index) => (
-        <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
-          <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
+        <Animated.View
+          key={tab}
+          entering={FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)}
+          style={{ flex: 1 }}
+        >
+          <AnimatedPressable
+      accessibilityRole="button" style={styles.action} onPress={() => navigation.navigate(tab)}>
             <Icon width={22} height={22} color={theme.colors.primary} />
             <Text style={styles.label}>{label}</Text>
           </AnimatedPressable>
@@ -45,7 +51,7 @@ export function QuickActionsRow() {
 
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    row: { flexDirection: 'row', gap: 10, marginBottom: spacing.xl },
     action: {
       backgroundColor: colors.surface,
       borderRadius: radii.input,
@@ -54,6 +60,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 6,
       ...shadow,
     },
-    label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
+    label: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, textAlign: 'center' },
   });
 }

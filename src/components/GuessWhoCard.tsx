@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
@@ -45,7 +47,8 @@ function NewFactModal({
           <Text style={styles.pickLabel}>Who is it about?</Text>
           <View style={styles.memberChips}>
             {members?.filter((m) => m.status === 'active').map((m) => (
-              <TouchableOpacity
+              <AnimatedPressable
+      accessibilityRole="button"
                 key={m.user_id}
                 style={[styles.chip, answerUserId === m.user_id && styles.chipActive]}
                 onPress={() => setAnswerUserId(m.user_id)}
@@ -53,7 +56,7 @@ function NewFactModal({
                 <Text style={[styles.chipText, answerUserId === m.user_id && styles.chipTextActive]}>
                   {m.profiles?.name ?? 'Member'}
                 </Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
           <View style={styles.modalButtons}>
@@ -98,13 +101,14 @@ function GuessWhoPostRow({
             {members
               ?.filter((m) => m.user_id !== post.created_by)
               .map((m) => (
-                <TouchableOpacity
+                <AnimatedPressable
+      accessibilityRole="button"
                   key={m.user_id}
                   style={styles.chip}
                   onPress={() => submitGuess.mutate({ postId: post.id, userId, guessedUserId: m.user_id })}
                 >
                   <Text style={styles.chipText}>{m.profiles?.name ?? 'Member'}</Text>
-                </TouchableOpacity>
+                </AnimatedPressable>
               ))}
           </View>
         </View>
@@ -136,9 +140,10 @@ export function GuessWhoCard({ circleId, userId }: { circleId: string; userId: s
           <MasksIcon width={18} height={18} color={theme.colors.textSecondary} />
           <Text style={styles.title}>Guess Who</Text>
         </View>
-        <TouchableOpacity onPress={() => setCreating(true)}>
+        <AnimatedPressable
+      accessibilityRole="button" onPress={() => setCreating(true)}>
           <Text style={styles.newLink}>+ New</Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {posts && posts.length > 0 ? (
@@ -160,19 +165,19 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-    empty: { fontSize: 13, color: colors.shellSecondary },
-    hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 6 },
-    postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
-    fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 6 },
+    postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: spacing.md, gap: spacing.sm },
+    fact: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, fontStyle: 'italic' },
     memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: {
       backgroundColor: colors.inputBg,
@@ -181,32 +186,32 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 5,
     },
     chipActive: { backgroundColor: colors.primary },
-    chipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    chipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     chipTextActive: { color: colors.onAccent },
-    revealed: { fontSize: 13, fontWeight: '700', color: colors.success },
-    guessCount: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+    revealed: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.success },
+    guessCount: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    pickLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    pickLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

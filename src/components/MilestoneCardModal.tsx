@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing } from '../theme/colors';
 
 // Same brand mark used in OnboardingScreen's header - Logo.tsx's old
 // "friendly face" primitive was still showing up here too.
@@ -41,10 +42,10 @@ export function MilestoneCardModal({
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <Animated.View entering={FadeIn.duration(200)} style={styles.overlay}>
-        <Animated.View entering={ZoomIn.springify().damping(13).delay(80)}>
+      <Animated.View entering={FadeIn.duration(motion.duration.base)} style={styles.overlay}>
+        <Animated.View entering={ZoomIn.springify().damping(motion.damping.pop).delay(80)}>
           <LinearGradient colors={theme.gradients.achievement} style={styles.card} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-            <Animated.View entering={ZoomIn.springify().damping(10).delay(200)}>
+            <Animated.View entering={ZoomIn.springify().damping(motion.damping.celebrate).delay(200)}>
               <Image source={BRAND_MARK} style={{ height: 56, width: 56 * BRAND_MARK_RATIO }} resizeMode="contain" />
             </Animated.View>
             <Text style={styles.title}>{title}</Text>
@@ -52,7 +53,7 @@ export function MilestoneCardModal({
             {circleName && <Text style={styles.circle}>{circleName}</Text>}
           </LinearGradient>
         </Animated.View>
-        <Animated.View entering={FadeIn.duration(300).delay(250)} style={styles.actions}>
+        <Animated.View entering={FadeIn.duration(motion.duration.entrance).delay(250)} style={styles.actions}>
           <PillButton label={shareLabel ?? 'Share'} onPress={handleShare} style={{ flex: 1 }} />
           <PillButton label="Close" variant="outline" onPress={onClose} style={{ flex: 1 }} />
         </Animated.View>
@@ -67,18 +68,18 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
-      gap: 16,
+      padding: spacing.xxl,
+      gap: spacing.lg,
     },
     card: {
       borderRadius: radii.card,
-      padding: 32,
+      padding: spacing.section,
       alignItems: 'center',
       gap: 10,
     },
-    title: { fontSize: 22, fontWeight: '800', color: colors.onAccent, textAlign: 'center', marginTop: 8 },
-    subtitle: { fontSize: 14, color: colors.onAccentMuted, textAlign: 'center' },
-    circle: { fontSize: 12, color: colors.onAccentFaint, marginTop: 8 },
+    title: { fontSize: 22, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center', marginTop: spacing.sm },
+    subtitle: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.onAccentMuted, textAlign: 'center' },
+    circle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.onAccentFaint, marginTop: spacing.sm },
     actions: { flexDirection: 'row', gap: 10 },
   });
 }

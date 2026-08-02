@@ -1,3 +1,5 @@
+import { AnimatedPressable } from '../components/AnimatedPressable';
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import {
   Modal,
@@ -5,9 +7,7 @@ import {
   Share,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../state/useAuthStore';
@@ -51,13 +51,14 @@ function RoleChip({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
-    <TouchableOpacity
+    <AnimatedPressable
+      accessibilityRole="button"
       style={[styles.roleChip, active && styles.roleChipActive]}
       onPress={onPress}
       disabled={!onPress}
     >
       <Text style={[styles.roleChipText, active && styles.roleChipTextActive]}>{role}</Text>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
@@ -116,7 +117,7 @@ function JoinOrCreateModal({
             <Text style={styles.askOwnerText}>
               {"The circle owner needs to approve it - you'll be notified once you're in."}
             </Text>
-            <PillButton label="Done" onPress={onClose} style={{ marginTop: 4 }} />
+            <PillButton label="Done" onPress={onClose} style={{ marginTop: spacing.xs }} />
           </View>
         </View>
       </Modal>
@@ -158,9 +159,10 @@ function JoinOrCreateModal({
             disabled={!inviteCode.trim()}
           />
           {error && <Text style={styles.error}>{error}</Text>}
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 4 }}>
+          <AnimatedPressable
+      accessibilityRole="button" onPress={onClose} style={{ marginTop: spacing.xs }}>
             <Text style={styles.cancelLink}>Cancel</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </View>
       </View>
     </Modal>
@@ -225,12 +227,12 @@ export default function CircleSettingsScreen() {
           <View style={styles.inviteCard}>
             <Text style={styles.inviteLabel}>Invite code</Text>
             <Text style={styles.inviteCode}>{circle?.invite_code}</Text>
-            <PillButton label="Share via WhatsApp" onPress={handleShareWhatsApp} style={{ marginTop: 12 }} />
+            <PillButton label="Share via WhatsApp" onPress={handleShareWhatsApp} style={{ marginTop: spacing.md }} />
             <PillButton
               label="Other apps"
               variant="outline"
               onPress={handleShareOther}
-              style={{ marginTop: 8 }}
+              style={{ marginTop: spacing.sm }}
             />
           </View>
         ) : (
@@ -298,7 +300,8 @@ export default function CircleSettingsScreen() {
             <Text style={styles.sectionTitle}>Your Circles</Text>
             <View style={styles.memberList}>
               {myCircles.map((c) => (
-                <TouchableOpacity
+                <AnimatedPressable
+      accessibilityRole="button"
                   key={c.id}
                   style={[styles.circleRow, c.id === circleId && styles.circleRowActive]}
                   onPress={() => setActiveCircleId(c.id)}
@@ -309,7 +312,7 @@ export default function CircleSettingsScreen() {
                     {c.name}
                   </Text>
                   {c.id === circleId && <Text style={styles.circleRowActiveTag}>Active</Text>}
-                </TouchableOpacity>
+                </AnimatedPressable>
               ))}
             </View>
           </>
@@ -355,7 +358,7 @@ export default function CircleSettingsScreen() {
           label="Join or start another circle"
           variant="outline"
           onPress={() => setShowJoinCreate(true)}
-          style={{ marginTop: 20 }}
+          style={{ marginTop: spacing.xl }}
         />
         <PillButton
           label="Leave this circle"
@@ -395,20 +398,20 @@ export default function CircleSettingsScreen() {
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { padding: 20, paddingBottom: 40 },
-    circleName: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, marginBottom: 16 },
+    content: { padding: spacing.xl, paddingBottom: spacing.hero },
+    circleName: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.lg },
     inviteCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       alignItems: 'center',
       ...shadow,
     },
-    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-    inviteCode: { fontSize: 28, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 6 },
-    askOwnerText: { fontSize: 14, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
-    requestBtn: { paddingHorizontal: 16, paddingVertical: 8 },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
+    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontFamily: fontFamily.semibold },
+    inviteCode: { fontSize: 28, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    askOwnerText: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: spacing.sm, textAlign: 'center' },
+    requestBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+    sectionTitle: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: 28, marginBottom: spacing.md },
     memberList: { gap: 10 },
     memberRow: {
       backgroundColor: colors.surface,
@@ -417,7 +420,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 10,
       ...shadow,
     },
-    memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    memberName: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     roleChips: { flexDirection: 'row', gap: 6 },
     roleChip: {
       backgroundColor: colors.inputBg,
@@ -426,7 +429,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingVertical: 5,
     },
     roleChipActive: { backgroundColor: colors.primary },
-    roleChipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary, textTransform: 'capitalize' },
+    roleChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary, textTransform: 'capitalize' },
     roleChipTextActive: { color: colors.onAccent },
     circleRow: {
       backgroundColor: colors.surface,
@@ -438,9 +441,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     circleRowActive: { borderWidth: 1.5, borderColor: colors.primary },
-    circleRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    circleRowText: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     circleRowTextActive: { color: colors.primary },
-    circleRowActiveTag: { fontSize: 11, fontWeight: '700', color: colors.primary },
+    circleRowActiveTag: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
     notifyRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -450,34 +453,34 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       ...shadow,
     },
-    notifyLabel: { fontSize: 14, fontWeight: '600', color: colors.textPrimary, flex: 1 },
+    notifyLabel: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
     notifyLabelCol: { flex: 1, gap: 1 },
     // 13 is the type floor in design/PRINCIPLES.md, which supersedes the
     // plan's 12 for any new copy.
-    notifyHint: { fontSize: 13, color: colors.textSecondary },
+    notifyHint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
     orDivider: { textAlign: 'center', color: colors.textSecondary },
-    cancelLink: { textAlign: 'center', color: colors.textSecondary, fontWeight: '600' },
+    cancelLink: { textAlign: 'center', color: colors.textSecondary, fontFamily: fontFamily.semibold },
     error: { color: colors.danger, textAlign: 'center' },
   });
 }

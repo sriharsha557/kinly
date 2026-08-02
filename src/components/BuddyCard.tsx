@@ -1,5 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
+import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useMyBuddy, useSetBuddy, useCheckInOnBuddy } from '../hooks/useBuddy';
 import { useCircleMembers } from '../hooks/useCircles';
@@ -41,12 +43,13 @@ function PickBuddyModal({
             <Text style={styles.empty}>No other members in this circle yet.</Text>
           ) : (
             others.map((m) => (
-              <TouchableOpacity key={m.user_id} style={styles.memberRow} onPress={() => handlePick(m.user_id)}>
+              <AnimatedPressable
+      accessibilityRole="button" key={m.user_id} style={styles.memberRow} onPress={() => handlePick(m.user_id)}>
                 <Text style={styles.memberName}>{m.profiles?.name ?? 'Member'}</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))
           )}
-          <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ marginTop: 8 }} />
+          <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ marginTop: spacing.sm }} />
         </View>
       </View>
     </Modal>
@@ -121,12 +124,13 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
               variant="outline"
               onPress={handleWater}
               loading={waterStreak.isPending}
-              style={{ marginTop: 8 }}
+              style={{ marginTop: spacing.sm }}
             />
           )}
-          <TouchableOpacity onPress={() => setPicking(true)} style={{ marginTop: 8 }}>
+          <AnimatedPressable
+      accessibilityRole="button" onPress={() => setPicking(true)} style={{ marginTop: spacing.sm }}>
             <Text style={styles.changeLink}>Change buddy</Text>
-          </TouchableOpacity>
+          </AnimatedPressable>
         </>
       ) : (
         <>
@@ -144,35 +148,35 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    buddyName: { fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-    status: { fontSize: 14, lineHeight: 20, color: colors.shellSecondary, marginTop: 2 },
-    changeLink: { fontSize: 14, fontWeight: '600', color: colors.primary },
-    empty: { fontSize: 14, lineHeight: 20, color: colors.shellSecondary, marginTop: 6 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    buddyName: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm },
+    status: { ...type.secondary, color: colors.shellSecondary, marginTop: 2 },
+    changeLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.primary },
+    empty: { ...type.secondary, color: colors.shellSecondary, marginTop: 6 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 8,
+      padding: spacing.xl,
+      gap: spacing.sm,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 6 },
     memberRow: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
     },
-    memberName: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    memberName: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
   });
 }

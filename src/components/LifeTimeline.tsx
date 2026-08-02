@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { SvgProps } from 'react-native-svg';
 import { useLifeTimeline, type TimelineEntry } from '../hooks/useLifeTimeline';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 
@@ -73,7 +74,9 @@ export function LifeTimeline({ userId }: { userId: string }) {
             return (
               <Animated.View
                 key={entry.id}
-                entering={FadeInDown.duration(300).delay(index * 30)}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(
+                Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+              )}
                 style={styles.row}
               >
                 <View style={styles.iconBubble}>
@@ -94,16 +97,16 @@ export function LifeTimeline({ userId }: { userId: string }) {
 
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    container: { gap: 20 },
+    container: { gap: spacing.xl },
     group: { gap: 10 },
-    monthHeader: { fontSize: 13, fontWeight: '700', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.4 },
+    monthHeader: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
     row: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 12,
+      padding: spacing.md,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: spacing.md,
       ...shadow,
     },
     iconBubble: {
@@ -115,15 +118,15 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.inputBg,
     },
     rowBody: { flex: 1, gap: 2 },
-    entryTitle: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
-    entryDate: { fontSize: 11, color: colors.textSecondary },
+    entryTitle: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    entryDate: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     emptyCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       alignItems: 'center',
       ...shadow,
     },
-    emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center' },
+    emptyText: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
   });
 }

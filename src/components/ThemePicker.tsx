@@ -1,6 +1,7 @@
+import { AnimatedPressable } from './AnimatedPressable';
 import { useMemo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { accents, ACCENT_OPTIONS, type AccentId, type ThemeMode } from '../theme/colors';
+import { StyleSheet, Text, View } from 'react-native';
+import { ACCENT_OPTIONS, accents, fontFamily, spacing, type AccentId, type ThemeMode } from '../theme/colors';
 import { useTheme } from '../theme/ThemeProvider';
 
 const MODE_OPTIONS: { id: ThemeMode; label: string }[] = [
@@ -33,7 +34,7 @@ export function ThemePicker({
         {ACCENT_OPTIONS.map(({ id, label }) => {
           const active = accent === id;
           return (
-            <TouchableOpacity
+            <AnimatedPressable
               key={id}
               style={styles.swatchItem}
               onPress={() => onChangeAccent(id)}
@@ -45,7 +46,7 @@ export function ThemePicker({
                 <View style={[styles.swatch, { backgroundColor: accents[id].primary }]} />
               </View>
               <Text style={[styles.swatchLabel, active && styles.swatchLabelActive]}>{label}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           );
         })}
       </View>
@@ -55,7 +56,7 @@ export function ThemePicker({
         {MODE_OPTIONS.map(({ id, label }) => {
           const active = mode === id;
           return (
-            <TouchableOpacity
+            <AnimatedPressable
               key={id}
               style={[styles.modeChip, active && styles.modeChipActive]}
               onPress={() => onChangeMode(id)}
@@ -64,7 +65,7 @@ export function ThemePicker({
               accessibilityLabel={`${label} appearance`}
             >
               <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>{label}</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           );
         })}
       </View>
@@ -75,9 +76,9 @@ export function ThemePicker({
 function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrap: { gap: 10 },
-    label: { fontSize: 13, fontWeight: '700', color: colors.textSecondary },
-    swatchRow: { flexDirection: 'row', gap: 16 },
-    swatchItem: { alignItems: 'center', gap: 4, minWidth: 56 },
+    label: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    swatchRow: { flexDirection: 'row', gap: spacing.lg },
+    swatchItem: { alignItems: 'center', gap: spacing.xs, minWidth: 56 },
     swatchRing: {
       width: 44,
       height: 44,
@@ -88,9 +89,9 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     swatch: { width: 30, height: 30, borderRadius: 15 },
-    swatchLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    swatchLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     swatchLabelActive: { color: colors.textPrimary },
-    modeRow: { flexDirection: 'row', gap: 8 },
+    modeRow: { flexDirection: 'row', gap: spacing.sm },
     modeChip: {
       flex: 1,
       minHeight: 44,
@@ -100,7 +101,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.surfaceSubtle,
     },
     modeChipActive: { backgroundColor: colors.primary },
-    modeChipText: { fontSize: 13, fontWeight: '600', color: colors.textPrimary },
+    modeChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     modeChipTextActive: { color: colors.onAccent },
   });
 }

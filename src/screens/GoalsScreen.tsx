@@ -6,9 +6,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  TextInput, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -30,6 +28,7 @@ import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -140,14 +139,14 @@ function GoalCard({
             </View>
           )}
           {isMine && (
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={() => setMenuOpen(true)}
               hitSlop={12}
               accessibilityRole="button"
               accessibilityLabel={`Options for ${goal.title}`}
             >
               <Text style={styles.optionsButton}>⋯</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
           )}
         </View>
       </View>
@@ -183,14 +182,16 @@ function GoalCard({
         </Text>
         {isComplete ? (
           <View style={styles.doneRow}>
-            <ToggleSwitch value onValueChange={() => {}} />
+            {/* Celebration, not a control - the heart pops when a goal hits
+                its target. "Completed" beside it carries the meaning. */}
+            <ToggleSwitch value decorative />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
         ) : isHealthStepsGoal && isConnected ? (
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={handleLogWithPhoto}
               disabled={isPending}
               hitSlop={13}
@@ -198,8 +199,9 @@ function GoalCard({
               accessibilityLabel="Log progress with a photo"
             >
               <CameraIcon width={18} height={18} color={theme.colors.primary} />
-            </TouchableOpacity>
-            <AnimatedPressable style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
+            </AnimatedPressable>
+            <AnimatedPressable
+      accessibilityRole="button" style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
               <Text style={styles.logButtonText}>Log progress</Text>
             </AnimatedPressable>
           </View>
@@ -323,7 +325,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           value={target}
           onChangeText={setTarget}
         />
-        <TouchableOpacity
+        <AnimatedPressable
           style={[styles.addButton, !canAdd && styles.addButtonDisabled]}
           onPress={handleAdd}
           disabled={!canAdd}
@@ -334,7 +336,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
           <Text style={[styles.addButtonText, !canAdd && styles.addButtonTextDisabled]}>
             {createGoal.isPending ? 'Adding…' : 'Add goal'}
           </Text>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
       {/* One-accent rule: resting chips are neutral with monochrome icons;
           only the selected chip takes the user's accent. */}
@@ -386,7 +388,7 @@ export default function GoalsScreen() {
       {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
 
       {isLoading ? (
-        <View style={{ marginTop: 4 }}>
+        <View style={{ marginTop: spacing.xs }}>
           <GoalCardSkeleton />
           <GoalCardSkeleton />
           <GoalCardSkeleton />
@@ -397,7 +399,11 @@ export default function GoalsScreen() {
           keyExtractor={(goal) => goal.id}
           renderItem={({ item, index }) =>
             userId && circleId ? (
-              <Animated.View entering={FadeInDown.duration(350).delay(Math.min(index, 6) * 60)}>
+              <Animated.View
+          entering={FadeInDown.duration(motion.duration.entrance).delay(
+            Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+          )}
+        >
                 <GoalCard
                   goal={item}
                   circleId={circleId}
@@ -420,33 +426,33 @@ export default function GoalsScreen() {
 
 function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: colors.background },
-    title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-    addGoalWrap: { marginBottom: 16, gap: 12 },
+    container: { flex: 1, padding: spacing.lg, backgroundColor: colors.background },
+    title: { ...type.title, color: colors.textPrimary, marginBottom: spacing.md },
+    addGoalWrap: { marginBottom: spacing.lg, gap: spacing.md },
     form: { gap: 6 },
-    fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
-    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    fieldLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
+    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categoryChip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
       minHeight: 48,
       borderRadius: radii.pill,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
     },
-    categoryChipLabel: { fontSize: 14, fontWeight: '600' },
+    categoryChipLabel: { ...type.secondary, fontFamily: fontFamily.semibold },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       minHeight: 52,
       color: colors.textPrimary,
     },
     addButton: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 52,
       justifyContent: 'center',
       alignItems: 'center',
@@ -456,69 +462,74 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // colors.primary for things you can actually act on, and a faded accent
     // still reads as the primary action.
     addButtonDisabled: { backgroundColor: colors.surfaceSubtle },
-    addButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
+    addButtonText: { ...type.body, color: colors.onAccent, fontFamily: fontFamily.bold },
     addButtonTextDisabled: { color: colors.textSecondary },
-    list: { gap: 12 },
+    list: { gap: spacing.md },
     card: {
       ...cardShell,
-      padding: 16,
+      padding: spacing.lg,
       gap: 10,
     },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-    streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
-    optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    // The goal title is the object this whole card is about - it reads as the
+    // card's heading, not as body text alongside the meta row.
+    cardTitle: { ...type.subheading, color: colors.textPrimary, flex: 1 },
+    streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    streak: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     autoBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
       gap: 6,
-      marginTop: 8,
+      marginTop: spacing.sm,
       paddingLeft: 10,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    autoBadgeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    autoBadgeText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
-    autoBadgeUndoText: { fontSize: 13, color: colors.textSecondary },
+    autoBadgeUndoText: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    cardMeta: { fontSize: 13, color: colors.textSecondary },
+    // Progress and the social line are secondary body, not captions - they're
+    // read, not glanced at.
+    cardMeta: { ...type.secondary, color: colors.textSecondary },
     doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
-    syncedLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    doneBadge: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.success },
+    syncedLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     logButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
     },
-    logButtonText: { fontSize: 14, fontWeight: '700', color: colors.primaryPressed },
-    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+    // Matches PillButton's label size - a button is a button wherever it is.
+    logButtonText: { ...type.body, fontFamily: fontFamily.bold, color: colors.primaryPressed },
+    empty: { ...type.secondary, textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

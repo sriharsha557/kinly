@@ -53,7 +53,17 @@
           "backgroundColor": "#FBF7F2"
         }
       ],
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Inter-Regular.ttf",
+            "./assets/fonts/Inter-Medium.ttf",
+            "./assets/fonts/Inter-SemiBold.ttf",
+            "./assets/fonts/Inter-Bold.ttf"
+          ]
+        }
+      ],
       "expo-web-browser",
       "@sentry/react-native",
       "expo-video",
