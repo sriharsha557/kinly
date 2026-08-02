@@ -28,7 +28,7 @@ import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, motion, spacing } from '../theme/colors';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -425,10 +425,10 @@ export default function GoalsScreen() {
 function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, padding: spacing.lg, backgroundColor: colors.background },
-    title: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
+    title: { ...type.title, color: colors.textPrimary, marginBottom: spacing.md },
     addGoalWrap: { marginBottom: spacing.lg, gap: spacing.md },
     form: { gap: 6 },
-    fieldLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
+    fieldLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
     categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categoryChip: {
       flexDirection: 'row',
@@ -439,7 +439,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.sm,
     },
-    categoryChipLabel: { fontSize: 14, fontFamily: fontFamily.semibold },
+    categoryChipLabel: { ...type.secondary, fontFamily: fontFamily.semibold },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
@@ -460,7 +460,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // colors.primary for things you can actually act on, and a faded accent
     // still reads as the primary action.
     addButtonDisabled: { backgroundColor: colors.surfaceSubtle },
-    addButtonText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 15 },
+    addButtonText: { ...type.body, color: colors.onAccent, fontFamily: fontFamily.bold },
     addButtonTextDisabled: { color: colors.textSecondary },
     list: { gap: spacing.md },
     card: {
@@ -470,9 +470,11 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    cardTitle: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    // The goal title is the object this whole card is about - it reads as the
+    // card's heading, not as body text alongside the meta row.
+    cardTitle: { ...type.subheading, color: colors.textPrimary, flex: 1 },
     streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-    streak: { fontSize: 14, color: colors.textPrimary, fontFamily: fontFamily.semibold },
+    streak: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     autoBadge: {
       flexDirection: 'row',
@@ -488,10 +490,12 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
     autoBadgeUndoText: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    cardMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    // Progress and the social line are secondary body, not captions - they're
+    // read, not glanced at.
+    cardMeta: { ...type.secondary, color: colors.textSecondary },
     doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    doneBadge: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.success },
-    syncedLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    doneBadge: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.success },
+    syncedLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     logButton: {
       backgroundColor: colors.inputBg,
@@ -500,8 +504,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       minHeight: 48,
       justifyContent: 'center',
     },
-    logButtonText: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primaryPressed },
-    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
+    // Matches PillButton's label size - a button is a button wherever it is.
+    logButtonText: { ...type.body, fontFamily: fontFamily.bold, color: colors.primaryPressed },
+    empty: { ...type.secondary, textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -514,7 +519,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
