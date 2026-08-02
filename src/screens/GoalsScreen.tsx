@@ -182,7 +182,9 @@ function GoalCard({
         </Text>
         {isComplete ? (
           <View style={styles.doneRow}>
-            <ToggleSwitch value onValueChange={() => {}} />
+            {/* Celebration, not a control - the heart pops when a goal hits
+                its target. "Completed" beside it carries the meaning. */}
+            <ToggleSwitch value decorative />
             <Text style={styles.doneBadge}>Completed</Text>
           </View>
         ) : isHealthStepsGoal && isConnected ? (
