@@ -65,14 +65,14 @@ export function CircleHealthCard({
   );
 }
 
-function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     // cardShell is the shared flat card treatment (1px border hairline, no
     // shadow) - design/PRINCIPLES.md's "Shape & space" rule, spread rather
     // than hand-rolled so this card cannot drift from every other one.
     card: { ...cardShell, padding: spacing.xl, gap: spacing.xs, marginBottom: spacing.lg },
     headline: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: spacing.xs },
-    word: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    fact: { fontSize: 14, fontFamily: fontFamily.medium, color: colors.textSecondary },
+    word: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    fact: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.textSecondary },
   });
 }

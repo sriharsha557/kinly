@@ -47,7 +47,7 @@ export function DisclosureSection({
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrap: { marginBottom: spacing.lg },
     header: {
@@ -61,8 +61,8 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     labelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    label: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    chevron: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    label: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    chevron: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     body: { marginTop: spacing.md, gap: 0 },
   });
 }

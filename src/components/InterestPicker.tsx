@@ -64,7 +64,7 @@ export function InterestPicker({
   );
 }
 
-function createStyles({ radii }: ReturnType<typeof useTheme>) {
+function createStyles({ radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
     chip: {
@@ -76,6 +76,6 @@ function createStyles({ radii }: ReturnType<typeof useTheme>) {
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
     },
-    chipLabel: { fontSize: 15, fontFamily: fontFamily.semibold },
+    chipLabel: { ...type.body, fontFamily: fontFamily.semibold },
   });
 }

@@ -84,7 +84,7 @@ export function CircleAICard({
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -94,8 +94,8 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       gap: 10,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    message: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 18 },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    message: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     pill: {
       backgroundColor: colors.inputBg,
@@ -103,7 +103,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingHorizontal: 10,
       paddingVertical: 5,
     },
-    pillText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    pillText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     suggestion: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
@@ -112,6 +112,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     suggestionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
     suggestionDone: { backgroundColor: colors.success },
-    suggestionText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center' },
+    suggestionText: { ...type.caption, fontFamily: fontFamily.bold, color: colors.onAccent, textAlign: 'center' },
   });
 }

@@ -73,10 +73,10 @@ export function ThemePicker({
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrap: { gap: 10 },
-    label: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    label: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textSecondary },
     swatchRow: { flexDirection: 'row', gap: spacing.lg },
     swatchItem: { alignItems: 'center', gap: spacing.xs, minWidth: 56 },
     swatchRing: {
@@ -89,7 +89,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     swatch: { width: 30, height: 30, borderRadius: 15 },
-    swatchLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    swatchLabel: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     swatchLabelActive: { color: colors.textPrimary },
     modeRow: { flexDirection: 'row', gap: spacing.sm },
     modeChip: {
@@ -101,7 +101,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.surfaceSubtle,
     },
     modeChipActive: { backgroundColor: colors.primary },
-    modeChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    modeChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     modeChipTextActive: { color: colors.onAccent },
   });
 }

@@ -477,6 +477,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     cardTitle: { ...type.subheading, color: colors.textPrimary, flex: 1 },
     streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
     streak: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    // Raw size on purpose: this renders the "⋯" glyph, not text. Its size is
+    // the affordance's diameter rather than a step in the type hierarchy, so
+    // it has no business following the type scale.
     optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     autoBadge: {
       flexDirection: 'row',
@@ -488,8 +491,11 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    autoBadgeText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    autoBadgeText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+    // Raw size on purpose: a bare glyph, sized to its control rather than
+    // to the type hierarchy - the token would also impose a lineHeight it
+    // has never had, shifting it off-centre in a tight container.
     autoBadgeUndoText: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     // Progress and the social line are secondary body, not captions - they're
@@ -528,7 +534,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });

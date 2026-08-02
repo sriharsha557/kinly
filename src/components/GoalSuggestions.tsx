@@ -117,10 +117,10 @@ export function GoalSuggestions({ circleId, userId }: { circleId: string; userId
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
-    sectionTitle: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    sectionTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
     suggestionsSection: { marginBottom: spacing.xl },
     suggestionsRow: { gap: 10, paddingRight: spacing.lg },
     suggestionCard: {
@@ -130,8 +130,8 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       justifyContent: 'space-between',
       gap: 10,
     },
-    suggestionText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellTitle },
-    suggestionAdd: { fontSize: 13, fontFamily: fontFamily.bold },
+    suggestionText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    suggestionAdd: { ...type.caption, fontFamily: fontFamily.bold },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -144,14 +144,14 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });

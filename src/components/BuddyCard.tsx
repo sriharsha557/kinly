@@ -153,10 +153,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       marginBottom: spacing.xl,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    buddyName: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    buddyName: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm },
     status: { ...type.secondary, color: colors.shellSecondary, marginTop: 2 },
-    changeLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.primary },
+    changeLink: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.primary },
     empty: { ...type.secondary, color: colors.shellSecondary, marginTop: 6 },
     modalOverlay: {
       flex: 1,
@@ -170,13 +170,13 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.sm,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 6 },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 6 },
     memberRow: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
     },
-    memberName: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    memberName: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
   });
 }

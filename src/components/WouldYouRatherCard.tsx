@@ -108,7 +108,7 @@ export function WouldYouRatherCard({ circleId, userId }: { circleId: string; use
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -118,10 +118,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
-    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
-    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 2 },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { ...type.caption, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 2 },
     options: { gap: spacing.sm },
     option: {
       backgroundColor: colors.surface,
@@ -133,9 +133,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       alignItems: 'center',
     },
     optionActive: { borderWidth: 1.5, borderColor: colors.primary },
-    optionText: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
-    optionPct: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
-    orDivider: { textAlign: 'center', fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    optionText: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    optionPct: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
+    orDivider: { textAlign: 'center', ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -148,14 +148,14 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     orText: { textAlign: 'center', color: colors.textSecondary },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },

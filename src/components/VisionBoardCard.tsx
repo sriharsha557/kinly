@@ -143,7 +143,7 @@ export function VisionBoardCard({ circleId, userId }: { circleId: string; userId
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     card: {
       ...cardShell,
@@ -153,8 +153,8 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
-    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { ...type.caption, fontFamily: fontFamily.medium, color: colors.primary },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     itemCard: {
       backgroundColor: colors.inputBg,
@@ -164,9 +164,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       maxWidth: '48%',
     },
     itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
-    itemTitle: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    itemOwner: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
-    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    itemTitle: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    itemOwner: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -179,14 +179,14 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     imagePicker: {
       backgroundColor: colors.inputBg,
@@ -196,7 +196,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       justifyContent: 'center',
       overflow: 'hidden',
     },
-    imagePickerText: { fontSize: 13, color: colors.textSecondary, fontFamily: fontFamily.semibold },
+    imagePickerText: { ...type.caption, color: colors.textSecondary, fontFamily: fontFamily.semibold },
     imagePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     imagePreview: { width: '100%', height: '100%' },
     modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },

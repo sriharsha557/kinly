@@ -395,11 +395,11 @@ export default function CircleSettingsScreen() {
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     content: { padding: spacing.xl, paddingBottom: spacing.hero },
-    circleName: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.lg },
+    circleName: { ...type.title, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.lg },
     inviteCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -407,11 +407,11 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       ...shadow,
     },
-    inviteLabel: { fontSize: 13, color: colors.textSecondary, fontFamily: fontFamily.semibold },
-    inviteCode: { fontSize: 28, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
-    askOwnerText: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: spacing.sm, textAlign: 'center' },
+    inviteLabel: { ...type.caption, color: colors.textSecondary, fontFamily: fontFamily.semibold },
+    inviteCode: { ...type.title, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    askOwnerText: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: spacing.sm, textAlign: 'center' },
     requestBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
-    sectionTitle: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: 28, marginBottom: spacing.md },
+    sectionTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: 28, marginBottom: spacing.md },
     memberList: { gap: 10 },
     memberRow: {
       backgroundColor: colors.surface,
@@ -420,7 +420,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 10,
       ...shadow,
     },
-    memberName: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    memberName: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     roleChips: { flexDirection: 'row', gap: 6 },
     roleChip: {
       backgroundColor: colors.inputBg,
@@ -429,7 +429,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       paddingVertical: 5,
     },
     roleChipActive: { backgroundColor: colors.primary },
-    roleChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary, textTransform: 'capitalize' },
+    roleChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary, textTransform: 'capitalize' },
     roleChipTextActive: { color: colors.onAccent },
     circleRow: {
       backgroundColor: colors.surface,
@@ -441,9 +441,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     circleRowActive: { borderWidth: 1.5, borderColor: colors.primary },
-    circleRowText: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    circleRowText: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     circleRowTextActive: { color: colors.primary },
-    circleRowActiveTag: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    circleRowActiveTag: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
     notifyRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
@@ -453,11 +453,11 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       ...shadow,
     },
-    notifyLabel: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    notifyLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
     notifyLabelCol: { flex: 1, gap: 1 },
     // 13 is the type floor in design/PRINCIPLES.md, which supersedes the
     // plan's 12 for any new copy.
-    notifyHint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    notifyHint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -470,14 +470,14 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       padding: spacing.xl,
       gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
     },
     orDivider: { textAlign: 'center', color: colors.textSecondary },
     cancelLink: { textAlign: 'center', color: colors.textSecondary, fontFamily: fontFamily.semibold },

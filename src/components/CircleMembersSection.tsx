@@ -105,11 +105,11 @@ export function CircleMembersSection({
   );
 }
 
-function createStyles({ colors }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     section: { marginBottom: spacing.xxl },
     heading: {
-      fontSize: 13,
+      ...type.caption,
       fontFamily: fontFamily.bold,
       color: colors.textSecondary,
       marginBottom: 10,
@@ -124,8 +124,8 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
       borderBottomColor: colors.border,
     },
     rowCopy: { flex: 1, gap: 2 },
-    name: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    detail: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    name: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    detail: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // minHeight keeps this on the 48dp touch-target floor; the row's 56dp
     // height does not cover it, because the row itself is not tappable.
     action: { paddingVertical: spacing.md, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },

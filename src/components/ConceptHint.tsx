@@ -43,11 +43,14 @@ export function ConceptHint({
   );
 }
 
-function createStyles({ colors }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, marginTop: 2 },
-    text: { flex: 1, fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 17 },
+    text: { flex: 1, ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 17 },
     textOnGradient: { color: 'rgba(255,255,255,0.85)' },
+    // Raw size on purpose: a bare glyph, sized to its control rather than
+    // to the type hierarchy - the token would also impose a lineHeight it
+    // has never had, shifting it off-centre in a tight container.
     close: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, paddingTop: 2 },
     closeOnGradient: { color: 'rgba(255,255,255,0.7)' },
   });

@@ -54,7 +54,7 @@ export function AvatarPickerModal({
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     overlay: {
       flex: 1,
@@ -69,7 +69,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       ...shadow,
     },
-    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 14 },
+    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 14 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
     avatarWrap: {
       width: 64,
@@ -79,6 +79,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.inputBg,
     },
     avatarImage: { width: 64, height: 64 },
-    cancel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    cancel: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

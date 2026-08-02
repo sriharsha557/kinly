@@ -64,7 +64,7 @@ export function DeleteAccountModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     overlay: {
       flex: 1,
@@ -79,9 +79,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 14,
       ...shadow,
     },
-    title: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    body: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 20 },
-    error: { color: colors.danger, fontSize: 13, fontFamily: fontFamily.regular },
+    title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    body: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    error: { color: colors.danger, ...type.caption, fontFamily: fontFamily.regular },
     actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

@@ -14,16 +14,16 @@ export function AppTextInput({ label, ...props }: TextInputProps & { label: stri
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrapper: { gap: 6 },
-    label: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: spacing.lg,
       paddingVertical: 14,
-      fontSize: 16, fontFamily: fontFamily.regular,
+      ...type.body, fontFamily: fontFamily.regular,
       color: colors.textPrimary,
     },
   });

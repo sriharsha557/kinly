@@ -82,12 +82,12 @@ export function HealthSyncRow() {
   );
 }
 
-function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     // Matches ProfileScreen's own sectionTitle so this sits level with
     // Appearance and the rest rather than looking bolted on.
     sectionTitle: {
-      fontSize: 18,
+      ...type.subheading,
       fontFamily: fontFamily.bold,
       color: colors.textPrimary,
       marginTop: 28,
@@ -102,8 +102,8 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       minHeight: 56,
     },
     copy: { flex: 1, gap: 2 },
-    label: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    label: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    hint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     fix: {
       minHeight: 48,
       justifyContent: 'center',
@@ -111,6 +111,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    fixText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    fixText: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
   });
 }

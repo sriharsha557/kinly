@@ -162,10 +162,10 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       ...shadow,
     },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    progressCount: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    progressCount: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary },
     empty: { ...type.secondary, color: colors.textSecondary },
-    done: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.success },
+    done: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.success },
     list: { gap: spacing.sm },
     row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     checkbox: {
@@ -178,11 +178,14 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-    checkmark: { color: colors.onAccent, fontSize: 13, fontFamily: fontFamily.bold },
+    checkmark: { color: colors.onAccent, ...type.caption, fontFamily: fontFamily.bold },
+    // Raw size on purpose: a bare glyph, sized to its control rather than
+    // to the type hierarchy - the token would also impose a lineHeight it
+    // has never had, shifting it off-centre in a tight container.
     checkboxLoading: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.primary },
     rowBody: { flex: 1, gap: 1 },
-    rowText: { fontSize: 16, fontFamily: fontFamily.regular, color: colors.textPrimary },
+    rowText: { ...type.body, fontFamily: fontFamily.regular, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
-    rowContext: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    rowContext: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }

@@ -129,7 +129,7 @@ export function CircleWelcomeModal() {
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     skip: {
@@ -143,11 +143,11 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    skipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    skipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     slide: { alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: spacing.md },
-    stepLabel: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary, marginTop: spacing.sm, letterSpacing: 0.5 },
-    title: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
-    body: { fontSize: 15, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+    stepLabel: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary, marginTop: spacing.sm, letterSpacing: 0.5 },
+    title: { ...type.title, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    body: { ...type.body, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
     footer: { padding: spacing.xxl, paddingTop: spacing.sm, gap: spacing.xl },
     dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },

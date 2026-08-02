@@ -128,11 +128,11 @@ export function CircleTodaySection({
   );
 }
 
-function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     section: { marginBottom: spacing.xxl },
     heading: {
-      fontSize: 13,
+      ...type.caption,
       fontFamily: fontFamily.bold,
       color: colors.textSecondary,
       marginBottom: 10,
@@ -148,8 +148,8 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       borderBottomColor: colors.border,
     },
     rowCopy: { flex: 1, gap: 2 },
-    name: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    detail: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    name: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    detail: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // Overrides PillButton's full-width default padding so the action sits
     // as a compact trailing control rather than dominating the row.
     // Compact against PillButton's full-width default, but minHeight keeps
@@ -165,7 +165,7 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       padding: spacing.lg,
     },
     emptyCopy: { flex: 1, gap: 2 },
-    emptyTitle: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    emptyBody: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    emptyTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    emptyBody: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }

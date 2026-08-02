@@ -83,12 +83,12 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
   );
 }
 
-function createStyles({ colors }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    title: { fontSize: 22, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md, textAlign: 'center' },
+    title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md, textAlign: 'center' },
     subtitle: {
-      fontSize: 14, fontFamily: fontFamily.regular,
+      ...type.secondary, fontFamily: fontFamily.regular,
       color: colors.onAccentMuted,
       marginTop: spacing.sm,
       textAlign: 'center',
@@ -97,12 +97,12 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
     },
     body: { padding: spacing.xxl },
     switchList: { gap: spacing.sm },
-    switchLabel: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.xs },
+    switchLabel: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.xs },
     switchRow: {
       backgroundColor: colors.surface,
       borderRadius: 14,
       padding: 14,
     },
-    switchRowText: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    switchRowText: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
   });
 }
