@@ -17,6 +17,7 @@ import {
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import { useAuthStore } from '../state/useAuthStore';
 import { useMomentsUnread } from '../hooks/useMomentsUnread';
 import { useGoals } from '../hooks/useGoals';
@@ -55,7 +56,7 @@ function TabIcon({
   const scale = useSharedValue(1);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1.12 : 1, { damping: 14, stiffness: 220 });
+    scale.value = withSpring(focused ? 1.12 : 1, motion.spring.settle);
   }, [focused, scale]);
 
   const iconStyle = useAnimatedStyle(() => ({

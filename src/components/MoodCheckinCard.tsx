@@ -14,6 +14,7 @@ import { PillButton } from './PillButton';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 
@@ -78,7 +79,7 @@ function MoodOptionCard({
   const tap = useSharedValue(1);
 
   useEffect(() => {
-    progress.value = withTiming(active ? 1 : 0, { duration: 200 });
+    progress.value = withTiming(active ? 1 : 0, { duration: motion.duration.base });
   }, [active, progress]);
 
   function handlePress() {
@@ -252,7 +253,7 @@ export function MoodCheckinCard({ circleId, userId }: { circleId: string; userId
             <Text style={styles.hint}>Tap to check in</Text>
           </TouchableOpacity>
         ) : (
-          <Animated.View entering={FadeIn.duration(300)}>
+          <Animated.View entering={FadeIn.duration(motion.duration.entrance)}>
             <View style={styles.gridHeader}>
               <Text style={styles.hint}>{MOOD_SENTENCE[myCheckin.mood]}</Text>
               <TouchableOpacity onPress={() => setModalOpen(true)} accessibilityRole="button" accessibilityLabel="Change your check-in">

@@ -30,6 +30,7 @@ import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -397,7 +398,11 @@ export default function GoalsScreen() {
           keyExtractor={(goal) => goal.id}
           renderItem={({ item, index }) =>
             userId && circleId ? (
-              <Animated.View entering={FadeInDown.duration(350).delay(Math.min(index, 6) * 60)}>
+              <Animated.View
+          entering={FadeInDown.duration(motion.duration.entrance).delay(
+            Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+          )}
+        >
                 <GoalCard
                   goal={item}
                   circleId={circleId}

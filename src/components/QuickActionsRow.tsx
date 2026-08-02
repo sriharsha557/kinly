@@ -7,6 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
@@ -32,7 +33,11 @@ export function QuickActionsRow() {
   return (
     <View style={styles.row}>
       {ACTIONS.map(({ label, icon: Icon, tab }, index) => (
-        <Animated.View key={tab} entering={FadeInDown.duration(350).delay(index * 60)} style={{ flex: 1 }}>
+        <Animated.View
+          key={tab}
+          entering={FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)}
+          style={{ flex: 1 }}
+        >
           <AnimatedPressable style={styles.action} onPress={() => navigation.navigate(tab)}>
             <Icon width={22} height={22} color={theme.colors.primary} />
             <Text style={styles.label}>{label}</Text>

@@ -7,6 +7,7 @@ import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoal
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -93,7 +94,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
       ) : pending.length === 0 ? (
-        <Animated.Text entering={ZoomIn.springify().damping(14)} style={styles.done}>
+        <Animated.Text entering={ZoomIn.springify().damping(motion.damping.pop)} style={styles.done}>
           ✓ Everything logged for today. Nice work.
         </Animated.Text>
       ) : (
@@ -103,8 +104,8 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
             return (
               <Animated.View
                 key={goal.id}
-                entering={FadeInDown.duration(300).delay(index * 50)}
-                exiting={FadeOutRight.duration(250)}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)}
+                exiting={FadeOutRight.duration(motion.duration.quick)}
                 layout={LinearTransition.springify()}
               >
                 <AnimatedPressable
@@ -114,7 +115,10 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
                 >
                   <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
                     {checked ? (
-                      <Animated.Text entering={ZoomIn.springify().damping(9)} style={styles.checkmark}>
+                      <Animated.Text
+                        entering={ZoomIn.springify().damping(motion.damping.celebrate)}
+                        style={styles.checkmark}
+                      >
                         ✓
                       </Animated.Text>
                     ) : (

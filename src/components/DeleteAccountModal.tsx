@@ -5,6 +5,7 @@ import { AppTextInput } from './AppTextInput';
 import { PillButton } from './PillButton';
 import { deleteAccount } from '../lib/auth';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -31,8 +32,8 @@ export function DeleteAccountModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <Animated.View entering={FadeIn.duration(200)} style={styles.overlay}>
-        <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.card}>
+      <Animated.View entering={FadeIn.duration(motion.duration.base)} style={styles.overlay}>
+        <Animated.View entering={ZoomIn.springify().damping(motion.damping.pop)} style={styles.card}>
           <Text style={styles.title}>Delete your account?</Text>
           <Text style={styles.body}>
             This permanently deletes your account, your goals, posts, and Vision Board images, and removes you

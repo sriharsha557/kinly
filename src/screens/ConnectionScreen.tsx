@@ -34,6 +34,7 @@ import { AskCardSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import GoalIcon from '../../assets/illustrations/kinly-Goal.svg';
 import DiceIcon from '../../assets/illustrations/kinly-ill-dice.svg';
 import DeleteIcon from '../../assets/icons/feed/delete.svg';
@@ -225,7 +226,7 @@ export default function ConnectionScreen() {
 
           {/* Support: daily check-in + advice from your circle */}
           {userId && circleId && (
-            <Animated.View entering={FadeInDown.duration(350)}>
+            <Animated.View entering={FadeInDown.duration(motion.duration.entrance)}>
               <DailyCircleCard circleId={circleId} userId={userId} />
             </Animated.View>
           )}
@@ -275,7 +276,12 @@ export default function ConnectionScreen() {
             <View style={styles.list}>
               {posts.map((post, index) =>
                 userId && circleId ? (
-                  <Animated.View key={post.id} entering={FadeInDown.duration(300).delay(Math.min(index, 6) * 50)}>
+                  <Animated.View
+                key={post.id}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(
+                  Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+                )}
+              >
                     <AskCard
                       post={post}
                       circleId={circleId}

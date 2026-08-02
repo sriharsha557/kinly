@@ -28,6 +28,7 @@ import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono 
 import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -294,7 +295,11 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
 
   return (
     <Animated.View
-      entering={isCelebration ? ZoomIn.springify().damping(14) : FadeInDown.duration(350)}
+      entering={
+        isCelebration
+          ? ZoomIn.springify().damping(motion.damping.pop)
+          : FadeInDown.duration(motion.duration.entrance)
+      }
       style={styles.eventCard}
     >
       <TouchableOpacity

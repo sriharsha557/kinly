@@ -23,13 +23,22 @@ import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import SettingsIcon from '../../assets/brand/settings.svg';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 function Reveal({ index, children }: { index: number; children: ReactNode }) {
-  return <Animated.View entering={FadeInDown.duration(350).delay(index * 70)}>{children}</Animated.View>;
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(motion.duration.entrance).delay(
+        Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+      )}
+    >
+      {children}
+    </Animated.View>
+  );
 }
 
 export default function CircleScreen() {

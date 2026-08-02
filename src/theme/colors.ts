@@ -216,6 +216,54 @@ export const touch = {
   chip: 48,
 } as const;
 
+// Motion scale. Before this existed, timings were picked per call site and
+// the app had drifted to 6 durations (150/200/250/300/350/400), 4 stagger
+// steps (30/50/60/70) and 6 entrance dampings (9/10/12/13/14/15) - the
+// vocabulary was already consistent (FadeInDown for arrivals, ZoomIn for
+// celebrations), only the timing wasn't.
+//
+// Scope note: these cover *transitions and entrances* - the shared grammar
+// of "something arrived / changed / left". They deliberately do NOT cover
+// indeterminate or signature animation, which is per-component by nature
+// and would be flattened by a shared scale: LoadingSpinner's chase,
+// Skeleton's pulse, ProgressBar's fill, ToggleSwitch's spark burst and
+// GardenHero's sway all keep their own timing.
+export const motion = {
+  duration: {
+    // Exits and dismissals. Leaving should always be faster than arriving.
+    quick: 150,
+    // Most state changes: overlays fading in, a value settling, a section
+    // disclosing.
+    base: 200,
+    // Cards and list rows arriving. Longer than `base` on purpose - an
+    // entrance is the one moment where the motion is the message.
+    entrance: 320,
+  },
+  // Per-item delay in a staggered list, and the cap on how many items keep
+  // staggering. Without the cap a 30-item list makes the last row wait
+  // nearly two seconds; every screen that staggers already capped it by
+  // hand at 6, so that convention is now the token.
+  stagger: { step: 60, maxItems: 6 },
+  // withSpring() configs, for values driven imperatively.
+  spring: {
+    // AnimatedPressable's press-in/press-out pair. Asymmetric on purpose:
+    // the press bites quickly, the release settles.
+    pressIn: { damping: 15, stiffness: 300 },
+    pressOut: { damping: 12, stiffness: 200 },
+    // A value coming to rest - the tab bar's focused-icon scale.
+    settle: { damping: 14, stiffness: 220 },
+  },
+  // Damping for `.springify()` entering animations, which take damping
+  // alone rather than a full config.
+  damping: {
+    // Standard arrival with a little life in it.
+    pop: 14,
+    // Reserved for genuine celebrations (milestone cards, the check-off
+    // checkmark) - looser, so it overshoots more visibly.
+    celebrate: 10,
+  },
+} as const;
+
 // The garden's own palette - fixed nature hues that never follow the
 // accent (the accent drives chrome and the hero's sky tint only), dimmed
 // once centrally for dark mode.
@@ -286,6 +334,7 @@ export function resolveTheme(accentId: AccentId, scheme: ResolvedScheme) {
     spacing,
     type,
     touch,
+    motion,
     gradients: {
       hero: [accent.celebration, accent.primarySoft] as const,
       achievement: [n.amber, accent.celebration] as const,

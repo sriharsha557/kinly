@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { SvgProps } from 'react-native-svg';
 import { useLifeTimeline, type TimelineEntry } from '../hooks/useLifeTimeline';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 
@@ -73,7 +74,9 @@ export function LifeTimeline({ userId }: { userId: string }) {
             return (
               <Animated.View
                 key={entry.id}
-                entering={FadeInDown.duration(300).delay(index * 30)}
+                entering={FadeInDown.duration(motion.duration.entrance).delay(
+                Math.min(index, motion.stagger.maxItems) * motion.stagger.step,
+              )}
                 style={styles.row}
               >
                 <View style={styles.iconBubble}>

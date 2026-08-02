@@ -22,6 +22,7 @@ import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
+import { motion } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import SunIcon from '../../assets/illustrations/kinly-ill-sun.svg';
 import SunCloudIcon from '../../assets/illustrations/kinly-ill-sun-cloud.svg';
@@ -120,7 +121,7 @@ function Plant({
       <Animated.View style={[swayStyle, wilted && styles.plantWilted]}>
         <Animated.View
           key={member.stage}
-          entering={stageChanged && !reducedMotion ? ZoomIn.springify().damping(12) : undefined}
+          entering={stageChanged && !reducedMotion ? ZoomIn.springify().damping(motion.damping.pop) : undefined}
         >
           <GardenStageArt stage={member.stage} size={artSize} />
         </Animated.View>
@@ -188,7 +189,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
         <Animated.View
           key={state}
           style={styles.weather}
-          entering={reducedMotion ? undefined : ZoomIn.springify().damping(12)}
+          entering={reducedMotion ? undefined : ZoomIn.springify().damping(motion.damping.pop)}
         >
           <Weather width={44} height={44} />
         </Animated.View>
@@ -210,7 +211,11 @@ export function GardenHero({ circleId }: { circleId: string }) {
             // first render instead of appearing all at once.
             <Animated.View
               key={member.userId}
-              entering={reducedMotion ? undefined : FadeInDown.duration(350).delay(index * 70)}
+              entering={
+                reducedMotion
+                  ? undefined
+                  : FadeInDown.duration(motion.duration.entrance).delay(index * motion.stagger.step)
+              }
             >
               <Plant
                 member={member}
@@ -236,7 +241,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
   );
 
   return (
-    <Animated.View entering={FadeInDown.duration(400)}>
+    <Animated.View entering={FadeInDown.duration(motion.duration.entrance)}>
       <AnimatedPressable
         onPress={() => navigation.navigate('Circle')}
         accessibilityRole="button"
