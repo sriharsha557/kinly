@@ -75,7 +75,7 @@ export function ThemePicker({
 
 function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    wrap: { gap: 10 },
+    wrap: { gap: spacing.s10 },
     label: { ...type.caption, fontFamily: fontFamily.bold, color: colors.textSecondary },
     swatchRow: { flexDirection: 'row', gap: spacing.lg },
     swatchItem: { alignItems: 'center', gap: spacing.xs, minWidth: 56 },

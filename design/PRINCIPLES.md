@@ -30,8 +30,12 @@ Notion: near-monochrome surfaces where a single accent means "you can act here".
 ## Shape & space
 
 - Radius scale: `radii` only — card 20, tile 24, hero 28, input 16, pill 999.
-- Spacing: `spacing` tokens (4pt scale); `gutter` for screen insets, `section`
-  between sections. No ad-hoc numbers.
+- Spacing: `spacing` tokens only, never raw numbers. The named steps (`xs`…`xxl`,
+  plus `gutter` for screen insets and `section` between sections) are the 4pt
+  rhythm and are what a layout should reach for first. The `s*` tokens are the
+  2pt in-betweens — tight gaps inside a row, the few paddings above `hero` —
+  that the rhythm cannot express. No value has two names, so there is never a
+  choice between `spacing.lg` and an `s16`.
 - Cards: spread `cardShell` (1px `border` hairline, no shadow) or `surface` +
   `shadow` for the few elevated moments (hero, mission card). Never both, never a
   colored left strip.

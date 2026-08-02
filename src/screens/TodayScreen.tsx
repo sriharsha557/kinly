@@ -562,8 +562,8 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     greeting: { ...type.title, fontFamily: fontFamily.bold, color: colors.textPrimary },
     date: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.lg },
     sectionTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
-    list: { gap: 10 },
-    dayHeader: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
+    list: { gap: spacing.s10 },
+    dayHeader: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.s6 },
     newDivider: {
       ...type.caption,
       fontFamily: fontFamily.bold,
@@ -571,7 +571,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       textTransform: 'uppercase',
       color: colors.primary,
       marginTop: spacing.md,
-      marginBottom: 2,
+      marginBottom: spacing.s2,
     },
     loadMoreButton: {
       alignSelf: 'center',
@@ -586,16 +586,16 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     // Tertiary level: no card chrome - quiet rows on the screen background
     // with a hairline separator (design/REDESIGN.md §4).
     eventCard: {
-      paddingVertical: 6,
-      gap: 10,
+      paddingVertical: spacing.s6,
+      gap: spacing.s10,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
     },
     eventHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
-    eventBody: { flex: 1, gap: 2 },
+    eventBody: { flex: 1, gap: spacing.s2 },
     eventText: { ...type.body, lineHeight: 22, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     eventTime: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
-    nudgeRow: { flexDirection: 'row', gap: 6 },
+    nudgeRow: { flexDirection: 'row', gap: spacing.s6 },
     nudgeButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
@@ -611,7 +611,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       justifyContent: 'center',
       alignItems: 'center',
     },
-    waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.s6 },
     waterButtonText: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.primary },
     nudgeList: { gap: spacing.xs },
     photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
@@ -625,7 +625,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       borderRadius: radii.card,
       padding: spacing.xxl,
       alignItems: 'center',
-      gap: 6,
+      gap: spacing.s6,
       ...shadow,
     },
     emptyTitle: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },

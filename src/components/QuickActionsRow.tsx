@@ -51,13 +51,13 @@ export function QuickActionsRow() {
 
 function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', gap: 10, marginBottom: spacing.xl },
+    row: { flexDirection: 'row', gap: spacing.s10, marginBottom: spacing.xl },
     action: {
       backgroundColor: colors.surface,
       borderRadius: radii.input,
-      paddingVertical: 14,
+      paddingVertical: spacing.s14,
       alignItems: 'center',
-      gap: 6,
+      gap: spacing.s6,
       ...shadow,
     },
     label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textPrimary, textAlign: 'center' },

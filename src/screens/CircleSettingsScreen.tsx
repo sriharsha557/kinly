@@ -365,7 +365,7 @@ export default function CircleSettingsScreen() {
           variant="outline"
           onPress={() => setConfirmingLeave(true)}
           loading={leaveCircle.isPending}
-          style={{ marginTop: 10, borderColor: theme.colors.danger }}
+          style={{ marginTop: spacing.s10, borderColor: theme.colors.danger }}
         />
       </ScrollView>
 
@@ -408,25 +408,25 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       ...shadow,
     },
     inviteLabel: { ...type.caption, color: colors.textSecondary, fontFamily: fontFamily.semibold },
-    inviteCode: { ...type.title, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    inviteCode: { ...type.title, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: spacing.s6 },
     askOwnerText: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: spacing.sm, textAlign: 'center' },
     requestBtn: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
-    sectionTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: 28, marginBottom: spacing.md },
-    memberList: { gap: 10 },
+    sectionTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.s28, marginBottom: spacing.md },
+    memberList: { gap: spacing.s10 },
     memberRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 14,
-      gap: 10,
+      padding: spacing.s14,
+      gap: spacing.s10,
       ...shadow,
     },
     memberName: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    roleChips: { flexDirection: 'row', gap: 6 },
+    roleChips: { flexDirection: 'row', gap: spacing.s6 },
     roleChip: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
+      paddingHorizontal: spacing.s10,
+      paddingVertical: spacing.s6,
     },
     roleChipActive: { backgroundColor: colors.primary },
     roleChipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary, textTransform: 'capitalize' },
@@ -434,7 +434,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
     circleRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 14,
+      padding: spacing.s14,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -447,14 +447,14 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
     notifyRow: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 14,
+      padding: spacing.s14,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       ...shadow,
     },
     notifyLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
-    notifyLabelCol: { flex: 1, gap: 1 },
+    notifyLabelCol: { flex: 1, gap: spacing.s2 },
     // 13 is the type floor in design/PRINCIPLES.md, which supersedes the
     // plan's 12 for any new copy.
     notifyHint: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
@@ -474,7 +474,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
       ...type.body, fontFamily: fontFamily.regular,

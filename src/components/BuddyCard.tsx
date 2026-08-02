@@ -115,7 +115,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
                 )
               }
               loading={checkIn.isPending}
-              style={{ marginTop: 10 }}
+              style={{ marginTop: spacing.s10 }}
             />
           )}
           {waterableGoal && (
@@ -135,7 +135,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
       ) : (
         <>
           <Text style={styles.empty}>Pick a buddy to keep each other on track.</Text>
-          <PillButton label="Choose a buddy" onPress={() => setPicking(true)} style={{ marginTop: 10 }} />
+          <PillButton label="Choose a buddy" onPress={() => setPicking(true)} style={{ marginTop: spacing.s10 }} />
         </>
       )}
 
@@ -149,15 +149,15 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     card: {
       ...cardShell,
       padding: spacing.xl,
-      paddingLeft: 18,
+      paddingLeft: spacing.s18,
       marginBottom: spacing.xl,
     },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
     buddyName: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm },
-    status: { ...type.secondary, color: colors.shellSecondary, marginTop: 2 },
+    status: { ...type.secondary, color: colors.shellSecondary, marginTop: spacing.s2 },
     changeLink: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.primary },
-    empty: { ...type.secondary, color: colors.shellSecondary, marginTop: 6 },
+    empty: { ...type.secondary, color: colors.shellSecondary, marginTop: spacing.s6 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
@@ -170,11 +170,11 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       padding: spacing.xl,
       gap: spacing.sm,
     },
-    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 6 },
+    modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.s6 },
     memberRow: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
     },
     memberName: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },

@@ -91,7 +91,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     // old size - has no home in the scale; rounding it up to title (26)
     // would have worked against the only reason the style exists.
     valueThird: { ...type.heading, fontFamily: fontFamily.regular },
-    deltaRow: { flexDirection: 'row', gap: 6 },
+    deltaRow: { flexDirection: 'row', gap: spacing.s6 },
     pill: {
       backgroundColor: colors.pillBg,
       borderRadius: radii.pill,

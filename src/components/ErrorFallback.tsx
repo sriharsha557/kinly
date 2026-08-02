@@ -57,9 +57,9 @@ export function ErrorFallback({ resetError }: { resetError: () => void }) {
 function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: 10 },
+    content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: spacing.s10 },
     title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm, textAlign: 'center' },
     body: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
-    actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xxl, width: '100%' },
+    actions: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xxl, width: '100%' },
   });
 }

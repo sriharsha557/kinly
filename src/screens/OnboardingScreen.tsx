@@ -554,8 +554,8 @@ export default function OnboardingScreen() {
 function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    body: { padding: spacing.xxl, paddingTop: 28 },
-    form: { gap: 14 },
+    body: { padding: spacing.xxl, paddingTop: spacing.s28 },
+    form: { gap: spacing.s14 },
     confirmTitle: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
     confirmBody: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center' },
     inviteCard: {
@@ -566,7 +566,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       ...shadow,
     },
     inviteLabel: { ...type.caption, color: colors.textSecondary, fontFamily: fontFamily.semibold },
-    inviteCode: { ...type.title, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: 6 },
+    inviteCode: { ...type.title, fontFamily: fontFamily.bold, color: colors.primary, letterSpacing: 2, marginTop: spacing.s6 },
     title: { ...type.title, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md },
     subtitle: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.onAccentMuted, marginTop: spacing.xs },
     link: { textAlign: 'center', marginTop: spacing.xs, color: colors.primary, fontFamily: fontFamily.semibold },

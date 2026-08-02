@@ -55,7 +55,7 @@ export function GoalCardSkeleton() {
     <Animated.View style={skeletonCardStyle(theme)}>
       <Skeleton width="60%" height={16} />
       <Skeleton width="100%" height={8} radius={theme.radii.card} style={{ marginTop: spacing.md }} />
-      <Skeleton width="30%" height={11} style={{ marginTop: 10 }} />
+      <Skeleton width="30%" height={11} style={{ marginTop: spacing.s10 }} />
     </Animated.View>
   );
 }
@@ -63,7 +63,7 @@ export function GoalCardSkeleton() {
 export function EventRowSkeleton() {
   const theme = useTheme();
   return (
-    <Animated.View style={[skeletonCardStyle(theme), { flexDirection: 'row', alignItems: 'center', gap: 10 }]}>
+    <Animated.View style={[skeletonCardStyle(theme), { flexDirection: 'row', alignItems: 'center', gap: spacing.s10 }]}>
       <Skeleton width={20} height={20} radius={10} />
       <Skeleton width="70%" height={14} />
     </Animated.View>

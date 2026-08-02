@@ -76,12 +76,12 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       backgroundColor: colors.surface,
       borderRadius: radii.card,
       padding: spacing.xxl,
-      gap: 14,
+      gap: spacing.s14,
       ...shadow,
     },
     title: { ...type.heading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     body: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
     error: { color: colors.danger, ...type.caption, fontFamily: fontFamily.regular },
-    actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
+    actions: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xs },
   });
 }

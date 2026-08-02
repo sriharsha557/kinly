@@ -112,7 +112,7 @@ function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
       ...type.caption,
       fontFamily: fontFamily.bold,
       color: colors.textSecondary,
-      marginBottom: 10,
+      marginBottom: spacing.s10,
     },
     row: {
       flexDirection: 'row',
@@ -123,11 +123,11 @@ function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    rowCopy: { flex: 1, gap: 2 },
+    rowCopy: { flex: 1, gap: spacing.s2 },
     name: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     detail: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // minHeight keeps this on the 48dp touch-target floor; the row's 56dp
     // height does not cover it, because the row itself is not tappable.
-    action: { paddingVertical: spacing.md, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
+    action: { paddingVertical: spacing.md, paddingHorizontal: spacing.s18, minHeight: 48, justifyContent: 'center' },
   });
 }

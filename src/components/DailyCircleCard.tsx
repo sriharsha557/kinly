@@ -64,7 +64,7 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
 
 function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    card: { borderRadius: radii.card, padding: spacing.lg, marginBottom: spacing.xl, gap: 10 },
+    card: { borderRadius: radii.card, padding: spacing.lg, marginBottom: spacing.xl, gap: spacing.s10 },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     title: { ...type.body, fontFamily: fontFamily.bold, color: colors.onAccent },
     prompt: { ...type.body, fontFamily: fontFamily.bold, color: colors.onAccent, lineHeight: 22 },
@@ -72,7 +72,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     input: {
       backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.onAccent,
       ...type.secondary, fontFamily: fontFamily.regular,
@@ -83,9 +83,9 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     answerBubble: {
       backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
-      padding: 10,
+      padding: spacing.s10,
     },
     answerAuthor: { ...type.caption, fontFamily: fontFamily.bold, color: colors.background },
-    answerText: { ...type.caption, fontFamily: fontFamily.regular, color: colors.onAccent, marginTop: 2 },
+    answerText: { ...type.caption, fontFamily: fontFamily.regular, color: colors.onAccent, marginTop: spacing.s2 },
   });
 }

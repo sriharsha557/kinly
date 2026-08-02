@@ -429,13 +429,13 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     container: { flex: 1, padding: spacing.lg, backgroundColor: colors.background },
     title: { ...type.title, color: colors.textPrimary, marginBottom: spacing.md },
     addGoalWrap: { marginBottom: spacing.lg, gap: spacing.md },
-    form: { gap: 6 },
+    form: { gap: spacing.s6 },
     fieldLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
     categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categoryChip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: spacing.s6,
       minHeight: 48,
       borderRadius: radii.pill,
       paddingHorizontal: spacing.md,
@@ -456,7 +456,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       minHeight: 52,
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 6,
+      marginTop: spacing.s6,
     },
     // surfaceSubtle rather than a dimmed accent: the one-accent rule reserves
     // colors.primary for things you can actually act on, and a faded accent
@@ -468,10 +468,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     card: {
       ...cardShell,
       padding: spacing.lg,
-      gap: 10,
+      gap: spacing.s10,
     },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.s10 },
     // The goal title is the object this whole card is about - it reads as the
     // card's heading, not as body text alongside the meta row.
     cardTitle: { ...type.subheading, color: colors.textPrimary, flex: 1 },
@@ -485,9 +485,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
-      gap: 6,
+      gap: spacing.s6,
       marginTop: spacing.sm,
-      paddingLeft: 10,
+      paddingLeft: spacing.s10,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
@@ -501,10 +501,10 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // Progress and the social line are secondary body, not captions - they're
     // read, not glanced at.
     cardMeta: { ...type.secondary, color: colors.textSecondary },
-    doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+    doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.s6 },
     doneBadge: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.success },
     syncedLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
-    logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    logActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.s10 },
     logButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
@@ -531,11 +531,11 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.md,
       color: colors.textPrimary,
       ...type.body, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
+    modalButtons: { flexDirection: 'row', gap: spacing.s10, marginTop: spacing.xs },
   });
 }

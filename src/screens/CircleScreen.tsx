@@ -207,7 +207,7 @@ function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
     settingsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
+      gap: spacing.s6,
       minHeight: 48,
       paddingHorizontal: spacing.sm,
       marginLeft: 'auto',

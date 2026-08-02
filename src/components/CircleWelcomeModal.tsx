@@ -138,7 +138,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       zIndex: 1,
       minHeight: 44,
       justifyContent: 'center',
-      paddingHorizontal: 14,
+      paddingHorizontal: spacing.s14,
       paddingVertical: spacing.sm,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,

@@ -104,9 +104,9 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
 
 function createStyles({ colors, cardShell, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    card: { ...cardShell, padding: spacing.lg, paddingLeft: 14, marginBottom: spacing.xl, gap: 10 },
+    card: { ...cardShell, padding: spacing.lg, paddingLeft: spacing.s14, marginBottom: spacing.xl, gap: spacing.s10 },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.s6 },
     title: { ...type.body, fontFamily: fontFamily.medium, color: colors.shellTitle },
     shareLink: { ...type.caption, fontFamily: fontFamily.bold, color: colors.primary, textDecorationLine: 'underline' },
     highlight: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
@@ -114,8 +114,8 @@ function createStyles({ colors, cardShell, type }: ReturnType<typeof useTheme>) 
     stat: { alignItems: 'center' },
     statValue: { ...type.heading, fontFamily: fontFamily.bold, color: colors.shellTitle },
     statLabel: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
-    footerRow: { gap: spacing.xs, marginTop: 2 },
-    footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    footerRow: { gap: spacing.xs, marginTop: spacing.s2 },
+    footerLine: { flexDirection: 'row', alignItems: 'center', gap: spacing.s6 },
     footerText: { ...type.caption, color: colors.shellSecondary, fontFamily: fontFamily.semibold },
   });
 }

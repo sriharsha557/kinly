@@ -93,8 +93,8 @@ export default function ResetPasswordScreen() {
 function createStyles({ colors, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    body: { padding: spacing.xxl, paddingTop: 28 },
-    form: { gap: 14 },
+    body: { padding: spacing.xxl, paddingTop: spacing.s28 },
+    form: { gap: spacing.s14 },
     title: { ...type.title, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md, textAlign: 'center' },
     subtitle: { ...type.secondary, fontFamily: fontFamily.regular, color: colors.onAccentMuted, marginTop: spacing.xs, textAlign: 'center' },
     error: { color: colors.danger, textAlign: 'center' },

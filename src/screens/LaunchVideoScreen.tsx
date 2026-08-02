@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   skip: {
     position: 'absolute',
     right: 20,
-    paddingHorizontal: 14,
+    paddingHorizontal: spacing.s14,
     paddingVertical: spacing.sm,
     borderRadius: 999,
     backgroundColor: 'rgba(0,0,0,0.35)',

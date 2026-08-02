@@ -71,7 +71,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
       padding: spacing.xxl,
-      paddingBottom: 36,
+      paddingBottom: spacing.s36,
       gap: spacing.xs,
       ...shadow,
     },
@@ -88,12 +88,12 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
     options: { marginTop: spacing.lg, gap: spacing.xs },
     option: {
       borderRadius: radii.input,
-      paddingVertical: 14,
+      paddingVertical: spacing.s14,
       alignItems: 'center',
     },
     optionText: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     optionTextDestructive: { color: colors.danger },
-    cancelOption: { marginTop: 10, backgroundColor: colors.inputBg },
+    cancelOption: { marginTop: spacing.s10, backgroundColor: colors.inputBg },
     cancelText: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }
