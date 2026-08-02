@@ -1,5 +1,5 @@
-Drop real app screenshots here with these exact filenames (index.html
-picks them up automatically, no code changes needed):
+Drop real app screenshots here with these exact filenames. The landing
+page's hero phone cycles through all five, so no code changes are needed:
 
 - `today.png`
 - `circle.png`

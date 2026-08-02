@@ -428,11 +428,6 @@
     transition:transform 0.25s cubic-bezier(.2,.8,.2,1), border-color 0.25s ease;
   }
   .point:hover, .roadmap-item:hover{transform:translateY(-3px);}
-  .phone-frame .glass{transition:transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease;}
-  .phone-frame:hover .glass{
-    transform:translateY(-6px);
-    box-shadow:0 24px 46px -26px rgba(34,40,31,0.5);
-  }
 
   /* Everything above is decoration. Under reduced motion the page keeps its
      layout and colour and simply stops moving - the JS below makes the same
@@ -663,46 +658,6 @@
   }
   @media (max-width: 760px){
     .garden-explain{grid-template-columns:1fr; padding:36px 26px;}
-  }
-
-  /* ---------- SCREENSHOTS ---------- */
-  .screens-row{
-    display:flex;
-    gap:20px;
-    overflow-x:auto;
-    padding:8px 4px 24px;
-    scroll-snap-type:x proximity;
-  }
-  .phone-frame{
-    flex:0 0 auto;
-    width:220px;
-    scroll-snap-align:start;
-  }
-  .phone-frame .glass{
-    width:220px;
-    aspect-ratio:9/19.5;
-    border-radius:26px;
-    border:6px solid var(--ink);
-    background:var(--sand);
-    overflow:hidden;
-    box-shadow:var(--shadow-card);
-  }
-  .phone-frame .glass img{width:100%; height:100%; object-fit:cover;}
-  .phone-frame .glass .placeholder{
-    width:100%; height:100%;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    color:var(--ink-faint);
-    text-align:center;
-    padding:20px;
-  }
-  .phone-frame .caption{
-    margin-top:12px;
-    font-size:13.5px;
-    font-weight:600;
-    color:var(--ink-soft);
-    text-align:center;
   }
 
   /* ---------- DOWNLOAD / BETA CTA ---------- */
@@ -942,8 +897,8 @@
     </a>
     <nav class="nav-links">
       <a class="hide-mobile" href="#how-it-works">How it works</a>
-      <a class="hide-mobile" href="#screens">Screens</a>
       <a class="hide-mobile" href="#garden">The garden</a>
+      <a class="hide-mobile" href="#screens">Screens</a>
       <a class="hide-mobile" href="#why">Why Kinly</a>
       <a href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener" class="btn btn-ghost">GitHub</a>
     </nav>
@@ -959,9 +914,10 @@
 
       <div class="hero-grid">
         <div class="hero-copy">
-          <!-- assets/kinly-logo.json is the app's own launch animation. The
-               PNG is what shows until (and if) Lottie loads, so the mark is
-               never missing when the CDN is blocked. -->
+          <!-- The current mark, and only the current mark. This used to play
+               assets/kinly-logo.json through Lottie, but that file is the old
+               wordmark lockup (plain loop, no hands) and shipping it here put
+               a retired logo on the front page. -->
           <div class="hero-mark" id="heroMark"><img src="assets/brand/logo-web.png" alt=""></div>
           <h1>Growth doesn't happen alone.</h1>
           <p class="lede">Kinly is a small, private space for you and 2–10 friends — a Growth Circle — to check in, chase goals, and grow together. No feeds, no strangers, no performing.</p>
@@ -1116,144 +1072,6 @@
   </div>
 
   <div class="wrap">
-    <section id="screens">
-      <div class="section-head">
-        <p class="eyebrow">Screens</p>
-        <h2>Five places, one loop.</h2>
-        <p>Everything in Kinly feeds the same idea: show up, log something real, see how your circle is doing.</p>
-      </div>
-      <div class="feature-grid">
-
-        <div class="feature-card">
-          <div class="icon-badge">
-            <svg viewBox="0 5.5 200 200" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="100" cy="38" r="9" fill="currentColor" stroke="none"/>
-              <path d="M28,100 L100,44 L172,100"/>
-              <path d="M46,90 L46,168 C46,172 49,175 53,175 L147,175 C151,175 154,172 154,168 L154,90"/>
-              <path d="M84,175 L84,130 C84,124 89,120 95,120 L105,120 C111,120 116,124 116,130 L116,175" stroke-width="12"/>
-            </svg>
-          </div>
-          <h3>Today</h3>
-          <p>Your one clear answer to "what should I do right now" — a greeting, your circle's health at a glance, today's goals to check off, and what your circle's been up to.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon-badge"><img src="assets/brand/logo-web.png" alt=""></div>
-          <h3>Circle</h3>
-          <p>Every member's garden, side by side. Pair up with an accountability buddy and take on challenges together.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon-badge">
-            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
-              <circle cx="100" cy="100" r="82" stroke-width="12"/>
-              <circle cx="100" cy="100" r="54" stroke-width="12"/>
-              <circle cx="84" cy="88" r="7" fill="currentColor" stroke="none"/>
-              <circle cx="116" cy="88" r="7" fill="currentColor" stroke="none"/>
-              <path d="M76,108 C76,120 88,128 100,122" stroke-width="8"/>
-              <path d="M124,108 C124,120 112,128 100,122" stroke-width="8"/>
-            </svg>
-          </div>
-          <h3>Goals</h3>
-          <p>Set a target, log progress, keep the streak alive. Suggestions are tailored to what you actually care about.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon-badge">
-            <svg viewBox="0 -6 200 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M100,20 C147,20 176,50 176,88 C176,126 147,156 100,156 C88,156 77,154 67,150 L38,168 L46,140 C24,126 24,50 67,26 C77,22 88,20 100,20 Z" stroke-width="11"/>
-              <circle cx="80" cy="80" r="8" fill="currentColor" stroke="none"/>
-              <circle cx="122" cy="80" r="8" fill="currentColor" stroke="none"/>
-              <path d="M68,108 C68,128 88,140 101,131" stroke-width="10"/>
-              <path d="M134,108 C134,128 114,140 101,131" stroke-width="10"/>
-            </svg>
-          </div>
-          <h3>Together</h3>
-          <p>One daily prompt for the whole circle, answers hidden until you post your own — plus a couple of two-minute games for lighter days.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon-badge">
-            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
-              <circle cx="100" cy="76" r="46" stroke-width="13"/>
-              <circle cx="84" cy="70" r="7" fill="currentColor" stroke="none"/>
-              <circle cx="116" cy="70" r="7" fill="currentColor" stroke="none"/>
-              <path d="M76,90 C76,104 90,113 100,106" stroke-width="9"/>
-              <path d="M124,90 C124,104 110,113 100,106" stroke-width="9"/>
-              <path d="M30,178 C30,140 62,130 100,130 C138,130 170,140 170,178" stroke-width="13"/>
-            </svg>
-          </div>
-          <h3>Profile</h3>
-          <p>Your streaks, your badges, your story — a running tally of what you've completed and a reflection on who you're becoming.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="icon-badge">
-            <!-- assets/icons/nudges/cheer.svg, inlined so it can pick up the
-                 badge's currentColor the way the tab marks above do. -->
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9.5,20 L9.5,13.5 C8.6,13.5 8,12.7 8,11.9 L8,6.5 C8,5.8 8.6,5.2 9.2,5.2 C9.9,5.2 10.4,5.8 10.4,6.5 L10.4,10.5"/>
-              <path d="M10.4,10.5 L10.4,4.7 C10.4,4 11,3.4 11.7,3.4 C12.4,3.4 13,4 13,4.7 L13,10.3"/>
-              <path d="M13,10.3 L13,5.4 C13,4.7 13.6,4.1 14.3,4.1 C15,4.1 15.6,4.7 15.6,5.4 L15.6,11"/>
-              <path d="M15.6,11 L15.6,7.6 C15.6,6.9 16.2,6.3 16.9,6.3 C17.6,6.3 18.2,6.9 18.2,7.6 L18.2,13.5 C18.2,17.1 15.6,20 12.3,20 L9.5,20 Z"/>
-              <path d="M5,9 L6.6,10.3"/>
-              <path d="M4.3,13 L6.3,13"/>
-            </svg>
-          </div>
-          <h3>Nudges</h3>
-          <p>One-tap cheers when a friend's on a streak or gone quiet — a small push, never a lecture.</p>
-        </div>
-
-      </div>
-    </section>
-  </div>
-
-  <div class="wrap">
-    <!--
-      Drop real screenshots into assets/screenshots/ using these exact
-      filenames (9:19.5 aspect ratio, e.g. a raw phone screenshot works
-      fine) and each placeholder below is replaced automatically:
-        today.png, circle.png, goals.png, connection.png, profile.png
-      connection.png is the tab the app labels "Together"; the filename
-      follows the internal route name, which is still Connection.
-
-      Bump ?v= on every src when the images are replaced. GitHub Pages sends
-      a long max-age for /assets, so a same-named replacement otherwise keeps
-      showing the old shot to anyone who has visited before.
-    -->
-    <section id="app-screens" style="padding-top:0;">
-      <div class="section-head">
-        <p class="eyebrow">See it</p>
-        <h2>What it actually looks like.</h2>
-      </div>
-      <!-- data-lenis-prevent: this row scrolls horizontally, and Lenis would
-           otherwise swallow the trackpad gesture into the page scroll. -->
-      <div class="screens-row" data-lenis-prevent>
-        <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/today.png?v=2" alt="Today screen" data-fallback="Today"></div>
-          <div class="caption">Today</div>
-        </div>
-        <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/circle.png?v=2" alt="Circle screen" data-fallback="Circle"></div>
-          <div class="caption">Circle</div>
-        </div>
-        <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/goals.png?v=2" alt="Goals screen" data-fallback="Goals"></div>
-          <div class="caption">Goals</div>
-        </div>
-        <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/connection.png?v=2" alt="Together screen" data-fallback="Together"></div>
-          <div class="caption">Together</div>
-        </div>
-        <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/profile.png?v=2" alt="Profile screen" data-fallback="Profile"></div>
-          <div class="caption">Profile</div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="wrap">
     <section id="garden">
       <div class="garden-explain">
         <div>
@@ -1284,6 +1102,99 @@
             <span>Bloom<b>day 30</b></span>
           </div>
         </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <section id="screens" style="padding-top:0;">
+      <div class="section-head">
+        <p class="eyebrow">Screens</p>
+        <h2>Five places, one loop.</h2>
+        <p>Everything in Kinly feeds the same idea: show up, log something real, see how your circle is doing.</p>
+      </div>
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <div class="icon-badge">
+            <svg viewBox="0 5.5 200 200" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="100" cy="38" r="9" fill="currentColor" stroke="none"/>
+              <path d="M28,100 L100,44 L172,100"/>
+              <path d="M46,90 L46,168 C46,172 49,175 53,175 L147,175 C151,175 154,172 154,168 L154,90"/>
+              <path d="M84,175 L84,130 C84,124 89,120 95,120 L105,120 C111,120 116,124 116,130 L116,175" stroke-width="12"/>
+            </svg>
+          </div>
+          <h3>Today</h3>
+          <p>Your one clear answer to "what should I do right now" — your circle's garden at a glance, today's goals to check off, a one-tap mood check-in, and the circle's activity underneath it.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-badge"><img src="assets/brand/logo-web.png" alt=""></div>
+          <h3>Circle</h3>
+          <p>Every member's garden, side by side. Pair up with an accountability buddy, run a monthly challenge, and read the weekly recap of how the circle actually did.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-badge">
+            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+              <circle cx="100" cy="100" r="82" stroke-width="12"/>
+              <circle cx="100" cy="100" r="54" stroke-width="12"/>
+              <circle cx="84" cy="88" r="7" fill="currentColor" stroke="none"/>
+              <circle cx="116" cy="88" r="7" fill="currentColor" stroke="none"/>
+              <path d="M76,108 C76,120 88,128 100,122" stroke-width="8"/>
+              <path d="M124,108 C124,120 112,128 100,122" stroke-width="8"/>
+            </svg>
+          </div>
+          <h3>Goals</h3>
+          <p>Set a target, log progress, keep the streak alive — with a photo if you want proof. Step goals sync themselves from Health Connect on Android.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-badge">
+            <svg viewBox="0 -6 200 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M100,20 C147,20 176,50 176,88 C176,126 147,156 100,156 C88,156 77,154 67,150 L38,168 L46,140 C24,126 24,50 67,26 C77,22 88,20 100,20 Z" stroke-width="11"/>
+              <circle cx="80" cy="80" r="8" fill="currentColor" stroke="none"/>
+              <circle cx="122" cy="80" r="8" fill="currentColor" stroke="none"/>
+              <path d="M68,108 C68,128 88,140 101,131" stroke-width="10"/>
+              <path d="M134,108 C134,128 114,140 101,131" stroke-width="10"/>
+            </svg>
+          </div>
+          <h3>Together</h3>
+          <p>One daily prompt for the whole circle, answers hidden until you post your own — plus a couple of two-minute games for lighter days.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-badge">
+            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+              <circle cx="100" cy="76" r="46" stroke-width="13"/>
+              <circle cx="84" cy="70" r="7" fill="currentColor" stroke="none"/>
+              <circle cx="116" cy="70" r="7" fill="currentColor" stroke="none"/>
+              <path d="M76,90 C76,104 90,113 100,106" stroke-width="9"/>
+              <path d="M124,90 C124,104 110,113 100,106" stroke-width="9"/>
+              <path d="M30,178 C30,140 62,130 100,130 C138,130 170,140 170,178" stroke-width="13"/>
+            </svg>
+          </div>
+          <h3>Profile</h3>
+          <p>Your streaks and badges, plus Your Story: every goal you've finished and every milestone you've hit, gathered into one timeline.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon-badge">
+            <!-- assets/icons/nudges/cheer.svg, inlined so it can pick up the
+                 badge's currentColor the way the tab marks above do. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.5,20 L9.5,13.5 C8.6,13.5 8,12.7 8,11.9 L8,6.5 C8,5.8 8.6,5.2 9.2,5.2 C9.9,5.2 10.4,5.8 10.4,6.5 L10.4,10.5"/>
+              <path d="M10.4,10.5 L10.4,4.7 C10.4,4 11,3.4 11.7,3.4 C12.4,3.4 13,4 13,4.7 L13,10.3"/>
+              <path d="M13,10.3 L13,5.4 C13,4.7 13.6,4.1 14.3,4.1 C15,4.1 15.6,4.7 15.6,5.4 L15.6,11"/>
+              <path d="M15.6,11 L15.6,7.6 C15.6,6.9 16.2,6.3 16.9,6.3 C17.6,6.3 18.2,6.9 18.2,7.6 L18.2,13.5 C18.2,17.1 15.6,20 12.3,20 L9.5,20 Z"/>
+              <path d="M5,9 L6.6,10.3"/>
+              <path d="M4.3,13 L6.3,13"/>
+            </svg>
+          </div>
+          <h3>Nudges</h3>
+          <p>One-tap cheers when a friend's on a streak or gone quiet. When someone's about to lose a streak, you can water it for them.</p>
+        </div>
+
       </div>
     </section>
   </div>
@@ -1348,13 +1259,13 @@
         </div>
         <div class="roadmap-item">
           <span class="roadmap-badge">Next</span>
-          <h3>Daily mood</h3>
-          <p>A one-swipe evening check-in, so friends can see how your day actually went.</p>
+          <h3>The iOS beta</h3>
+          <p>Sign in with Apple is already written. The rest is a build pipeline and Apple's review.</p>
         </div>
         <div class="roadmap-item">
           <span class="roadmap-badge">Later</span>
-          <h3>Life timeline</h3>
-          <p>Your wins collected into a story you'll never want to delete.</p>
+          <h3>More that logs itself</h3>
+          <p>Steps already sync from Health Connect on Android. HealthKit, and per-metric control over what your circle sees, come next.</p>
         </div>
       </div>
     </section>
@@ -1372,7 +1283,7 @@
         <p class="eyebrow">Get the app</p>
         <h2>Join the beta.</h2>
         <p class="sub">Kinly is in active testing on Android right now — an iOS beta will follow once that's sorted out.</p>
-        <a class="btn btn-primary" href="https://expo.dev/accounts/sriharsha87/projects/kinly/builds/21099b0a-1789-4df3-8177-59989527a29a" target="_blank" rel="noopener">Join the Beta — Android</a>
+        <a class="btn btn-primary" href="https://expo.dev/accounts/sriharsha87/projects/kinly/builds/ef85964b-2d6e-449d-8a30-86a175ab1183" target="_blank" rel="noopener">Join the Beta — Android</a>
         <p class="fine">Takes about a minute. Android only for now.</p>
 
         <div class="install-steps">
@@ -1390,10 +1301,15 @@
       <p class="eyebrow">Built with</p>
       <div class="built-with">
         <span class="chip">React Native · Expo</span>
-        <span class="chip">Supabase (Postgres · Auth · Storage · Edge Functions)</span>
-        <span class="chip">TanStack Query</span>
+        <span class="chip">TypeScript</span>
+        <span class="chip">Supabase (Postgres · RLS · Auth · Storage · Edge Functions)</span>
+        <span class="chip">TanStack Query, persisted for offline</span>
         <span class="chip">Zustand</span>
         <span class="chip">Reanimated</span>
+        <span class="chip">Expo Notifications (FCM)</span>
+        <span class="chip">Health Connect</span>
+        <span class="chip">Sentry</span>
+        <span class="chip">EAS Build</span>
       </div>
     </section>
   </div>
@@ -1453,15 +1369,10 @@
   revealOnScroll('gardenStages');
   revealOnScroll('gardenMiniStages');
 
-  // Real screenshots aren't in assets/screenshots/ yet - swap any missing
-  // one for a labeled placeholder instead of a broken image icon.
-  document.querySelectorAll('.glass img[data-fallback]').forEach(function(img){
-    img.addEventListener('error', function(){
-      var placeholder = document.createElement('div');
-      placeholder.className = 'placeholder';
-      placeholder.textContent = img.getAttribute('data-fallback');
-      img.replaceWith(placeholder);
-    });
+  // A screenshot that fails to load is hidden rather than left as a broken
+  // image icon inside the phone. The hero cycles the rest regardless.
+  document.querySelectorAll('.hero-shot').forEach(function(img){
+    img.addEventListener('error', function(){ img.style.display = 'none'; });
   });
 
   // The nav condenses once the hero is behind you. Deliberately outside the
@@ -1493,7 +1404,6 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie_light.min.js"></script>
 <script>
 (function(){
   var gsap = window.gsap;
@@ -1520,30 +1430,6 @@
         lenis.scrollTo(target, { offset: -70 });
       });
     });
-  }
-
-  // ---------- The brand mark, drawn ----------
-  // assets/kinly-logo.json is the app's launch animation. It replaces the
-  // static PNG only once Lottie has actually parsed it.
-  var markBox = document.getElementById('heroMark');
-  if (markBox && window.lottie) {
-    try {
-      var holder = document.createElement('div');
-      var anim = window.lottie.loadAnimation({
-        container: holder,
-        renderer: 'svg',
-        loop: false,
-        autoplay: false,
-        path: 'assets/kinly-logo.json'
-      });
-      anim.addEventListener('DOMLoaded', function(){
-        markBox.innerHTML = '';
-        markBox.appendChild(holder);
-        holder.style.width = '56px';
-        holder.style.height = '62px';
-        anim.play();
-      });
-    } catch (err) { /* keep the PNG */ }
   }
 
   // ---------- Hero entrance ----------
@@ -1636,7 +1522,6 @@
   reveal('.stat');
   reveal('.flow-step');
   reveal('.feature-card', { y: 38 });
-  reveal('.phone-frame', { y: 44, stagger: 0.1 });
   reveal('.garden-explain > div', { y: 34, stagger: 0.12 });
   reveal('.compare-col', { y: 34, stagger: 0.12 });
   reveal('.roadmap-item');
