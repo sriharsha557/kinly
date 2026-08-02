@@ -8,6 +8,25 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script>
+  // Holds the hero back for the entrance animation at the bottom of the page,
+  // without ever risking a permanently blank hero: the timer below drops the
+  // class no matter what, and tells the motion script it lost its window, so
+  // a slow or blocked CDN produces a plain hero rather than a flash of the
+  // finished hero followed by it animating in from nothing.
+  (function(){
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+    var root = document.documentElement;
+    root.classList.add('pre-anim');
+    window.__introDeadlinePassed = false;
+    window.setTimeout(function(){
+      window.__introDeadlinePassed = true;
+      root.classList.remove('pre-anim');
+    }, 2000);
+  })();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500;1,6..72,600&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -145,10 +164,93 @@
     padding:96px 0 64px;
     position:relative;
   }
+  .hero-grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr);
+    gap:48px;
+    align-items:center;
+  }
+  /* The washes sit behind the copy and are allowed to bleed past the
+     content column, so the drift reads as light moving rather than a
+     shape sliding around inside a box. */
+  .hero-glow{
+    position:absolute;
+    inset:-10% -18% 0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .hero-glow i{
+    position:absolute;
+    display:block;
+    border-radius:50%;
+    filter:blur(70px);
+    opacity:0.55;
+  }
+  .hero-glow i:nth-child(1){
+    width:44vw; height:44vw; max-width:560px; max-height:560px;
+    top:-6%; left:-6%;
+    background:radial-gradient(circle, rgba(249,115,22,0.30), rgba(249,115,22,0) 68%);
+  }
+  .hero-glow i:nth-child(2){
+    width:38vw; height:38vw; max-width:480px; max-height:480px;
+    top:22%; right:-4%;
+    background:radial-gradient(circle, rgba(59,93,69,0.26), rgba(59,93,69,0) 68%);
+  }
+  /* Paired with the deadline script in <head>. Only the hero is held: every
+     other reveal starts from a state GSAP sets itself, so nothing below the
+     fold can get stuck hidden. */
+  .pre-anim .hero-copy > *, .pre-anim .hero-phone, .pre-anim .hero-glow{opacity:0;}
   .hero-mark{
-    width:56px; height:56px;
+    width:56px; height:62px;
     margin-bottom:28px;
   }
+  .hero-mark img, .hero-mark svg{width:56px; height:56px;}
+
+  /* ---------- HERO PHONE ---------- */
+  .hero-phone{
+    justify-self:center;
+    width:min(268px, 100%);
+  }
+  .hero-phone-shell{
+    position:relative;
+    border-radius:34px;
+    border:7px solid var(--ink);
+    background:var(--sand);
+    overflow:hidden;
+    box-shadow:0 30px 60px -28px rgba(34,40,31,0.45), 0 2px 6px rgba(34,40,31,0.06);
+  }
+  .hero-phone-screen{
+    position:relative;
+    aspect-ratio:9/19.5;
+  }
+  /* All five shots are stacked and only opacity changes, so a cycle never
+     reflows the page or re-decodes an image mid-transition. */
+  .hero-shot{
+    position:absolute;
+    inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    opacity:0;
+  }
+  .hero-shot.is-live{opacity:1;}
+  .hero-phone-label{
+    margin-top:14px;
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  @media (max-width: 880px){
+    .hero{padding-top:64px;}
+    .hero-grid{grid-template-columns:1fr; gap:44px;}
+    .hero-phone{width:min(232px, 70%);}
+  }
+
   .hero h1{
     font-size:clamp(38px, 6vw, 66px);
     font-style:italic;
@@ -187,6 +289,10 @@
 
   /* ---------- GARDEN BAR (signature) ---------- */
   .garden-bar{
+    /* Above .hero-glow, which is a positioned sibling and would otherwise
+       paint its wash over the plants and wash them out. */
+    position:relative;
+    z-index:1;
     margin-top:64px;
     background:linear-gradient(180deg, #F0EDDE 0%, #E8E4CE 100%);
     border:1px solid var(--line);
@@ -290,6 +396,55 @@
     height:1px;
     background:var(--line);
     margin-top:8px;
+  }
+
+  /* ---------- MOTION POLISH ---------- */
+  /* Lenis' own required styles. They are inert until the script adds the
+     .lenis classes to <html>, so they cost nothing when it never loads. */
+  html.lenis, html.lenis body{height:auto;}
+  .lenis.lenis-smooth{scroll-behavior:auto !important;}
+  .lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain;}
+  .lenis.lenis-stopped{overflow:hidden;}
+  .lenis.lenis-smooth iframe{pointer-events:none;}
+
+  /* The nav tightens and gains a shadow once the hero is behind you, so the
+     bar reads as floating over content rather than pinned to nothing. */
+  header.nav{transition:box-shadow 0.3s ease, background 0.3s ease;}
+  header.nav.is-condensed{
+    background:rgba(245,246,238,0.94);
+    box-shadow:0 1px 0 rgba(34,40,31,0.05), 0 10px 30px -22px rgba(34,40,31,0.5);
+  }
+  .nav-inner{transition:padding 0.3s cubic-bezier(.2,.8,.2,1);}
+  header.nav.is-condensed .nav-inner{padding-top:10px; padding-bottom:10px;}
+
+  .btn-primary{
+    box-shadow:0 10px 22px -14px rgba(217,96,10,0.9);
+    transition:transform 0.18s cubic-bezier(.2,.8,.2,1), background 0.15s ease, box-shadow 0.25s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 16px 30px -14px rgba(217,96,10,0.85);}
+  .btn-ghost:hover{transform:translateY(-1px);}
+
+  .point, .roadmap-item, .install-step{
+    transition:transform 0.25s cubic-bezier(.2,.8,.2,1), border-color 0.25s ease;
+  }
+  .point:hover, .roadmap-item:hover{transform:translateY(-3px);}
+  .phone-frame .glass{transition:transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease;}
+  .phone-frame:hover .glass{
+    transform:translateY(-6px);
+    box-shadow:0 24px 46px -26px rgba(34,40,31,0.5);
+  }
+
+  /* Everything above is decoration. Under reduced motion the page keeps its
+     layout and colour and simply stops moving - the JS below makes the same
+     call and skips its timelines, smooth scroll, and phone cycle. */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:0.001ms !important;
+      scroll-behavior:auto !important;
+    }
+    .hero-glow{display:none;}
   }
 
   /* ---------- SECTIONS ---------- */
@@ -421,7 +576,15 @@
     display:flex; align-items:center; justify-content:center;
     margin-bottom:18px;
   }
-  .feature-card .icon-badge img{width:24px; height:24px;}
+  /* The badge sets `color`, and the icons below are drawn with
+     stroke/fill="currentColor" - they're the app's own tab icons
+     (src/components/icons/TabIcons.tsx) transcribed to plain SVG, so the
+     site shows the same marks the app does. */
+  .feature-card .icon-badge{color:var(--orange-deep);}
+  .feature-card .icon-badge svg{width:24px; height:24px; display:block;}
+  /* Circle is the brand mark itself, in full colour, so it doesn't take the
+     badge's currentColor like its siblings. */
+  .feature-card .icon-badge img{width:26px; height:26px;}
   .feature-card h3{
     font-size:19px;
     font-style:italic;
@@ -485,6 +648,18 @@
     letter-spacing:0.06em;
     text-transform:uppercase;
     color:#B9CDBB;
+    text-align:center;
+  }
+  /* The streak each stage is reached at (src/lib/gardenGrowth.ts owns the
+     3 / 14 / 30 thresholds). Quieter than the stage name so the row still
+     reads as five stages first and a scale second. */
+  .stage-mini span b{
+    display:block;
+    margin-top:4px;
+    font-weight:400;
+    font-size:9.5px;
+    letter-spacing:0.04em;
+    color:#8FAA93;
   }
   @media (max-width: 760px){
     .garden-explain{grid-template-columns:1fr; padding:36px 26px;}
@@ -778,14 +953,41 @@
 <main id="top">
   <div class="wrap">
     <section class="hero">
-      <img class="hero-mark" src="assets/brand/logo-web.png" alt="">
-      <h1>Growth doesn't happen alone.</h1>
-      <p class="lede">Kinly is a small, private space for you and 2–10 friends — a Growth Circle — to check in, chase goals, and grow together. No feeds, no strangers, no performing.</p>
-      <div class="hero-ctas">
-        <a class="btn btn-primary" href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener">View on GitHub</a>
-        <a class="btn btn-ghost" href="#screens">See how it works</a>
+      <!-- Two slow-drifting radial washes behind the hero copy. Decorative
+           only, and they stop entirely under prefers-reduced-motion. -->
+      <div class="hero-glow" aria-hidden="true"><i></i><i></i></div>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <!-- assets/kinly-logo.json is the app's own launch animation. The
+               PNG is what shows until (and if) Lottie loads, so the mark is
+               never missing when the CDN is blocked. -->
+          <div class="hero-mark" id="heroMark"><img src="assets/brand/logo-web.png" alt=""></div>
+          <h1>Growth doesn't happen alone.</h1>
+          <p class="lede">Kinly is a small, private space for you and 2–10 friends — a Growth Circle — to check in, chase goals, and grow together. No feeds, no strangers, no performing.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="https://github.com/sriharsha557/kinly" target="_blank" rel="noopener">View on GitHub</a>
+            <a class="btn btn-ghost" href="#screens">See how it works</a>
+          </div>
+          <div class="status-chip"><span class="status-dot"></span> In active development — Android testing now</div>
+        </div>
+
+        <!-- The same five shots the "See it" row uses, cross-faded in place.
+             aria-hidden because that row already presents them with captions
+             a screen reader can actually use. -->
+        <div class="hero-phone" id="heroPhone" aria-hidden="true">
+          <div class="hero-phone-shell">
+            <div class="hero-phone-screen">
+              <img class="hero-shot is-live" src="assets/screenshots/today.png?v=2" alt="" data-label="Today">
+              <img class="hero-shot" src="assets/screenshots/circle.png?v=2" alt="" data-label="Circle">
+              <img class="hero-shot" src="assets/screenshots/goals.png?v=2" alt="" data-label="Goals">
+              <img class="hero-shot" src="assets/screenshots/connection.png?v=2" alt="" data-label="Together">
+              <img class="hero-shot" src="assets/screenshots/profile.png?v=2" alt="" data-label="Profile">
+            </div>
+          </div>
+          <div class="hero-phone-label" id="heroPhoneLabel">Today</div>
+        </div>
       </div>
-      <div class="status-chip"><span class="status-dot"></span> In active development — Android testing now</div>
 
       <div class="garden-bar" id="gardenBar">
         <div class="garden-stages" id="gardenStages">
@@ -923,37 +1125,81 @@
       <div class="feature-grid">
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/home.svg" alt=""></div>
+          <div class="icon-badge">
+            <svg viewBox="0 5.5 200 200" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="100" cy="38" r="9" fill="currentColor" stroke="none"/>
+              <path d="M28,100 L100,44 L172,100"/>
+              <path d="M46,90 L46,168 C46,172 49,175 53,175 L147,175 C151,175 154,172 154,168 L154,90"/>
+              <path d="M84,175 L84,130 C84,124 89,120 95,120 L105,120 C111,120 116,124 116,130 L116,175" stroke-width="12"/>
+            </svg>
+          </div>
           <h3>Today</h3>
           <p>Your one clear answer to "what should I do right now" — a greeting, your circle's health at a glance, today's goals to check off, and what your circle's been up to.</p>
         </div>
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/people.svg" alt=""></div>
+          <div class="icon-badge"><img src="assets/brand/logo-web.png" alt=""></div>
           <h3>Circle</h3>
           <p>Every member's garden, side by side. Pair up with an accountability buddy and take on challenges together.</p>
         </div>
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/goals.svg" alt=""></div>
+          <div class="icon-badge">
+            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+              <circle cx="100" cy="100" r="82" stroke-width="12"/>
+              <circle cx="100" cy="100" r="54" stroke-width="12"/>
+              <circle cx="84" cy="88" r="7" fill="currentColor" stroke="none"/>
+              <circle cx="116" cy="88" r="7" fill="currentColor" stroke="none"/>
+              <path d="M76,108 C76,120 88,128 100,122" stroke-width="8"/>
+              <path d="M124,108 C124,120 112,128 100,122" stroke-width="8"/>
+            </svg>
+          </div>
           <h3>Goals</h3>
           <p>Set a target, log progress, keep the streak alive. Suggestions are tailored to what you actually care about.</p>
         </div>
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/chat.svg" alt=""></div>
-          <h3>Connection</h3>
+          <div class="icon-badge">
+            <svg viewBox="0 -6 200 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M100,20 C147,20 176,50 176,88 C176,126 147,156 100,156 C88,156 77,154 67,150 L38,168 L46,140 C24,126 24,50 67,26 C77,22 88,20 100,20 Z" stroke-width="11"/>
+              <circle cx="80" cy="80" r="8" fill="currentColor" stroke="none"/>
+              <circle cx="122" cy="80" r="8" fill="currentColor" stroke="none"/>
+              <path d="M68,108 C68,128 88,140 101,131" stroke-width="10"/>
+              <path d="M134,108 C134,128 114,140 101,131" stroke-width="10"/>
+            </svg>
+          </div>
+          <h3>Together</h3>
           <p>One daily prompt for the whole circle, answers hidden until you post your own — plus a couple of two-minute games for lighter days.</p>
         </div>
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/profile.svg" alt=""></div>
+          <div class="icon-badge">
+            <svg viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true">
+              <circle cx="100" cy="76" r="46" stroke-width="13"/>
+              <circle cx="84" cy="70" r="7" fill="currentColor" stroke="none"/>
+              <circle cx="116" cy="70" r="7" fill="currentColor" stroke="none"/>
+              <path d="M76,90 C76,104 90,113 100,106" stroke-width="9"/>
+              <path d="M124,90 C124,104 110,113 100,106" stroke-width="9"/>
+              <path d="M30,178 C30,140 62,130 100,130 C138,130 170,140 170,178" stroke-width="13"/>
+            </svg>
+          </div>
           <h3>Profile</h3>
           <p>Your streaks, your badges, your story — a running tally of what you've completed and a reflection on who you're becoming.</p>
         </div>
 
         <div class="feature-card">
-          <div class="icon-badge"><img src="assets/icons/notification.svg" alt=""></div>
+          <div class="icon-badge">
+            <!-- assets/icons/nudges/cheer.svg, inlined so it can pick up the
+                 badge's currentColor the way the tab marks above do. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9.5,20 L9.5,13.5 C8.6,13.5 8,12.7 8,11.9 L8,6.5 C8,5.8 8.6,5.2 9.2,5.2 C9.9,5.2 10.4,5.8 10.4,6.5 L10.4,10.5"/>
+              <path d="M10.4,10.5 L10.4,4.7 C10.4,4 11,3.4 11.7,3.4 C12.4,3.4 13,4 13,4.7 L13,10.3"/>
+              <path d="M13,10.3 L13,5.4 C13,4.7 13.6,4.1 14.3,4.1 C15,4.1 15.6,4.7 15.6,5.4 L15.6,11"/>
+              <path d="M15.6,11 L15.6,7.6 C15.6,6.9 16.2,6.3 16.9,6.3 C17.6,6.3 18.2,6.9 18.2,7.6 L18.2,13.5 C18.2,17.1 15.6,20 12.3,20 L9.5,20 Z"/>
+              <path d="M5,9 L6.6,10.3"/>
+              <path d="M4.3,13 L6.3,13"/>
+            </svg>
+          </div>
           <h3>Nudges</h3>
           <p>One-tap cheers when a friend's on a streak or gone quiet — a small push, never a lecture.</p>
         </div>
@@ -968,31 +1214,39 @@
       filenames (9:19.5 aspect ratio, e.g. a raw phone screenshot works
       fine) and each placeholder below is replaced automatically:
         today.png, circle.png, goals.png, connection.png, profile.png
+      connection.png is the tab the app labels "Together"; the filename
+      follows the internal route name, which is still Connection.
+
+      Bump ?v= on every src when the images are replaced. GitHub Pages sends
+      a long max-age for /assets, so a same-named replacement otherwise keeps
+      showing the old shot to anyone who has visited before.
     -->
     <section id="app-screens" style="padding-top:0;">
       <div class="section-head">
         <p class="eyebrow">See it</p>
         <h2>What it actually looks like.</h2>
       </div>
-      <div class="screens-row">
+      <!-- data-lenis-prevent: this row scrolls horizontally, and Lenis would
+           otherwise swallow the trackpad gesture into the page scroll. -->
+      <div class="screens-row" data-lenis-prevent>
         <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/today.png" alt="Today screen" data-fallback="Today"></div>
+          <div class="glass"><img src="assets/screenshots/today.png?v=2" alt="Today screen" data-fallback="Today"></div>
           <div class="caption">Today</div>
         </div>
         <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/circle.png" alt="Circle screen" data-fallback="Circle"></div>
+          <div class="glass"><img src="assets/screenshots/circle.png?v=2" alt="Circle screen" data-fallback="Circle"></div>
           <div class="caption">Circle</div>
         </div>
         <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/goals.png" alt="Goals screen" data-fallback="Goals"></div>
+          <div class="glass"><img src="assets/screenshots/goals.png?v=2" alt="Goals screen" data-fallback="Goals"></div>
           <div class="caption">Goals</div>
         </div>
         <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/connection.png" alt="Connection screen" data-fallback="Connection"></div>
-          <div class="caption">Connection</div>
+          <div class="glass"><img src="assets/screenshots/connection.png?v=2" alt="Together screen" data-fallback="Together"></div>
+          <div class="caption">Together</div>
         </div>
         <div class="phone-frame">
-          <div class="glass"><img src="assets/screenshots/profile.png" alt="Profile screen" data-fallback="Profile"></div>
+          <div class="glass"><img src="assets/screenshots/profile.png?v=2" alt="Profile screen" data-fallback="Profile"></div>
           <div class="caption">Profile</div>
         </div>
       </div>
@@ -1005,28 +1259,29 @@
         <div>
           <p class="eyebrow">The signature mechanic</p>
           <h2>Every goal plants something.</h2>
-          <p>Kinly turns consistency into something you can actually see. Log a goal and your garden moves forward. Go quiet, and it wilts — no lectures, just a plant that notices.</p>
+          <p>Kinly turns consistency into something you can actually see. Every day you log a goal your plant grows a little, not only when it reaches the next stage, and it never shrinks back. Go quiet and it wilts. No lectures, just a plant that notices.</p>
+          <p>Your whole circle stands in one row, each plant swaying to its own rhythm, under a sky that tracks your time of day from dawn through night.</p>
         </div>
         <div class="stage-mini-row" id="gardenMiniStages" aria-hidden="true">
           <div class="stage-mini">
             <svg viewBox="0 0 60 90" width="20" height="34"><ellipse cx="30" cy="80" rx="8" ry="5" fill="#B8B39A"/></svg>
-            <span>Wilted</span>
+            <span>Wilted<b>quiet</b></span>
           </div>
           <div class="stage-mini">
             <svg viewBox="0 0 60 90" width="24" height="40"><ellipse cx="30" cy="82" rx="5" ry="3.5" fill="#DCD4A8"/><path d="M30,82 C30,70 30,66 30,60" pathLength="1" class="stem-draw" stroke="#BFE0C4" stroke-width="4" stroke-linecap="round" fill="none"/></svg>
-            <span>Seed</span>
+            <span>Seed<b>day 1</b></span>
           </div>
           <div class="stage-mini">
             <svg viewBox="0 0 60 100" width="30" height="50"><path d="M30,90 L30,50" pathLength="1" class="stem-draw" stroke="#BFE0C4" stroke-width="5" stroke-linecap="round"/><g class="sway"><path d="M30,64 C18,58 14,46 16,36 C28,38 32,50 30,64 Z" fill="#BFE0C4"/></g></svg>
-            <span>Sprout</span>
+            <span>Sprout<b>day 3</b></span>
           </div>
           <div class="stage-mini">
             <svg viewBox="0 0 60 130" width="36" height="68"><path d="M30,120 L30,64" pathLength="1" class="stem-draw" stroke="#BFE0C4" stroke-width="6" stroke-linecap="round"/><g class="sway"><circle cx="30" cy="46" r="26" fill="#BFE0C4"/></g></svg>
-            <span>Tree</span>
+            <span>Tree<b>day 14</b></span>
           </div>
           <div class="stage-mini">
             <svg viewBox="0 0 60 140" width="40" height="76"><path d="M30,130 L30,70" pathLength="1" class="stem-draw" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/><g class="sway"><circle cx="30" cy="46" r="28" fill="#FFFFFF"/><circle cx="14" cy="34" r="6" fill="#F97316" class="flower-dot"/><circle cx="44" cy="30" r="5.5" fill="#F9A93F" class="flower-dot" style="animation-delay:0.6s"/></g></svg>
-            <span>Bloom</span>
+            <span>Bloom<b>day 30</b></span>
           </div>
         </div>
       </div>
@@ -1208,6 +1463,229 @@
       img.replaceWith(placeholder);
     });
   });
+
+  // The nav condenses once the hero is behind you. Deliberately outside the
+  // GSAP block below: it is a class toggle, it costs nothing, and it should
+  // still happen when the animation CDNs are blocked or motion is reduced.
+  (function(){
+    var nav = document.querySelector('header.nav');
+    if (!nav) return;
+    var ticking = false;
+    function sync(){
+      nav.classList.toggle('is-condensed', window.scrollY > 40);
+      ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+      if (!ticking) { ticking = true; window.requestAnimationFrame(sync); }
+    }, { passive: true });
+    sync();
+  })();
+</script>
+
+<!--
+  Motion layer. Every library here is optional: the page is fully laid out,
+  readable, and navigable without them, and the script below bails out if
+  any is missing (blocked CDN, offline, strict network) or if the visitor
+  prefers reduced motion. Nothing is hidden in CSS for that reason - the
+  entrance states are set from JS, so an element can only be invisible if
+  the code that reveals it is definitely running.
+-->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lottie-web@5.12.2/build/player/lottie_light.min.js"></script>
+<script>
+(function(){
+  var gsap = window.gsap;
+  if (prefersReduced || !gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(window.ScrollTrigger);
+  var ScrollTrigger = window.ScrollTrigger;
+
+  // ---------- Smooth scroll ----------
+  // Lenis drives GSAP's ticker rather than its own rAF loop, so scroll
+  // position and every ScrollTrigger read happen in one frame instead of
+  // two that can disagree by a few pixels.
+  if (window.Lenis) {
+    var lenis = new window.Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function(time){ lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+    // In-page links have to go through Lenis too, or the browser's instant
+    // jump fights the eased scroll already in flight.
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click', function(e){
+        var target = document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: -70 });
+      });
+    });
+  }
+
+  // ---------- The brand mark, drawn ----------
+  // assets/kinly-logo.json is the app's launch animation. It replaces the
+  // static PNG only once Lottie has actually parsed it.
+  var markBox = document.getElementById('heroMark');
+  if (markBox && window.lottie) {
+    try {
+      var holder = document.createElement('div');
+      var anim = window.lottie.loadAnimation({
+        container: holder,
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: 'assets/kinly-logo.json'
+      });
+      anim.addEventListener('DOMLoaded', function(){
+        markBox.innerHTML = '';
+        markBox.appendChild(holder);
+        holder.style.width = '56px';
+        holder.style.height = '62px';
+        anim.play();
+      });
+    } catch (err) { /* keep the PNG */ }
+  }
+
+  // ---------- Hero entrance ----------
+  // Skipped outright if the libraries arrived after the head script gave up
+  // waiting: by then the visitor has already seen the finished hero, and
+  // replaying it from nothing would read as a glitch.
+  var missedIntro = window.__introDeadlinePassed;
+  var heroBits = ['#heroMark', '.hero h1', '.hero p.lede', '.hero-ctas', '.hero .status-chip'];
+
+  if (!missedIntro) {
+    gsap.set(heroBits, { opacity: 0, y: 26 });
+    gsap.set('.hero-phone', { opacity: 0, y: 46, rotateZ: -1.5 });
+    gsap.set('.hero-glow', { opacity: 1 });
+    gsap.set('.hero-glow i', { opacity: 0, scale: 0.85 });
+    document.documentElement.classList.remove('pre-anim');
+
+    gsap.timeline({ defaults: { ease: 'power3.out' } })
+      .to('.hero-glow i', { opacity: 0.55, scale: 1, duration: 1.6, stagger: 0.25 })
+      .to('#heroMark', { opacity: 1, y: 0, duration: 0.7 }, 0.15)
+      .to('.hero h1', { opacity: 1, y: 0, duration: 0.9 }, 0.35)
+      .to('.hero p.lede', { opacity: 1, y: 0, duration: 0.8 }, 0.55)
+      .to('.hero-phone', { opacity: 1, y: 0, rotateZ: 0, duration: 1.1 }, 0.6)
+      .to('.hero-ctas', { opacity: 1, y: 0, duration: 0.7 }, 0.8)
+      .to('.hero .status-chip', { opacity: 1, y: 0, duration: 0.6 }, 0.95);
+  }
+
+  // Once settled, the washes keep drifting and the phone keeps floating, at
+  // amplitudes small enough to read as "alive" rather than "animating".
+  // These run either way - they are the resting state, not the entrance.
+  gsap.to('.hero-glow i:nth-child(1)', { x: 40, y: -26, duration: 13, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 1.6 });
+  gsap.to('.hero-glow i:nth-child(2)', { x: -34, y: 22, duration: 16, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 1.8 });
+  gsap.to('.hero-phone-shell', { y: -12, duration: 3.6, yoyo: true, repeat: -1, ease: 'sine.inOut', delay: 1.7 });
+
+  // ---------- The phone cycles real screens ----------
+  var shots = gsap.utils.toArray('.hero-shot');
+  var label = document.getElementById('heroPhoneLabel');
+  if (shots.length > 1) {
+    var index = 0;
+    var cycle = gsap.delayedCall(3.4, function step(){
+      var current = shots[index];
+      index = (index + 1) % shots.length;
+      var next = shots[index];
+      gsap.to(current, { opacity: 0, duration: 0.7, ease: 'power2.inOut' });
+      gsap.fromTo(next, { opacity: 0 }, { opacity: 1, duration: 0.7, ease: 'power2.inOut' });
+      if (label) {
+        gsap.to(label, {
+          opacity: 0, duration: 0.22,
+          onComplete: function(){
+            label.textContent = next.getAttribute('data-label');
+            gsap.to(label, { opacity: 1, duration: 0.3 });
+          }
+        });
+      }
+      cycle.restart(true);
+    });
+    // A cycle nobody is looking at is wasted work, and returning to the tab
+    // after a long absence should not replay a queue of missed transitions.
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) cycle.pause(); else cycle.restart(true);
+    });
+  }
+
+  // ---------- Scroll reveals ----------
+  // One helper for every group: same distance, same easing, stagger only
+  // where there is a row of siblings to stagger.
+  function reveal(selector, options){
+    var items = gsap.utils.toArray(selector);
+    if (!items.length) return;
+    options = options || {};
+    gsap.set(items, { opacity: 0, y: options.y || 30 });
+    ScrollTrigger.batch(items, {
+      start: 'top 88%',
+      once: true,
+      onEnter: function(batch){
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: options.duration || 0.85,
+          ease: 'power3.out',
+          stagger: options.stagger === undefined ? 0.09 : options.stagger,
+          overwrite: true
+        });
+      }
+    });
+  }
+
+  reveal('.section-head > *', { stagger: 0.07, y: 22 });
+  reveal('.point');
+  reveal('.intro-grid > div:first-child > *', { stagger: 0.08, y: 22 });
+  reveal('.stat');
+  reveal('.flow-step');
+  reveal('.feature-card', { y: 38 });
+  reveal('.phone-frame', { y: 44, stagger: 0.1 });
+  reveal('.garden-explain > div', { y: 34, stagger: 0.12 });
+  reveal('.compare-col', { y: 34, stagger: 0.12 });
+  reveal('.roadmap-item');
+  reveal('.install-step', { y: 20, stagger: 0.07 });
+  reveal('.chip', { y: 16, stagger: 0.05 });
+  // :not(.install-steps) so the numbered steps are revealed once, by their
+  // own batch below, rather than fading in inside a wrapper that is itself
+  // still fading in.
+  reveal('.beta-cta > :not(.install-steps)', { stagger: 0.09, y: 26 });
+
+  // The closing CTA gets one breath of attention when it arrives, and then
+  // stops. A button that pulses forever is a button people stop seeing.
+  var cta = document.querySelector('.beta-cta .btn-primary');
+  if (cta) {
+    ScrollTrigger.create({
+      trigger: cta,
+      start: 'top 85%',
+      once: true,
+      onEnter: function(){
+        gsap.fromTo(cta,
+          { scale: 1 },
+          { scale: 1.045, duration: 0.75, ease: 'sine.inOut', yoyo: true, repeat: 3, delay: 0.5 }
+        );
+      }
+    });
+  }
+
+  // The garden rows animate off a CSS class, and the IntersectionObserver
+  // above already added it. Refresh so ScrollTrigger measures the page after
+  // fonts and the screenshot images have settled.
+  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+
+  // Last-resort net for the hero only. GSAP drives its tweens off rAF, which
+  // a browser is free to withhold from a backgrounded tab - and the hero is
+  // the one place where "still at the start of its entrance" means a blank
+  // first screen. If anything up there is still invisible well after load,
+  // it gets put back rather than waiting for a frame that may not come.
+  window.addEventListener('load', function(){
+    window.setTimeout(function(){
+      heroBits.concat(['.hero-phone']).forEach(function(selector){
+        document.querySelectorAll(selector).forEach(function(el){
+          if (parseFloat(window.getComputedStyle(el).opacity) < 0.05) {
+            gsap.set(el, { clearProps: 'all' });
+          }
+        });
+      });
+    }, 4000);
+  });
+})();
 </script>
 
 </body>
