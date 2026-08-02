@@ -6,6 +6,7 @@ import { queryClient } from '../lib/queryClient';
 import { asyncStoragePersister } from '../lib/persister';
 import { useTheme } from '../theme/ThemeProvider';
 import { SadIcon } from './icons/MonoIcons';
+import { fontFamily, spacing } from '../theme/colors';
 
 // Sentry.ErrorBoundary's fallback render prop - shown instead of a blank/
 // frozen screen when a render-time error escapes every screen's own
@@ -56,9 +57,9 @@ export function ErrorFallback({ resetError }: { resetError: () => void }) {
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
-    title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginTop: 8, textAlign: 'center' },
-    body: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-    actions: { flexDirection: 'row', gap: 10, marginTop: 24, width: '100%' },
+    content: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: 10 },
+    title: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm, textAlign: 'center' },
+    body: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
+    actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xxl, width: '100%' },
   });
 }

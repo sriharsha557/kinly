@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -79,7 +80,7 @@ export default function ResetPasswordScreen() {
                 onPress={handleSave}
                 loading={submitting}
                 disabled={!password || !confirm}
-                style={{ marginTop: 8 }}
+                style={{ marginTop: spacing.sm }}
               />
             </View>
           </View>
@@ -92,10 +93,10 @@ export default function ResetPasswordScreen() {
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    body: { padding: 24, paddingTop: 28 },
+    body: { padding: spacing.xxl, paddingTop: 28 },
     form: { gap: 14 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.onAccent, marginTop: 12, textAlign: 'center' },
-    subtitle: { fontSize: 14, color: colors.onAccentMuted, marginTop: 4, textAlign: 'center' },
+    title: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md, textAlign: 'center' },
+    subtitle: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.onAccentMuted, marginTop: spacing.xs, textAlign: 'center' },
     error: { color: colors.danger, textAlign: 'center' },
   });
 }

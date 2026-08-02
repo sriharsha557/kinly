@@ -7,7 +7,7 @@ import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoal
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -155,18 +155,18 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 16,
-      marginBottom: 16,
+      padding: spacing.lg,
+      marginBottom: spacing.lg,
       gap: 10,
       ...shadow,
     },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
-    progressCount: { fontSize: 13, fontWeight: '700', color: colors.primary },
-    empty: { fontSize: 14, lineHeight: 20, color: colors.textSecondary },
-    done: { fontSize: 14, fontWeight: '600', color: colors.success },
-    list: { gap: 8 },
-    row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
+    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    progressCount: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
+    empty: { ...type.secondary, color: colors.textSecondary },
+    done: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.success },
+    list: { gap: spacing.sm },
+    row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     checkbox: {
       width: 28,
       height: 28,
@@ -177,11 +177,11 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       justifyContent: 'center',
     },
     checkboxChecked: { backgroundColor: colors.success, borderColor: colors.success },
-    checkmark: { color: colors.onAccent, fontSize: 13, fontWeight: '800' },
-    checkboxLoading: { fontSize: 12, color: colors.primary },
+    checkmark: { color: colors.onAccent, fontSize: 13, fontFamily: fontFamily.bold },
+    checkboxLoading: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.primary },
     rowBody: { flex: 1, gap: 1 },
-    rowText: { fontSize: 16, color: colors.textPrimary },
+    rowText: { fontSize: 16, fontFamily: fontFamily.regular, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
-    rowContext: { fontSize: 13, color: colors.textSecondary },
+    rowContext: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }

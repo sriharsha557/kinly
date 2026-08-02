@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
@@ -129,10 +130,10 @@ export function CircleTodaySection({
 
 function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    section: { marginBottom: 24 },
+    section: { marginBottom: spacing.xxl },
     heading: {
       fontSize: 13,
-      fontWeight: '700',
+      fontFamily: fontFamily.bold,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
       color: colors.textSecondary,
@@ -142,31 +143,31 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: 12,
+      gap: spacing.md,
       minHeight: 56,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     rowCopy: { flex: 1, gap: 2 },
-    name: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
-    detail: { fontSize: 14, color: colors.textSecondary },
+    name: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    detail: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // Overrides PillButton's full-width default padding so the action sits
     // as a compact trailing control rather than dominating the row.
     // Compact against PillButton's full-width default, but minHeight keeps
     // it on the 48dp touch-target floor - the row is not the tappable thing,
     // so the row's own 56dp height does not cover this.
-    action: { paddingVertical: 12, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
+    action: { paddingVertical: spacing.md, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
     empty: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: spacing.md,
       backgroundColor: colors.surfaceSubtle,
       borderRadius: radii.card,
-      padding: 16,
+      padding: spacing.lg,
     },
     emptyCopy: { flex: 1, gap: 2 },
-    emptyTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
-    emptyBody: { fontSize: 14, color: colors.textSecondary },
+    emptyTitle: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    emptyBody: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }

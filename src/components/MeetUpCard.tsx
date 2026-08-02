@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useMeetups, useProposeMeetup, useRsvpMeetup, type MeetupWithRsvps } from '../hooks/useMeetups';
@@ -136,19 +137,19 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-    empty: { fontSize: 13, color: colors.shellSecondary },
-    meetupRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: 12, gap: 4 },
-    meetupTitle: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
-    meetupNote: { fontSize: 12, color: colors.textSecondary },
-    meetupMeta: { fontSize: 11, color: colors.textSecondary },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    meetupRow: { backgroundColor: colors.inputBg, borderRadius: radii.input, padding: spacing.md, gap: spacing.xs },
+    meetupTitle: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    meetupNote: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    meetupMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     rsvpRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
     rsvpChip: {
       backgroundColor: colors.inputBg,
@@ -157,29 +158,29 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 5,
     },
     rsvpChipActive: { backgroundColor: colors.primary },
-    rsvpChipText: { fontSize: 11, fontWeight: '600', color: colors.textSecondary },
+    rsvpChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     rsvpChipTextActive: { color: colors.onAccent },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

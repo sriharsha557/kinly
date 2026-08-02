@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuthStore } from '../state/useAuthStore';
@@ -116,10 +117,10 @@ export function GoalSuggestions({ circleId, userId }: { circleId: string; userId
 
 function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-    sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
-    suggestionsSection: { marginBottom: 20 },
-    suggestionsRow: { gap: 10, paddingRight: 16 },
+    sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
+    sectionTitle: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    suggestionsSection: { marginBottom: spacing.xl },
+    suggestionsRow: { gap: 10, paddingRight: spacing.lg },
     suggestionCard: {
       ...cardShell,
       padding: 14,
@@ -127,29 +128,29 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       justifyContent: 'space-between',
       gap: 10,
     },
-    suggestionText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
-    suggestionAdd: { fontSize: 12, fontWeight: '800' },
+    suggestionText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    suggestionAdd: { fontSize: 13, fontFamily: fontFamily.bold },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

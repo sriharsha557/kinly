@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAddVisionItem, useDeleteVisionItem, useVisionItems } from '../hooks/useVisionBoard';
@@ -142,46 +143,46 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     itemCard: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       paddingVertical: 10,
       maxWidth: '48%',
     },
     itemImage: { width: '100%', height: 80, borderRadius: radii.input - 4, marginBottom: 6 },
-    itemTitle: { fontSize: 12, fontWeight: '600', color: colors.textPrimary },
-    itemOwner: { fontSize: 10, color: colors.textSecondary, marginTop: 2 },
-    empty: { fontSize: 13, color: colors.shellSecondary },
+    itemTitle: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    itemOwner: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
     imagePicker: {
       backgroundColor: colors.inputBg,
@@ -191,9 +192,9 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       justifyContent: 'center',
       overflow: 'hidden',
     },
-    imagePickerText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+    imagePickerText: { fontSize: 13, color: colors.textSecondary, fontFamily: fontFamily.semibold },
     imagePickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     imagePreview: { width: '100%', height: '100%' },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

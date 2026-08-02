@@ -5,7 +5,7 @@ import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 
 // Groups lower-frequency features behind a tap so the primary cards on a
 // screen aren't competing for the same visual weight as everything else.
@@ -48,7 +48,7 @@ export function DisclosureSection({
 
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    wrap: { marginBottom: 16 },
+    wrap: { marginBottom: spacing.lg },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -56,12 +56,12 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
       paddingVertical: 15,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       ...shadow,
     },
-    labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    label: { fontSize: 16, fontWeight: '700', color: colors.textPrimary },
-    chevron: { fontSize: 11, color: colors.textSecondary },
-    body: { marginTop: 12, gap: 0 },
+    labelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    label: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    chevron: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    body: { marginTop: spacing.md, gap: 0 },
   });
 }

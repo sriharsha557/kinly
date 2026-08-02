@@ -5,7 +5,7 @@ import { AppTextInput } from './AppTextInput';
 import { PillButton } from './PillButton';
 import { deleteAccount } from '../lib/auth';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 
 const CONFIRM_WORD = 'DELETE';
 
@@ -70,18 +70,18 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 24,
+      padding: spacing.xxl,
       gap: 14,
       ...shadow,
     },
-    title: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
-    body: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-    error: { color: colors.danger, fontSize: 13 },
-    actions: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    title: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    body: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 20 },
+    error: { color: colors.danger, fontSize: 13, fontFamily: fontFamily.regular },
+    actions: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

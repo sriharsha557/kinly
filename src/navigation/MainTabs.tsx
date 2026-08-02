@@ -17,7 +17,7 @@ import {
   ProfileTabIcon,
 } from '../components/icons/TabIcons';
 import { useTheme, type Theme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion } from '../theme/colors';
 import { useAuthStore } from '../state/useAuthStore';
 import { useMomentsUnread } from '../hooks/useMomentsUnread';
 import { useGoals } from '../hooks/useGoals';
@@ -173,7 +173,7 @@ function createStyles({ colors }: Theme) {
     },
     tabBarLabel: {
       fontSize: 11,
-      fontWeight: '600' as const,
+      fontFamily: fontFamily.semibold,
       marginTop: 2,
     },
   };

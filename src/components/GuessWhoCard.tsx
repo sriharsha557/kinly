@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
@@ -160,19 +161,19 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     revealedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 13, fontWeight: '500', color: colors.primary },
-    empty: { fontSize: 13, color: colors.shellSecondary },
-    hint: { fontSize: 11, color: colors.shellSecondary, marginBottom: 6 },
-    postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: 12, gap: 8 },
-    fact: { fontSize: 13, fontWeight: '600', color: colors.textPrimary, fontStyle: 'italic' },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 13, fontFamily: fontFamily.medium, color: colors.primary },
+    empty: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, marginBottom: 6 },
+    postCard: { backgroundColor: colors.surface, borderRadius: radii.input, padding: spacing.md, gap: spacing.sm },
+    fact: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, fontStyle: 'italic' },
     memberChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: {
       backgroundColor: colors.inputBg,
@@ -181,32 +182,32 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       paddingVertical: 5,
     },
     chipActive: { backgroundColor: colors.primary },
-    chipText: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+    chipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     chipTextActive: { color: colors.onAccent },
-    revealed: { fontSize: 13, fontWeight: '700', color: colors.success },
-    guessCount: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+    revealed: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.success },
+    guessCount: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginTop: 2 },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       gap: 10,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    pickLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    pickLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { spacing } from '../theme/colors';
 
 export function GradientHeader({
   children,
@@ -29,6 +30,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 48,
-    paddingBottom: 32,
+    paddingBottom: spacing.section,
   },
 });

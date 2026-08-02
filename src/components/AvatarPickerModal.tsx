@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { PillButton } from './PillButton';
@@ -57,16 +58,16 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     card: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
+      padding: spacing.xl,
       alignItems: 'center',
       ...shadow,
     },
-    title: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 14 },
+    title: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: 14 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
     avatarWrap: {
       width: 64,
@@ -76,6 +77,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       backgroundColor: colors.inputBg,
     },
     avatarImage: { width: 64, height: 64 },
-    cancel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    cancel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

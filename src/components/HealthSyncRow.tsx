@@ -5,6 +5,7 @@ import { AnimatedPressable } from './AnimatedPressable';
 import { useHealthSync } from '../hooks/useHealthSync';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, spacing } from '../theme/colors';
 
 // Renders its own section heading and card, not just a row: the whole section
 // has to disappear together on a device that cannot have the feature, or an
@@ -87,29 +88,29 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // Appearance and the rest rather than looking bolted on.
     sectionTitle: {
       fontSize: 18,
-      fontWeight: '700',
+      fontFamily: fontFamily.bold,
       color: colors.textPrimary,
       marginTop: 28,
-      marginBottom: 12,
+      marginBottom: spacing.md,
     },
-    card: { ...cardShell, padding: 16 },
+    card: { ...cardShell, padding: spacing.lg },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: 12,
+      gap: spacing.md,
       minHeight: 56,
     },
     copy: { flex: 1, gap: 2 },
-    label: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
-    hint: { fontSize: 13, color: colors.textSecondary },
+    label: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     fix: {
       minHeight: 48,
       justifyContent: 'center',
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    fixText: { fontSize: 13, fontWeight: '700', color: colors.primary },
+    fixText: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary },
   });
 }

@@ -14,7 +14,7 @@ import { PillButton } from './PillButton';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useSubmitMoodCheckin, useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import { HappyIcon, NeutralIcon, SadIcon } from './icons/MonoIcons';
 import type { MoodValue } from '../types/models';
 
@@ -303,22 +303,22 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 16,
+      marginBottom: spacing.lg,
     },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle, marginBottom: 2 },
-    hint: { fontSize: 11, color: colors.shellSecondary },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle, marginBottom: 2 },
+    hint: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
     gridHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    changeLink: { fontSize: 12, fontWeight: '600', color: colors.primary },
+    changeLink: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.primary },
     sectionCaption: {
-      fontSize: 10,
-      fontWeight: '600',
+      fontSize: 13,
+      fontFamily: fontFamily.semibold,
       color: colors.shellSecondary,
       textTransform: 'uppercase',
       letterSpacing: 0.4,
       marginTop: 14,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     gridRow: { gap: 14 },
     memberChip: { alignItems: 'center', width: 52 },
@@ -331,8 +331,8 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
     },
     moodBubbleFilled: { backgroundColor: colors.inputBg },
     moodBubbleEmpty: { backgroundColor: colors.background },
-    moodBubbleText: { fontSize: 18, fontWeight: '700', color: colors.textSecondary },
-    memberName: { fontSize: 11, fontWeight: '600', color: colors.shellSecondary, marginTop: 4 },
+    moodBubbleText: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textSecondary },
+    memberName: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellSecondary, marginTop: spacing.xs },
 
     overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' },
     overlayDismiss: { ...StyleSheet.absoluteFillObject },
@@ -340,9 +340,9 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       backgroundColor: colors.background,
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
-      padding: 24,
+      padding: spacing.xxl,
       paddingBottom: 36,
-      gap: 4,
+      gap: spacing.xs,
       ...shadow,
     },
     sheetHandle: {
@@ -351,23 +351,23 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       borderRadius: 2,
       backgroundColor: colors.border,
       alignSelf: 'center',
-      marginBottom: 16,
+      marginBottom: spacing.lg,
     },
-    sheetTitle: { fontSize: 19, fontWeight: '700', color: colors.shellTitle, textAlign: 'center' },
-    sheetSubtitle: { fontSize: 13, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: 16 },
-    moodStack: { gap: 12, marginTop: 18 },
+    sheetTitle: { fontSize: 19, fontFamily: fontFamily.bold, color: colors.shellTitle, textAlign: 'center' },
+    sheetSubtitle: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, textAlign: 'center', marginTop: 2, marginBottom: spacing.lg },
+    moodStack: { gap: spacing.md, marginTop: 18 },
     moodOption: {
       borderWidth: 1.5,
       borderColor: colors.border,
       borderRadius: 20,
-      paddingVertical: 20,
+      paddingVertical: spacing.xl,
       alignItems: 'center',
       gap: 10,
       ...shadow,
     },
-    moodOptionLabel: { fontSize: 16, fontWeight: '600', color: colors.shellTitle },
+    moodOptionLabel: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     moodOptionLabelActive: { color: colors.onAccent },
-    tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     tagChip: {
       backgroundColor: colors.surface,
       borderWidth: 1,
@@ -378,7 +378,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       justifyContent: 'center',
     },
     tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-    tagChipText: { fontSize: 13, fontWeight: '600', color: colors.shellTitle },
+    tagChipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.shellTitle },
     tagChipTextActive: { color: colors.onAccent },
   });
 }

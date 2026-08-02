@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -63,28 +64,28 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
 
 function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    card: { borderRadius: radii.card, padding: 16, marginBottom: 20, gap: 10 },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '700', color: colors.onAccent },
-    prompt: { fontSize: 16, fontWeight: '700', color: colors.onAccent, lineHeight: 22 },
-    answerRow: { gap: 8 },
+    card: { borderRadius: radii.card, padding: spacing.lg, marginBottom: spacing.xl, gap: 10 },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.bold, color: colors.onAccent },
+    prompt: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.onAccent, lineHeight: 22 },
+    answerRow: { gap: spacing.sm },
     input: {
       backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.onAccent,
-      fontSize: 14,
+      fontSize: 14, fontFamily: fontFamily.regular,
       minHeight: 60,
       textAlignVertical: 'top',
     },
-    answers: { gap: 8 },
+    answers: { gap: spacing.sm },
     answerBubble: {
       backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
       padding: 10,
     },
-    answerAuthor: { fontSize: 11, fontWeight: '700', color: colors.background },
-    answerText: { fontSize: 13, color: colors.onAccent, marginTop: 2 },
+    answerAuthor: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.background },
+    answerText: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.onAccent, marginTop: 2 },
   });
 }

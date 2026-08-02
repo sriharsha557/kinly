@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
+import { fontFamily, spacing } from '../theme/colors';
 
 export function AppTextInput({ label, ...props }: TextInputProps & { label: string }) {
   const theme = useTheme();
@@ -16,13 +17,13 @@ export function AppTextInput({ label, ...props }: TextInputProps & { label: stri
 function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrapper: { gap: 6 },
-    label: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    label: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       paddingVertical: 14,
-      fontSize: 16,
+      fontSize: 16, fontFamily: fontFamily.regular,
       color: colors.textPrimary,
     },
   });

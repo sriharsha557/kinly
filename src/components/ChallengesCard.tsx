@@ -1,3 +1,4 @@
+import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import {
@@ -174,7 +175,7 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
       </View>
 
       {challenges && challenges.length > 0 ? (
-        <View style={{ gap: 12 }}>
+        <View style={{ gap: spacing.md }}>
           {challenges.map((challenge) => (
             <View key={challenge.id} style={styles.challenge}>
               <Text style={styles.challengeTitle}>{challenge.title}</Text>
@@ -223,42 +224,42 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
   return StyleSheet.create({
     card: {
       ...cardShell,
-      padding: 20,
+      padding: spacing.xl,
       paddingLeft: 18,
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    hintWrap: { marginTop: -10, marginBottom: 12 },
-    titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    newLink: { fontSize: 14, fontWeight: '500', color: colors.primary },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+    hintWrap: { marginTop: -10, marginBottom: spacing.md },
+    titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    newLink: { fontSize: 14, fontFamily: fontFamily.medium, color: colors.primary },
     challenge: { gap: 6 },
-    challengeTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
+    challengeTitle: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    challengeMeta: { fontSize: 13, color: colors.shellSecondary },
-    logLink: { fontSize: 14, fontWeight: '700', color: colors.primary },
-    empty: { fontSize: 14, lineHeight: 20, color: colors.shellSecondary },
+    challengeMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    logLink: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
+    empty: { ...type.secondary, color: colors.shellSecondary },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

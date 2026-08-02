@@ -30,7 +30,7 @@ import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import type { Goal, InterestCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
@@ -387,7 +387,7 @@ export default function GoalsScreen() {
       {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
 
       {isLoading ? (
-        <View style={{ marginTop: 4 }}>
+        <View style={{ marginTop: spacing.xs }}>
           <GoalCardSkeleton />
           <GoalCardSkeleton />
           <GoalCardSkeleton />
@@ -425,33 +425,33 @@ export default function GoalsScreen() {
 
 function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: colors.background },
-    title: { fontSize: 26, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 },
-    addGoalWrap: { marginBottom: 16, gap: 12 },
+    container: { flex: 1, padding: spacing.lg, backgroundColor: colors.background },
+    title: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
+    addGoalWrap: { marginBottom: spacing.lg, gap: spacing.md },
     form: { gap: 6 },
-    fieldLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
-    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    fieldLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
+    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categoryChip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
       minHeight: 48,
       borderRadius: radii.pill,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
     },
-    categoryChipLabel: { fontSize: 14, fontWeight: '600' },
+    categoryChipLabel: { fontSize: 14, fontFamily: fontFamily.semibold },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       minHeight: 52,
       color: colors.textPrimary,
     },
     addButton: {
       backgroundColor: colors.primary,
       borderRadius: radii.input,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 52,
       justifyContent: 'center',
       alignItems: 'center',
@@ -461,69 +461,69 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // colors.primary for things you can actually act on, and a faded accent
     // still reads as the primary action.
     addButtonDisabled: { backgroundColor: colors.surfaceSubtle },
-    addButtonText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
+    addButtonText: { color: colors.onAccent, fontFamily: fontFamily.bold, fontSize: 15 },
     addButtonTextDisabled: { color: colors.textSecondary },
-    list: { gap: 12 },
+    list: { gap: spacing.md },
     card: {
       ...cardShell,
-      padding: 16,
+      padding: spacing.lg,
       gap: 10,
     },
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    cardTitle: { fontSize: 16, fontWeight: '600', color: colors.textPrimary, flex: 1 },
-    streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    streak: { fontSize: 14, color: colors.textPrimary, fontWeight: '600' },
-    optionsButton: { fontSize: 18, color: colors.textSecondary, fontWeight: '700', paddingHorizontal: 4 },
+    cardTitle: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary, flex: 1 },
+    streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    streak: { fontSize: 14, color: colors.textPrimary, fontFamily: fontFamily.semibold },
+    optionsButton: { fontSize: 18, color: colors.textSecondary, fontFamily: fontFamily.bold, paddingHorizontal: spacing.xs },
     autoBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
       gap: 6,
-      marginTop: 8,
+      marginTop: spacing.sm,
       paddingLeft: 10,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    autoBadgeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    autoBadgeText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     autoBadgeUndo: { minHeight: 48, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
-    autoBadgeUndoText: { fontSize: 13, color: colors.textSecondary },
+    autoBadgeUndoText: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    cardMeta: { fontSize: 13, color: colors.textSecondary },
+    cardMeta: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     doneRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    doneBadge: { fontSize: 13, fontWeight: '700', color: colors.success },
-    syncedLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    doneBadge: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.success },
+    syncedLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     logActions: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     logButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
     },
-    logButtonText: { fontSize: 14, fontWeight: '700', color: colors.primaryPressed },
-    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: 24 },
+    logButtonText: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primaryPressed },
+    empty: { textAlign: 'center', color: colors.textSecondary, marginTop: spacing.xxl },
     modalOverlay: {
       flex: 1,
       backgroundColor: colors.overlay,
       justifyContent: 'center',
-      padding: 24,
+      padding: spacing.xxl,
     },
     modalCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 20,
-      gap: 12,
+      padding: spacing.xl,
+      gap: spacing.md,
     },
-    modalTitle: { fontSize: 17, fontWeight: '700', color: colors.textPrimary },
+    modalTitle: { fontSize: 17, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       color: colors.textPrimary,
-      fontSize: 15,
+      fontSize: 15, fontFamily: fontFamily.regular,
     },
-    modalButtons: { flexDirection: 'row', gap: 10, marginTop: 4 },
+    modalButtons: { flexDirection: 'row', gap: 10, marginTop: spacing.xs },
   });
 }

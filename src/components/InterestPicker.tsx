@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { FC } from 'react';
@@ -57,16 +58,16 @@ export function InterestPicker({
 
 function createStyles({ radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: spacing.sm,
       minHeight: 48,
       borderRadius: radii.pill,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
     },
-    chipLabel: { fontSize: 15, fontWeight: '600' },
+    chipLabel: { fontSize: 15, fontFamily: fontFamily.semibold },
   });
 }

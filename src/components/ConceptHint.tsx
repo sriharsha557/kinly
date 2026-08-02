@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useUxHintsStore } from '../state/useUxHintsStore';
@@ -43,10 +44,10 @@ export function ConceptHint({
 
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 2 },
-    text: { flex: 1, fontSize: 12, color: colors.textSecondary, lineHeight: 17 },
+    row: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, marginTop: 2 },
+    text: { flex: 1, fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, lineHeight: 17 },
     textOnGradient: { color: 'rgba(255,255,255,0.85)' },
-    close: { fontSize: 11, color: colors.textSecondary, paddingTop: 2 },
+    close: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, paddingTop: 2 },
     closeOnGradient: { color: 'rgba(255,255,255,0.7)' },
   });
 }

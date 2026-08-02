@@ -28,7 +28,7 @@ import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono 
 import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing, type } from '../theme/colors';
 import type { EventType, MoodValue, NudgeKind } from '../types/models';
 import CheckIcon from '../../assets/icons/feed/check.svg';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
@@ -547,32 +547,32 @@ export default function TodayScreen() {
 function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    page: { padding: 16 },
-    greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    greeting: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
-    date: { fontSize: 14, color: colors.textSecondary, marginBottom: 16 },
-    sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 },
+    page: { padding: spacing.lg },
+    greetingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    greeting: { fontSize: 26, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    date: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.lg },
+    sectionTitle: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing.md },
     list: { gap: 10 },
-    dayHeader: { fontSize: 14, fontWeight: '700', color: colors.textSecondary, marginTop: 12, marginBottom: 6 },
+    dayHeader: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.textSecondary, marginTop: spacing.md, marginBottom: 6 },
     newDivider: {
-      fontSize: 12,
-      fontWeight: '700',
+      fontSize: 13,
+      fontFamily: fontFamily.bold,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
       color: colors.primary,
-      marginTop: 12,
+      marginTop: spacing.md,
       marginBottom: 2,
     },
     loadMoreButton: {
       alignSelf: 'center',
-      marginTop: 8,
-      paddingHorizontal: 16,
+      marginTop: spacing.sm,
+      paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',
       borderRadius: radii.pill,
       backgroundColor: colors.inputBg,
     },
-    loadMoreLabel: { fontSize: 14, fontWeight: '700', color: colors.primary },
+    loadMoreLabel: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
     // Tertiary level: no card chrome - quiet rows on the screen background
     // with a hairline separator (design/REDESIGN.md §4).
     eventCard: {
@@ -581,10 +581,10 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       borderBottomWidth: 0.5,
       borderBottomColor: colors.border,
     },
-    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
+    eventHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56 },
     eventBody: { flex: 1, gap: 2 },
-    eventText: { fontSize: 16, lineHeight: 22, fontWeight: '600', color: colors.shellTitle },
-    eventTime: { fontSize: 13, color: colors.textSecondary },
+    eventText: { fontSize: 16, lineHeight: 22, fontFamily: fontFamily.semibold, color: colors.shellTitle },
+    eventTime: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary },
     nudgeRow: { flexDirection: 'row', gap: 6 },
     nudgeButton: {
       backgroundColor: colors.inputBg,
@@ -594,7 +594,7 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
       justifyContent: 'center',
     },
-    nudgeButtonText: { fontSize: 16 },
+    nudgeButtonText: { fontSize: 16, fontFamily: fontFamily.regular },
     waterButton: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.pill,
@@ -603,23 +603,23 @@ function createStyles({ colors, radii, shadow, cardShell }: ReturnType<typeof us
       alignItems: 'center',
     },
     waterButtonRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    waterButtonText: { fontSize: 14, fontWeight: '700', color: colors.primary },
-    nudgeList: { gap: 4 },
+    waterButtonText: { fontSize: 14, fontFamily: fontFamily.bold, color: colors.primary },
+    nudgeList: { gap: spacing.xs },
     photoThumb: { width: '100%', height: 160, borderRadius: radii.input },
     photoThumbLoading: { backgroundColor: colors.pillBg, alignItems: 'center', justifyContent: 'center' },
     photoOverlay: { flex: 1, backgroundColor: colors.overlayStrong, alignItems: 'center', justifyContent: 'center' },
     photoFull: { width: '100%', height: '80%' },
-    nudgeMessage: { fontSize: 14, lineHeight: 20, color: colors.textPrimary },
-    nudgeSender: { fontWeight: '700' },
+    nudgeMessage: { ...type.secondary, color: colors.textPrimary },
+    nudgeSender: { fontFamily: fontFamily.bold },
     emptyCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.card,
-      padding: 24,
+      padding: spacing.xxl,
       alignItems: 'center',
       gap: 6,
       ...shadow,
     },
-    emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
-    emptyBody: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+    emptyTitle: { fontSize: 16, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center' },
+    emptyBody: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
   });
 }

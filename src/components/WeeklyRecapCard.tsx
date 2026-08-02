@@ -5,6 +5,7 @@ import { useCircleDetail } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
 import { RobotIcon, SproutIcon } from './icons/MonoIcons';
 import { HealthIcon } from './icons/PillarIcons';
+import { fontFamily, spacing } from '../theme/colors';
 
 function healthDeltaLabel(now: number, weekAgo: number | null): string | null {
   if (weekAgo === null) return null;
@@ -102,18 +103,18 @@ export function WeeklyRecapCard({ circleId }: { circleId: string }) {
 
 function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    card: { ...cardShell, padding: 16, paddingLeft: 14, marginBottom: 20, gap: 10 },
+    card: { ...cardShell, padding: spacing.lg, paddingLeft: 14, marginBottom: spacing.xl, gap: 10 },
     titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     titleTextRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    title: { fontSize: 15, fontWeight: '500', color: colors.shellTitle },
-    shareLink: { fontSize: 13, fontWeight: '700', color: colors.primary, textDecorationLine: 'underline' },
-    highlight: { fontSize: 13, color: colors.shellSecondary, lineHeight: 18 },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+    title: { fontSize: 15, fontFamily: fontFamily.medium, color: colors.shellTitle },
+    shareLink: { fontSize: 13, fontFamily: fontFamily.bold, color: colors.primary, textDecorationLine: 'underline' },
+    highlight: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary, lineHeight: 18 },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs },
     stat: { alignItems: 'center' },
-    statValue: { fontSize: 20, fontWeight: '800', color: colors.shellTitle },
-    statLabel: { fontSize: 10, color: colors.shellSecondary },
-    footerRow: { gap: 4, marginTop: 2 },
+    statValue: { fontSize: 20, fontFamily: fontFamily.bold, color: colors.shellTitle },
+    statLabel: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    footerRow: { gap: spacing.xs, marginTop: 2 },
     footerLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    footerText: { fontSize: 12, color: colors.shellSecondary, fontWeight: '600' },
+    footerText: { fontSize: 13, color: colors.shellSecondary, fontFamily: fontFamily.semibold },
   });
 }

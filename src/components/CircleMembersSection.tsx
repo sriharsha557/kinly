@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -106,10 +107,10 @@ export function CircleMembersSection({
 
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    section: { marginBottom: 24 },
+    section: { marginBottom: spacing.xxl },
     heading: {
       fontSize: 13,
-      fontWeight: '700',
+      fontFamily: fontFamily.bold,
       letterSpacing: 0.6,
       textTransform: 'uppercase',
       color: colors.textSecondary,
@@ -118,17 +119,17 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: spacing.md,
       minHeight: 56,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     rowCopy: { flex: 1, gap: 2 },
-    name: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
-    detail: { fontSize: 14, color: colors.textSecondary },
+    name: { fontSize: 16, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+    detail: { fontSize: 14, fontFamily: fontFamily.regular, color: colors.textSecondary },
     // minHeight keeps this on the 48dp touch-target floor; the row's 56dp
     // height does not cover it, because the row itself is not tappable.
-    action: { paddingVertical: 12, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
+    action: { paddingVertical: spacing.md, paddingHorizontal: 18, minHeight: 48, justifyContent: 'center' },
   });
 }

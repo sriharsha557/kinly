@@ -7,7 +7,7 @@ import type { SvgProps } from 'react-native-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import ChatIcon from '../../assets/illustrations/kinly-ill-chat.svg';
 import RocketIcon from '../../assets/illustrations/kinly-ill-rocket.svg';
@@ -50,7 +50,7 @@ export function QuickActionsRow() {
 
 function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    row: { flexDirection: 'row', gap: 10, marginBottom: spacing.xl },
     action: {
       backgroundColor: colors.surface,
       borderRadius: radii.input,
@@ -59,6 +59,6 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       gap: 6,
       ...shadow,
     },
-    label: { fontSize: 11, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' },
+    label: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textPrimary, textAlign: 'center' },
   });
 }

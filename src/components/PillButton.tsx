@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { StyleSheet, Text, ViewStyle } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
@@ -36,13 +37,13 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     base: {
       borderRadius: radii.pill,
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       alignItems: 'center',
       justifyContent: 'center',
     },
     solid: { backgroundColor: colors.primary },
-    solidText: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
+    solidText: { color: colors.onAccent, fontSize: 16, fontFamily: fontFamily.bold },
     outline: { borderWidth: 1.5, borderColor: colors.primary, backgroundColor: 'transparent' },
-    outlineText: { color: colors.primary, fontSize: 16, fontWeight: '700' },
+    outlineText: { color: colors.primary, fontSize: 16, fontFamily: fontFamily.bold },
   });
 }

@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -72,7 +73,7 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
             variant="outline"
             onPress={handleCancel}
             loading={cancelRequest.isPending}
-            style={{ marginTop: 16, borderColor: theme.colors.danger }}
+            style={{ marginTop: spacing.lg, borderColor: theme.colors.danger }}
           />
         </View>
       </ScrollView>
@@ -83,23 +84,23 @@ export default function PendingApprovalScreen({ pendingCircle }: { pendingCircle
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    title: { fontSize: 22, fontWeight: '800', color: colors.onAccent, marginTop: 12, textAlign: 'center' },
+    title: { fontSize: 22, fontFamily: fontFamily.bold, color: colors.onAccent, marginTop: spacing.md, textAlign: 'center' },
     subtitle: {
-      fontSize: 14,
+      fontSize: 14, fontFamily: fontFamily.regular,
       color: colors.onAccentMuted,
-      marginTop: 8,
+      marginTop: spacing.sm,
       textAlign: 'center',
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       lineHeight: 20,
     },
-    body: { padding: 24 },
-    switchList: { gap: 8 },
-    switchLabel: { fontSize: 13, color: colors.textSecondary, marginBottom: 4 },
+    body: { padding: spacing.xxl },
+    switchList: { gap: spacing.sm },
+    switchLabel: { fontSize: 13, fontFamily: fontFamily.regular, color: colors.textSecondary, marginBottom: spacing.xs },
     switchRow: {
       backgroundColor: colors.surface,
       borderRadius: 14,
       padding: 14,
     },
-    switchRowText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    switchRowText: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
   });
 }

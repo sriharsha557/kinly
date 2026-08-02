@@ -23,7 +23,7 @@ import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion, spacing } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import SettingsIcon from '../../assets/brand/settings.svg';
 
@@ -197,8 +197,8 @@ export default function CircleScreen() {
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    page: { padding: 16 },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    page: { padding: spacing.lg },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
     // marginLeft: auto rather than relying on the row's space-between:
     // CirclePicker renders nothing when you only belong to one circle, and
     // with a single child space-between would drop Settings to the left edge.
@@ -207,9 +207,9 @@ function createStyles({ colors }: ReturnType<typeof useTheme>) {
       alignItems: 'center',
       gap: 5,
       minHeight: 48,
-      paddingHorizontal: 8,
+      paddingHorizontal: spacing.sm,
       marginLeft: 'auto',
     },
-    settingsLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
+    settingsLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary },
   });
 }

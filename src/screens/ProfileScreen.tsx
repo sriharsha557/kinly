@@ -1,3 +1,4 @@
+import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -74,12 +75,12 @@ export default function ProfileScreen() {
             label="Edit Profile"
             variant="outline"
             onPress={() => navigation.navigate('EditProfile')}
-            style={{ marginTop: 12, paddingHorizontal: 24, paddingVertical: 8 }}
+            style={{ marginTop: spacing.md, paddingHorizontal: spacing.xxl, paddingVertical: spacing.sm }}
           />
         </View>
 
         {isLoading ? (
-          <View style={{ marginTop: 24, alignItems: 'center' }}>
+          <View style={{ marginTop: spacing.xxl, alignItems: 'center' }}>
             <LoadingSpinner size={12} />
           </View>
         ) : (
@@ -190,14 +191,14 @@ export default function ProfileScreen() {
 
         <TouchableOpacity
           onPress={() => Linking.openURL('https://sriharsha557.github.io/kinly/privacy.html')}
-          style={{ marginTop: 32, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}
+          style={{ marginTop: spacing.section, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}
         >
           <Text style={styles.privacyLink}>Privacy Policy</Text>
         </TouchableOpacity>
 
-        <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: 12 }} />
+        <PillButton label="Sign out" variant="outline" onPress={() => signOut()} style={{ marginTop: spacing.md }} />
 
-        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: 20, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}>
+        <TouchableOpacity onPress={() => setShowDeleteAccount(true)} style={{ marginTop: spacing.xl, alignItems: 'center', minHeight: 48, justifyContent: 'center' }}>
           <Text style={styles.deleteLink}>Delete account</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -218,27 +219,27 @@ export default function ProfileScreen() {
 function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { padding: 20 },
-    header: { alignItems: 'center', gap: 4, marginBottom: 24 },
+    content: { padding: spacing.xl },
+    header: { alignItems: 'center', gap: spacing.xs, marginBottom: spacing.xxl },
     avatarImage: { width: 72, height: 72, borderRadius: 36 },
-    bio: { fontSize: 14, lineHeight: 20, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
-    name: { fontSize: 22, fontWeight: '800', color: colors.textPrimary, marginTop: 8 },
-    circleName: { fontSize: 15, color: colors.textSecondary },
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary, marginTop: 28, marginBottom: 12 },
+    bio: { ...type.secondary, color: colors.textSecondary, textAlign: 'center', marginTop: 6, paddingHorizontal: spacing.xl },
+    name: { fontSize: 22, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing.sm },
+    circleName: { fontSize: 15, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, justifyContent: 'space-between' },
+    sectionTitle: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: 28, marginBottom: spacing.md },
     badgeList: { gap: 10 },
     badge: {
       ...cardShell,
       paddingVertical: 14,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
     },
-    badgeText: { fontSize: 15, fontWeight: '600', color: colors.textPrimary },
+    badgeText: { fontSize: 15, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     appearanceCard: {
       ...cardShell,
-      padding: 16,
+      padding: spacing.lg,
     },
     empty: { color: colors.textSecondary },
-    privacyLink: { fontSize: 14, fontWeight: '600', color: colors.textSecondary, textDecorationLine: 'underline' },
-    deleteLink: { fontSize: 14, fontWeight: '600', color: colors.danger },
+    privacyLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.textSecondary, textDecorationLine: 'underline' },
+    deleteLink: { fontSize: 14, fontFamily: fontFamily.semibold, color: colors.danger },
   });
 }

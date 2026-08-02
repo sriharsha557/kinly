@@ -1,3 +1,4 @@
+import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -90,7 +91,7 @@ export default function EditProfileScreen() {
             onPress={handleSave}
             loading={updateProfile.isPending}
             disabled={!name.trim()}
-            style={{ marginTop: 8 }}
+            style={{ marginTop: spacing.sm }}
           />
         </View>
       </ScrollView>
@@ -105,13 +106,13 @@ export default function EditProfileScreen() {
 function createStyles({ colors }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    content: { padding: 20, paddingBottom: 60, alignItems: 'center' },
-    avatarWrap: { alignItems: 'center', gap: 8, marginBottom: 24 },
+    content: { padding: spacing.xl, paddingBottom: 60, alignItems: 'center' },
+    avatarWrap: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xxl },
     avatarImage: { width: 88, height: 88, borderRadius: 44 },
-    avatarActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    avatarActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     avatarActionsDivider: { color: colors.textSecondary },
-    avatarHint: { fontSize: 13, color: colors.primary, fontWeight: '600' },
+    avatarHint: { fontSize: 13, color: colors.primary, fontFamily: fontFamily.semibold },
     form: { width: '100%', gap: 14 },
-    sectionLabel: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginTop: 4 },
+    sectionLabel: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
   });
 }

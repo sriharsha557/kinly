@@ -4,6 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PillButton } from '../components/PillButton';
 import { useTheme } from '../theme/ThemeProvider';
 import { CircleScene, GoalScene, ChatScene, RocketScene } from '../components/illustrations/Scenes';
+import { fontFamily, spacing } from '../theme/colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -108,16 +109,16 @@ function createStyles({ colors, radii }: ReturnType<typeof useTheme>) {
       minHeight: 44,
       justifyContent: 'center',
       paddingHorizontal: 14,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderRadius: radii.pill,
       backgroundColor: colors.surfaceSubtle,
     },
-    skipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    slide: { alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
-    title: { fontSize: 24, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', marginTop: 8 },
-    body: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-    footer: { padding: 24, paddingTop: 8, gap: 20 },
-    dots: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+    skipText: { fontSize: 13, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    slide: { alignItems: 'center', justifyContent: 'center', padding: spacing.section, gap: spacing.lg },
+    title: { fontSize: 24, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'center', marginTop: spacing.sm },
+    body: { fontSize: 15, fontFamily: fontFamily.regular, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, maxWidth: 320 },
+    footer: { padding: spacing.xxl, paddingTop: spacing.sm, gap: spacing.xl },
+    dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     dotActive: { backgroundColor: colors.primary, width: 20 },
   });
