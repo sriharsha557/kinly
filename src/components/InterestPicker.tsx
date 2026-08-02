@@ -4,9 +4,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { FC } from 'react';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
-import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon } from './icons/PillarIcons';
+import { HealthIcon, WealthIcon, IdeasIcon, LearningIcon, RelationshipsIcon, OtherIcon } from './icons/PillarIcons';
 import { CheckIcon } from './icons/MonoIcons';
-import type { InterestCategory } from '../types/models';
+import type { GoalCategory, InterestCategory } from '../types/models';
 
 interface PillarIconProps {
   size?: number;
@@ -19,6 +19,14 @@ export const INTEREST_OPTIONS: { key: InterestCategory; label: string; Icon: FC<
   { key: 'ideas', label: 'Ideas', Icon: IdeasIcon },
   { key: 'learning', label: 'Learning', Icon: LearningIcon },
   { key: 'relationships', label: 'Relationships', Icon: RelationshipsIcon },
+];
+
+// Goal tagging only. Deliberately not part of INTEREST_OPTIONS: the
+// onboarding interest picker, the suggestion catalogue and Circle Ideas all
+// iterate that list and none of them have anything to say about "Other".
+export const GOAL_CATEGORY_OPTIONS: { key: GoalCategory; label: string; Icon: FC<PillarIconProps> }[] = [
+  ...INTEREST_OPTIONS,
+  { key: 'misc', label: 'Other', Icon: OtherIcon },
 ];
 
 export function InterestPicker({

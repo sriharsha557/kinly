@@ -2,6 +2,17 @@ import type { AccentId, ThemeMode } from '../theme/colors';
 
 export type InterestCategory = 'health' | 'wealth' | 'ideas' | 'learning' | 'relationships';
 
+// A goal can be tagged with something the five pillars don't cover; an
+// *interest* can't. "What are you interested in?" has no sensible "Other"
+// answer, and the onboarding picker, the suggestion catalogue and Circle
+// Ideas' copy are all built around the five. So the widening lives here,
+// on goals alone, rather than in InterestCategory.
+//
+// goals.category is a plain text column with no check constraint (migration
+// 0012), so this needs no migration - the constraint was only ever in
+// TypeScript.
+export type GoalCategory = InterestCategory | 'misc';
+
 export interface User {
   id: string;
   name: string;
@@ -44,7 +55,7 @@ export interface Goal {
   progress: number;
   streak_count: number;
   last_logged_date: string | null;
-  category: InterestCategory | null;
+  category: GoalCategory | null;
   goal_source: GoalSource;
   last_synced_date: string | null;
 }

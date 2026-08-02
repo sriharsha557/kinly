@@ -10,6 +10,21 @@ interface PillarIconProps {
   color: string;
 }
 
+// The catch-all bucket for goals that aren't one of the five pillars. Three
+// dots is the one shape that reads as "something else" without implying a
+// sixth category of its own - anything more specific (a star, a tag) would
+// look like it means something. Same stroke weight and 24px box as the rest
+// so it sits in the chip row without standing out.
+export function OtherIcon({ size = 22, color }: PillarIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={6} cy={12} r={1.5} fill={color} />
+      <Circle cx={12} cy={12} r={1.5} fill={color} />
+      <Circle cx={18} cy={12} r={1.5} fill={color} />
+    </Svg>
+  );
+}
+
 export function HealthIcon({ size = 22, color }: PillarIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

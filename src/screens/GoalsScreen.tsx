@@ -22,14 +22,14 @@ import { PillButton } from '../components/PillButton';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { ActionSheet } from '../components/ActionSheet';
-import { INTEREST_OPTIONS } from '../components/InterestPicker';
+import { GOAL_CATEGORY_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
-import type { Goal, InterestCategory } from '../types/models';
+import type { Goal, GoalCategory } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
@@ -274,7 +274,7 @@ function GoalCard({
 function AddGoalForm({ circleId, userId }: { circleId: string; userId: string }) {
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
-  const [category, setCategory] = useState<InterestCategory | null>(null);
+  const [category, setCategory] = useState<GoalCategory | null>(null);
   const createGoal = useCreateGoal();
   const theme = useTheme();
   const { colors } = theme;
@@ -341,7 +341,7 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
       {/* One-accent rule: resting chips are neutral with monochrome icons;
           only the selected chip takes the user's accent. */}
       <View style={styles.categoryRow}>
-        {INTEREST_OPTIONS.map(({ key, label, Icon }) => {
+        {GOAL_CATEGORY_OPTIONS.map(({ key, label, Icon }) => {
           const active = category === key;
           return (
             <AnimatedPressable

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { isStepGoal } from '../lib/stepGoal';
 import { useHealthSyncStore } from '../state/useHealthSyncStore';
-import type { Goal, GoalSource, InterestCategory } from '../types/models';
+import type { Goal, GoalCategory, GoalSource } from '../types/models';
 
 export function useGoals(circleId: string | undefined) {
   return useQuery({
@@ -25,7 +25,7 @@ interface NewGoal {
   userId: string;
   title: string;
   target: number;
-  category?: InterestCategory | null;
+  category?: GoalCategory | null;
   source?: GoalSource;
 }
 

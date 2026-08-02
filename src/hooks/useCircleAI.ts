@@ -33,6 +33,11 @@ export function useCircleAI(circleId: string | undefined) {
       const totals = new Map<string, number>();
       for (const g of goals) {
         if (!g.category) continue;
+        // 'misc' is the catch-all for goals that fit no pillar, so it can't
+        // stand for one here: circlePrompts keys its strength/weakness copy
+        // to the five pillars, and letting misc win either end would either
+        // render undefined text or claim the circle is "strongest at Other".
+        if (g.category === 'misc') continue;
         totals.set(g.category, (totals.get(g.category) ?? 0) + g.streak_count);
       }
       if (totals.size === 0) return null;
