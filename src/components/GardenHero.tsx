@@ -22,7 +22,7 @@ import { useGardenState, type MemberGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
 import { useAuthStore } from '../state/useAuthStore';
 import { useTheme } from '../theme/ThemeProvider';
-import { motion } from '../theme/colors';
+import { fontFamily, motion } from '../theme/colors';
 import type { MainTabParamList } from '../navigation/types';
 import SunIcon from '../../assets/illustrations/kinly-ill-sun.svg';
 import SunCloudIcon from '../../assets/illustrations/kinly-ill-sun-cloud.svg';
@@ -285,12 +285,14 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
     plantWilted: { opacity: 0.7 },
     plantName: {
       ...type.caption,
-      fontWeight: '600',
+      fontFamily: fontFamily.medium,
       color: colors.textPrimary,
       marginTop: spacing.xs,
       maxWidth: 72,
     },
-    plantNameSelf: { fontWeight: '800', color: colors.primary },
+    // Your own plant is named in bold - the one place in the row that has to
+    // read as "you" at a glance.
+    plantNameSelf: { fontFamily: fontFamily.bold, color: colors.primary },
     plantStreak: { ...type.caption, color: colors.textSecondary, fontVariant: ['tabular-nums'] },
     // A soft ground shadow instead of the old edge-to-edge 14px brown bar,
     // which split the card into disconnected slabs.
@@ -308,8 +310,8 @@ function createStyles(theme: ReturnType<typeof useTheme>) {
       paddingTop: spacing.lg,
       gap: spacing.xs,
     },
-    title: { ...type.subheading, fontWeight: '700', color: colors.textPrimary },
+    title: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     status: { ...type.body, color: colors.textPrimary },
-    statusMeta: { ...type.secondary, fontWeight: '600', color: colors.textSecondary },
+    statusMeta: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.textSecondary },
   });
 }

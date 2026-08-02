@@ -196,16 +196,47 @@ export const spacing = {
   gutter: 20,
 } as const;
 
+// Inter, embedded natively via the expo-font config plugin (see app.json).
+//
+// These are referenced by *family name per weight*, never as one family plus
+// a `fontWeight`, and the font files are deliberately named to match their
+// PostScript names. The reason is Inter's name table: only Regular and Bold
+// live in the "Inter" family: Medium and SemiBold register as their own
+// legacy families ("Inter Medium", "Inter SemiBold") because the classic
+// name table holds four styles per family at most. So on iOS,
+// `fontFamily: 'Inter'` + `fontWeight: '600'` silently resolves to Regular
+// or Bold rather than SemiBold.
+//
+// Naming each file after its PostScript name sidesteps that on both
+// platforms at once: Android derives a font family from the file name, iOS
+// reads the PostScript name, and here those are the same string.
+//
+// Consequence for call sites: set `fontFamily` and do NOT also set
+// `fontWeight`. A `fontWeight` next to an explicit family is at best ignored
+// and at worst synthesises a fake bold on top of a real one.
+export const fontFamily = {
+  regular: 'Inter-Regular',
+  medium: 'Inter-Medium',
+  semibold: 'Inter-SemiBold',
+  bold: 'Inter-Bold',
+} as const;
+
 // Type scale (design/REDESIGN.md §2.2). 13 is the floor - nothing smaller
-// anywhere. Sizes pair with lineHeight; weights stay per-use.
+// anywhere. Sizes pair with lineHeight; each step also carries the family it
+// should be set in, so `...type.heading` is a complete text style rather than
+// something every call site has to finish by hand.
+//
+// Steps default to the weight that step is usually set in - override by
+// spreading a different family after the step (`...type.body,
+// fontFamily: fontFamily.semibold`), never by adding a fontWeight.
 export const type = {
-  display: { fontSize: 32, lineHeight: 38 },
-  title: { fontSize: 26, lineHeight: 32 },
-  heading: { fontSize: 20, lineHeight: 26 },
-  subheading: { fontSize: 17, lineHeight: 24 },
-  body: { fontSize: 16, lineHeight: 24 },
-  secondary: { fontSize: 14, lineHeight: 20 },
-  caption: { fontSize: 13, lineHeight: 18 },
+  display: { fontSize: 32, lineHeight: 38, fontFamily: fontFamily.bold },
+  title: { fontSize: 26, lineHeight: 32, fontFamily: fontFamily.bold },
+  heading: { fontSize: 20, lineHeight: 26, fontFamily: fontFamily.semibold },
+  subheading: { fontSize: 17, lineHeight: 24, fontFamily: fontFamily.semibold },
+  body: { fontSize: 16, lineHeight: 24, fontFamily: fontFamily.regular },
+  secondary: { fontSize: 14, lineHeight: 20, fontFamily: fontFamily.regular },
+  caption: { fontSize: 13, lineHeight: 18, fontFamily: fontFamily.regular },
 } as const;
 
 // Touch standards (design/REDESIGN.md §2.3): minimum interactive box,
