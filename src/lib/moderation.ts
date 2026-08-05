@@ -18,10 +18,20 @@ export function showModerationSheet({
     {
       text: 'Report',
       onPress: () => {
-        Alert.alert('Why are you reporting this?', undefined, [
-          ...REPORT_REASONS.map((reason) => ({ text: reason, onPress: () => onReport(reason) })),
-          { text: 'Cancel', style: 'cancel' as const },
-        ]);
+        // cancelable is the only escape here. Android's Alert keeps
+        // buttons.slice(0, 3), so the three reasons fill the dialog and the
+        // trailing Cancel is silently discarded - and Alert.alert defaults
+        // cancelable to false, which left back and tap-outside dead too.
+        // Reporting is a flow people enter by accident; it must be leavable.
+        Alert.alert(
+          'Why are you reporting this?',
+          undefined,
+          [
+            ...REPORT_REASONS.map((reason) => ({ text: reason, onPress: () => onReport(reason) })),
+            { text: 'Cancel', style: 'cancel' as const },
+          ],
+          { cancelable: true },
+        );
       },
     },
     {

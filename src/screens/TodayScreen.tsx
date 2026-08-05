@@ -25,6 +25,7 @@ import { QuickActionsRow } from '../components/QuickActionsRow';
 import { EventRowSkeleton } from '../components/Skeleton';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { AnimatedPressable } from '../components/AnimatedPressable';
+import { ActionSheet } from '../components/ActionSheet';
 import { HappyIcon as HappyMono, NeutralIcon as NeutralMono, SadIcon as SadMono } from '../components/icons/MonoIcons';
 import { GreetingIcon } from '../components/icons/GreetingIcon';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
@@ -228,6 +229,7 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   // revealed by tapping the row instead of six always-visible buttons per
   // event - the feed reads as quiet rows until you choose to react.
   const [expanded, setExpanded] = useState(false);
+  const [askingWaterReason, setAskingWaterReason] = useState(false);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const time = new Date(event.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -283,13 +285,18 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
   // Optional, never blocking - "Skip" waters the streak exactly like before
   // this existed. Naming a reason just gives the circle a kinder story than
   // a bare "watered their streak" ("Harsha took a travel day" vs nothing).
+  //
+  // This was an Alert.alert with these same five buttons, which on Android is
+  // a trap: RN keeps buttons.slice(0, 3) and silently drops the rest, so the
+  // three *reasons* rendered and both ways out - Skip and Cancel - were
+  // discarded. Alert.alert also hardcodes cancelable: false, so back and
+  // tap-outside were dead too, leaving force-quit as the only exit. A prompt
+  // that fires on a missed day and says "Optional" must never be the hardest
+  // thing on screen to escape, so it uses the themed sheet: no button
+  // ceiling, backdrop dismiss, and hardware back via onRequestClose.
   function handleWater() {
     if (!waterableGoalId) return;
-    Alert.alert('Why were they away?', "Optional - your circle will see this instead of a plain missed day.", [
-      ...STREAK_SAVE_REASONS.map(({ value, label }) => ({ text: label, onPress: () => confirmWater(value) })),
-      { text: 'Skip', onPress: () => confirmWater(undefined) },
-      { text: 'Cancel', style: 'cancel' as const },
-    ]);
+    setAskingWaterReason(true);
   }
 
   const isCelebration = event.type === 'streak' || event.type === 'goal_completed';
@@ -380,6 +387,30 @@ function EventRow({ event, circleId, userId }: { event: EventWithProfile; circle
             </AnimatedPressable>
           ))}
         </View>
+      )}
+
+      {askingWaterReason && (
+        <ActionSheet
+          title="Why were they away?"
+          message="Optional — your circle will see this instead of a plain missed day."
+          options={[
+            ...STREAK_SAVE_REASONS.map(({ value, label }) => ({
+              label,
+              onPress: () => {
+                setAskingWaterReason(false);
+                confirmWater(value);
+              },
+            })),
+            {
+              label: 'Skip — just water it',
+              onPress: () => {
+                setAskingWaterReason(false);
+                confirmWater(undefined);
+              },
+            },
+          ]}
+          onCancel={() => setAskingWaterReason(false)}
+        />
       )}
     </Animated.View>
   );
