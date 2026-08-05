@@ -197,5 +197,10 @@ export function consistency(
       const of = cadence.target_count ?? 1;
       return { done: Math.min(doneThisMonth(done, today), of), of };
     }
+    // An unrecognised target_type would fall through to implicit undefined
+    // and crash any caller doing destructuring. A corrupted or legacy database
+    // value must not crash a caller, so return a neutral value instead.
+    default:
+      return { done: 0, of: 0 };
   }
 }

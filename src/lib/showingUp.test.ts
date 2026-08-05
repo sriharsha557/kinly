@@ -215,3 +215,14 @@ test('consistency never exceeds its denominator', () => {
   const many = ['2026-08-03', '2026-08-04', '2026-08-05', '2026-08-06', '2026-08-07'];
   assert.deepEqual(consistency(fourPerWeek, many, WED), { done: 4, of: 4 });
 });
+
+test('consistency clamps monthly to its target', () => {
+  // Three check-ins in August, but target is 2; should report 2/2, not 3/2.
+  const three = ['2026-08-01', '2026-08-02', '2026-08-05'];
+  assert.deepEqual(consistency(monthly, three, WED), { done: 2, of: 2 });
+});
+
+test('consistency returns { done: 0, of: 0 } for an unrecognised target_type', () => {
+  const bogus = { target_type: 'bogus', target_count: null, target_weekdays: null } as unknown as Cadence;
+  assert.deepEqual(consistency(bogus, [], WED), { done: 0, of: 0 });
+});
