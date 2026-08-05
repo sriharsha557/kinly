@@ -14,7 +14,7 @@
 // Dependency-free apart from periods.ts so node:test can import it under
 // --experimental-strip-types.
 
-import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek, isoWeekday } from './periods.ts';
+import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek, isoWeekday, startOfMonth, daysRemainingInMonth } from './periods.ts';
 
 export type TargetType = 'daily' | 'times_per_week' | 'specific_weekdays' | 'monthly';
 
@@ -38,6 +38,15 @@ function doneThisWeek(done: Set<string>, day: Date): number {
   let count = 0;
   for (let i = 0; i < 7; i += 1) {
     if (done.has(toIsoDate(addDays(monday, i)))) count += 1;
+  }
+  return count;
+}
+
+function doneThisMonth(done: Set<string>, day: Date): number {
+  const prefix = toIsoDate(startOfMonth(day)).slice(0, 7); // YYYY-MM
+  let count = 0;
+  for (const date of done) {
+    if (date.startsWith(prefix)) count += 1;
   }
   return count;
 }
@@ -67,6 +76,10 @@ export function isShowingUp(cadence: Cadence, checkins: CheckinDates, now: numbe
       return scheduled
         .filter((weekday) => weekday < todayWeekday)
         .every((weekday) => done.has(toIsoDate(addDays(monday, weekday - 1))));
+    }
+    case 'monthly': {
+      const target = cadence.target_count ?? 1;
+      return doneThisMonth(done, today) + daysRemainingInMonth(today) >= target;
     }
     default:
       return false;

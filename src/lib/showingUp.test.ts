@@ -82,3 +82,29 @@ test('specific_weekdays is trivially true on the week s first scheduled day', ()
   const MON = new Date(2026, 7, 3, 12).getTime();
   assert.equal(isShowingUp(mwf, [], MON), true);
 });
+
+const monthly: Cadence = { target_type: 'monthly', target_count: 2, target_weekdays: null };
+
+test('monthly is true while the target is still reachable', () => {
+  assert.equal(isShowingUp(monthly, [], WED), true); // 27 days left, needs 2
+  assert.equal(isShowingUp(monthly, ['2026-08-01'], WED), true);
+});
+
+test('monthly is true once the target is met', () => {
+  const LAST = new Date(2026, 7, 31, 12).getTime();
+  assert.equal(isShowingUp(monthly, ['2026-08-01', '2026-08-02'], LAST), true);
+});
+
+test('monthly turns false when the month runs out', () => {
+  const LAST = new Date(2026, 7, 31, 12).getTime();
+  // 0 done, 1 day left, needs 2. Impossible.
+  assert.equal(isShowingUp(monthly, [], LAST), false);
+  // 1 done, 1 day left, needs 2. Exactly reachable.
+  assert.equal(isShowingUp(monthly, ['2026-08-01'], LAST), true);
+});
+
+test('monthly counts only the current month', () => {
+  assert.equal(isShowingUp(monthly, ['2026-07-01', '2026-07-02'], WED), true); // reachable anyway
+  const LAST = new Date(2026, 7, 31, 12).getTime();
+  assert.equal(isShowingUp(monthly, ['2026-07-01', '2026-07-02'], LAST), false);
+});
