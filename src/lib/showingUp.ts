@@ -14,7 +14,7 @@
 // Dependency-free apart from periods.ts so node:test can import it under
 // --experimental-strip-types.
 
-import { toIsoDate } from './periods.ts';
+import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek } from './periods.ts';
 
 export type TargetType = 'daily' | 'times_per_week' | 'specific_weekdays' | 'monthly';
 
@@ -32,6 +32,16 @@ function checkinSet(checkins: CheckinDates): Set<string> {
   return new Set(checkins.map((d) => d.slice(0, 10)));
 }
 
+// Check-ins falling inside the Monday-start week containing `day`.
+function doneThisWeek(done: Set<string>, day: Date): number {
+  const monday = startOfWeek(day);
+  let count = 0;
+  for (let i = 0; i < 7; i += 1) {
+    if (done.has(toIsoDate(addDays(monday, i)))) count += 1;
+  }
+  return count;
+}
+
 export function isShowingUp(cadence: Cadence, checkins: CheckinDates, now: number): boolean {
   const today = new Date(now);
   const done = checkinSet(checkins);
@@ -39,6 +49,14 @@ export function isShowingUp(cadence: Cadence, checkins: CheckinDates, now: numbe
   switch (cadence.target_type) {
     case 'daily':
       return done.has(toIsoDate(today));
+    case 'times_per_week': {
+      const target = cadence.target_count ?? 0;
+      // Reachability, not completion: the week is not over, so someone who
+      // can still hit the target has not broken anything. It flips false only
+      // when the arithmetic makes it impossible, and stays false for the rest
+      // of that week because no later check-in can change it.
+      return doneThisWeek(done, today) + daysRemainingInWeek(today) >= target;
+    }
     default:
       return false;
   }
