@@ -85,3 +85,65 @@ export function isShowingUp(cadence: Cadence, checkins: CheckinDates, now: numbe
       return false;
   }
 }
+
+// One concept: consecutive successful commitment periods. The period is the
+// cadence's own unit, which is why a weekly goal at 12 means twelve weeks
+// rather than 84 days - counting days here would silently make weekly goals
+// look seven times better than daily ones.
+//
+// The current period is counted only when it is ALREADY satisfied, and never
+// counted against. An unfinished today is not a failure, so a daily streak
+// does not collapse to zero every midnight.
+export function streak(cadence: Cadence, checkins: CheckinDates, now: number): number {
+  const today = new Date(now);
+  const done = checkinSet(checkins);
+
+  if (cadence.target_type === 'daily') {
+    let count = 0;
+    let cursor = done.has(toIsoDate(today)) ? today : addDays(today, -1);
+    while (done.has(toIsoDate(cursor))) {
+      count += 1;
+      cursor = addDays(cursor, -1);
+    }
+    return count;
+  }
+
+  if (cadence.target_type === 'monthly') {
+    const target = cadence.target_count ?? 1;
+    let count = 0;
+    let cursor = startOfMonth(today);
+    if (doneThisMonth(done, cursor) < target) {
+      cursor = startOfMonth(addDays(cursor, -1));
+    }
+    while (doneThisMonth(done, cursor) >= target) {
+      count += 1;
+      cursor = startOfMonth(addDays(cursor, -1));
+    }
+    return count;
+  }
+
+  // An empty weekday set would make weekMet vacuously true for every week
+  // and loop forever. A commitment scheduled for no days has no streak.
+  if (cadence.target_type === 'specific_weekdays' && (cadence.target_weekdays ?? []).length === 0) {
+    return 0;
+  }
+
+  // Both weekly cadences: walk back a week at a time, asking each week
+  // whether it met its own definition of success.
+  const weekMet = (weekStart: Date): boolean => {
+    if (cadence.target_type === 'specific_weekdays') {
+      const scheduled = cadence.target_weekdays ?? [];
+      return scheduled.every((weekday) => done.has(toIsoDate(addDays(weekStart, weekday - 1))));
+    }
+    return doneThisWeek(done, weekStart) >= (cadence.target_count ?? 0);
+  };
+
+  let count = 0;
+  let cursor = startOfWeek(today);
+  if (!weekMet(cursor)) cursor = addDays(cursor, -7);
+  while (weekMet(cursor)) {
+    count += 1;
+    cursor = addDays(cursor, -7);
+  }
+  return count;
+}

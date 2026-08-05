@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isShowingUp, type Cadence } from './showingUp.ts';
+import { isShowingUp, streak, type Cadence } from './showingUp.ts';
 
 // Wednesday 2026-08-05, midday, so nothing depends on the hour.
 const WED = new Date(2026, 7, 5, 12).getTime();
@@ -107,4 +107,50 @@ test('monthly counts only the current month', () => {
   assert.equal(isShowingUp(monthly, ['2026-07-01', '2026-07-02'], WED), true); // reachable anyway
   const LAST = new Date(2026, 7, 31, 12).getTime();
   assert.equal(isShowingUp(monthly, ['2026-07-01', '2026-07-02'], LAST), false);
+});
+
+test('daily streak counts consecutive days back from today', () => {
+  assert.equal(streak(daily, ['2026-08-05', '2026-08-04', '2026-08-03'], WED), 3);
+});
+
+test('daily streak survives a today that has not happened yet', () => {
+  // Nothing logged today; yesterday and the day before were done. Today is
+  // not a miss until it ends, so the streak is 2, not 0.
+  assert.equal(streak(daily, ['2026-08-04', '2026-08-03'], WED), 2);
+});
+
+test('daily streak resets on a missed day', () => {
+  assert.equal(streak(daily, ['2026-08-05', '2026-08-03'], WED), 1);
+  assert.equal(streak(daily, [], WED), 0);
+});
+
+test('weekly streak counts weeks, not days', () => {
+  // 4x in each of the two previous weeks; current week incomplete.
+  const checkins = [
+    '2026-07-27', '2026-07-28', '2026-07-29', '2026-07-30', // week of Jul 27
+    '2026-07-20', '2026-07-21', '2026-07-22', '2026-07-23', // week of Jul 20
+  ];
+  assert.equal(streak(fourPerWeek, checkins, WED), 2);
+});
+
+test('weekly streak includes the current week once already met', () => {
+  const checkins = [
+    '2026-08-03', '2026-08-04', '2026-08-05', '2026-08-05', // dupes ignored
+    '2026-08-01', // previous week, only 1 - not a success
+  ];
+  // Current week has 3 distinct, target is 4, so not yet met: streak 0.
+  assert.equal(streak(fourPerWeek, checkins, WED), 0);
+});
+
+test('specific_weekdays streak counts fully satisfied weeks', () => {
+  const checkins = [
+    '2026-07-27', '2026-07-29', '2026-07-31', // Mon/Wed/Fri, complete
+    '2026-07-20', '2026-07-22', // Fri missing, breaks it
+  ];
+  assert.equal(streak(mwf, checkins, WED), 1);
+});
+
+test('monthly streak counts months', () => {
+  const checkins = ['2026-07-01', '2026-07-02', '2026-06-01', '2026-06-02'];
+  assert.equal(streak(monthly, checkins, WED), 2);
 });
