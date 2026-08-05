@@ -154,3 +154,38 @@ test('monthly streak counts months', () => {
   const checkins = ['2026-07-01', '2026-07-02', '2026-06-01', '2026-06-02'];
   assert.equal(streak(monthly, checkins, WED), 2);
 });
+
+test('specific_weekdays streak is 0 when target_weekdays is null', () => {
+  const nullWeekdays: Cadence = { target_type: 'specific_weekdays', target_count: null, target_weekdays: null };
+  assert.equal(streak(nullWeekdays, [], WED), 0);
+});
+
+test('specific_weekdays streak is 0 when target_weekdays is empty', () => {
+  const emptyWeekdays: Cadence = { target_type: 'specific_weekdays', target_count: null, target_weekdays: [] };
+  assert.equal(streak(emptyWeekdays, [], WED), 0);
+});
+
+test('times_per_week streak is 0 when target_count is 0', () => {
+  const zeroPerWeek: Cadence = { target_type: 'times_per_week', target_count: 0, target_weekdays: null };
+  assert.equal(streak(zeroPerWeek, [], WED), 0);
+});
+
+test('monthly streak is 0 when target_count is 0', () => {
+  const zeroMonthly: Cadence = { target_type: 'monthly', target_count: 0, target_weekdays: null };
+  assert.equal(streak(zeroMonthly, [], WED), 0);
+});
+
+test('times_per_week streak is 0 when target_count is negative', () => {
+  const negativePerWeek: Cadence = { target_type: 'times_per_week', target_count: -1, target_weekdays: null };
+  assert.equal(streak(negativePerWeek, [], WED), 0);
+});
+
+test('monthly streak is 0 when target_count is negative', () => {
+  const negativeMonthly: Cadence = { target_type: 'monthly', target_count: -1, target_weekdays: null };
+  assert.equal(streak(negativeMonthly, [], WED), 0);
+});
+
+test('streak returns 0 for an unrecognised target_type', () => {
+  const bogus = { target_type: 'bogus', target_count: null, target_weekdays: null } as unknown as Cadence;
+  assert.equal(streak(bogus, [], WED), 0);
+});

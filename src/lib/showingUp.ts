@@ -110,6 +110,10 @@ export function streak(cadence: Cadence, checkins: CheckinDates, now: number): n
 
   if (cadence.target_type === 'monthly') {
     const target = cadence.target_count ?? 1;
+    // A target of zero or less would make `doneThisMonth(...) >= target` true
+    // for every month and loop forever. A commitment with nothing to reach
+    // is not a commitment, so it has no streak.
+    if (target <= 0) return 0;
     let count = 0;
     let cursor = startOfMonth(today);
     if (doneThisMonth(done, cursor) < target) {
@@ -125,6 +129,21 @@ export function streak(cadence: Cadence, checkins: CheckinDates, now: number): n
   // An empty weekday set would make weekMet vacuously true for every week
   // and loop forever. A commitment scheduled for no days has no streak.
   if (cadence.target_type === 'specific_weekdays' && (cadence.target_weekdays ?? []).length === 0) {
+    return 0;
+  }
+
+  if (cadence.target_type === 'times_per_week') {
+    // A target of zero or less would make `doneThisWeek(...) >= target` true
+    // for every week and loop forever. A commitment with nothing to reach is
+    // not a commitment, so it has no streak.
+    const target = cadence.target_count ?? 0;
+    if (target <= 0) return 0;
+  }
+
+  // An unrecognised target_type falls through to here otherwise, and would
+  // be silently treated as times_per_week. isShowingUp refuses to guess at
+  // an unknown cadence, so streak does too.
+  if (cadence.target_type !== 'times_per_week' && cadence.target_type !== 'specific_weekdays') {
     return 0;
   }
 
