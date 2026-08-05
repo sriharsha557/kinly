@@ -14,7 +14,7 @@
 // Dependency-free apart from periods.ts so node:test can import it under
 // --experimental-strip-types.
 
-import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek } from './periods.ts';
+import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek, isoWeekday } from './periods.ts';
 
 export type TargetType = 'daily' | 'times_per_week' | 'specific_weekdays' | 'monthly';
 
@@ -56,6 +56,17 @@ export function isShowingUp(cadence: Cadence, checkins: CheckinDates, now: numbe
       // when the arithmetic makes it impossible, and stays false for the rest
       // of that week because no later check-in can change it.
       return doneThisWeek(done, today) + daysRemainingInWeek(today) >= target;
+    }
+    case 'specific_weekdays': {
+      const scheduled = cadence.target_weekdays ?? [];
+      const monday = startOfWeek(today);
+      const todayWeekday = isoWeekday(today);
+      // Strictly earlier than today: a scheduled day that is still in progress
+      // is not a miss. Marking someone as failing at 00:01 on the day they
+      // planned to act is the judgement this model exists to avoid.
+      return scheduled
+        .filter((weekday) => weekday < todayWeekday)
+        .every((weekday) => done.has(toIsoDate(addDays(monday, weekday - 1))));
     }
     default:
       return false;

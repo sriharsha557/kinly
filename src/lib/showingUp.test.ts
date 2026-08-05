@@ -52,3 +52,33 @@ test('times_per_week counts only the current week', () => {
   const SUN = new Date(2026, 7, 9, 12).getTime();
   assert.equal(isShowingUp(fourPerWeek, lastWeek, SUN), false);
 });
+
+// Mon / Wed / Fri.
+const mwf: Cadence = {
+  target_type: 'specific_weekdays',
+  target_count: null,
+  target_weekdays: [1, 3, 5],
+};
+
+test('specific_weekdays ignores today - the day is not over', () => {
+  // Wednesday is scheduled and unlogged, but Monday was done.
+  assert.equal(isShowingUp(mwf, ['2026-08-03'], WED), true);
+});
+
+test('specific_weekdays fails on a missed earlier scheduled day', () => {
+  // Monday scheduled and missed.
+  assert.equal(isShowingUp(mwf, [], WED), false);
+});
+
+test('specific_weekdays ignores unscheduled days', () => {
+  const THU = new Date(2026, 7, 6, 12).getTime();
+  // Mon and Wed both done; Thursday is not scheduled, so nothing is owed.
+  assert.equal(isShowingUp(mwf, ['2026-08-03', '2026-08-05'], THU), true);
+  // Tuesday check-in does not substitute for the missed Monday.
+  assert.equal(isShowingUp(mwf, ['2026-08-04', '2026-08-05'], THU), false);
+});
+
+test('specific_weekdays is trivially true on the week s first scheduled day', () => {
+  const MON = new Date(2026, 7, 3, 12).getTime();
+  assert.equal(isShowingUp(mwf, [], MON), true);
+});
