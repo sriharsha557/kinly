@@ -1,4 +1,7 @@
 import type { AccentId, ThemeMode } from '../theme/colors';
+import type { TargetType } from '../lib/showingUp';
+
+export type { TargetType };
 
 export type InterestCategory = 'health' | 'wealth' | 'ideas' | 'learning' | 'relationships';
 
@@ -46,6 +49,44 @@ export interface CircleMember {
 
 export type GoalSource = 'manual' | 'health_steps';
 
+export type AreaKey =
+  | 'health' | 'mind' | 'learning' | 'finance'
+  | 'career' | 'family' | 'creativity' | 'community';
+
+export interface Area {
+  id: string;
+  key: AreaKey;
+  label: string;
+  emoji: string;
+  sort_order: number;
+}
+
+export type GoalStatus = 'active' | 'ended';
+export type EndedReason = 'replaced' | 'migration' | 'deleted' | 'completed';
+
+export interface GoalCheckin {
+  id: string;
+  goal_id: string;
+  user_id: string;
+  checkin_date: string;
+  created_at: string;
+}
+
+export interface GoalHistoryEntry {
+  id: string;
+  goal_id: string | null;
+  circle_id: string;
+  user_id: string;
+  area_id: string | null;
+  title: string;
+  target_type: TargetType | null;
+  started_at: string | null;
+  ended_at: string;
+  best_streak: number;
+  ended_reason: EndedReason;
+  needs_review: boolean;
+}
+
 export interface Goal {
   id: string;
   user_id: string;
@@ -58,6 +99,15 @@ export interface Goal {
   category: GoalCategory | null;
   goal_source: GoalSource;
   last_synced_date: string | null;
+  area_id: string | null;
+  target_type: TargetType | null;
+  target_count: number | null;
+  target_weekdays: number[] | null;
+  status: GoalStatus;
+  started_at: string;
+  ended_at: string | null;
+  ended_reason: EndedReason | null;
+  kind: string;
 }
 
 export type EventType =
