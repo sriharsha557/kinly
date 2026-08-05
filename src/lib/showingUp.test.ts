@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isShowingUp, streak, type Cadence } from './showingUp.ts';
+import { isShowingUp, streak, consistency, type Cadence } from './showingUp.ts';
 
 // Wednesday 2026-08-05, midday, so nothing depends on the hour.
 const WED = new Date(2026, 7, 5, 12).getTime();
@@ -188,4 +188,30 @@ test('monthly streak is 0 when target_count is negative', () => {
 test('streak returns 0 for an unrecognised target_type', () => {
   const bogus = { target_type: 'bogus', target_count: null, target_weekdays: null } as unknown as Cadence;
   assert.equal(streak(bogus, [], WED), 0);
+});
+
+test('daily consistency is out of seven', () => {
+  assert.deepEqual(consistency(daily, ['2026-08-03', '2026-08-04'], WED), { done: 2, of: 7 });
+});
+
+test('times_per_week consistency is out of its own target', () => {
+  assert.deepEqual(consistency(fourPerWeek, ['2026-08-03', '2026-08-04'], WED), { done: 2, of: 4 });
+});
+
+test('specific_weekdays consistency is out of the scheduled count', () => {
+  assert.deepEqual(consistency(mwf, ['2026-08-03'], WED), { done: 1, of: 3 });
+});
+
+test('specific_weekdays consistency counts only scheduled days', () => {
+  // Tuesday is not scheduled and must not count toward 1/3.
+  assert.deepEqual(consistency(mwf, ['2026-08-04'], WED), { done: 0, of: 3 });
+});
+
+test('monthly consistency reports the month', () => {
+  assert.deepEqual(consistency(monthly, ['2026-08-01'], WED), { done: 1, of: 2 });
+});
+
+test('consistency never exceeds its denominator', () => {
+  const many = ['2026-08-03', '2026-08-04', '2026-08-05', '2026-08-06', '2026-08-07'];
+  assert.deepEqual(consistency(fourPerWeek, many, WED), { done: 4, of: 4 });
 });

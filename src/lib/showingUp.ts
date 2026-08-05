@@ -166,3 +166,36 @@ export function streak(cadence: Cadence, checkins: CheckinDates, now: number): n
   }
   return count;
 }
+
+// Measured against the goal's OWN cadence, never a fixed /7 - a 4x/week goal
+// reading 4/7 would make someone who fully honored their commitment look like
+// they had failed three days.
+export function consistency(
+  cadence: Cadence,
+  checkins: CheckinDates,
+  now: number,
+): { done: number; of: number } {
+  const today = new Date(now);
+  const done = checkinSet(checkins);
+
+  switch (cadence.target_type) {
+    case 'daily':
+      return { done: doneThisWeek(done, today), of: 7 };
+    case 'times_per_week': {
+      const of = cadence.target_count ?? 0;
+      return { done: Math.min(doneThisWeek(done, today), of), of };
+    }
+    case 'specific_weekdays': {
+      const scheduled = cadence.target_weekdays ?? [];
+      const monday = startOfWeek(today);
+      const hit = scheduled.filter((weekday) =>
+        done.has(toIsoDate(addDays(monday, weekday - 1))),
+      ).length;
+      return { done: hit, of: scheduled.length };
+    }
+    case 'monthly': {
+      const of = cadence.target_count ?? 1;
+      return { done: Math.min(doneThisMonth(done, today), of), of };
+    }
+  }
+}
