@@ -61,6 +61,13 @@ export interface Area {
   sort_order: number;
 }
 
+export interface CircleArea {
+  circle_id: string;
+  area_id: string;
+  enabled: boolean;
+  created_at: string;
+}
+
 export type GoalStatus = 'active' | 'ended';
 export type EndedReason = 'replaced' | 'migration' | 'deleted' | 'completed';
 
@@ -80,11 +87,14 @@ export interface GoalHistoryEntry {
   area_id: string | null;
   title: string;
   target_type: TargetType | null;
+  target_count: number | null;
+  target_weekdays: number[] | null;
   started_at: string | null;
   ended_at: string;
   best_streak: number;
   ended_reason: EndedReason;
   needs_review: boolean;
+  created_at: string;
 }
 
 export interface Goal {

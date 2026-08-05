@@ -49,17 +49,22 @@ create table circle_areas (
 alter table goals add column area_id uuid references areas (id);
 alter table goals add column target_type text
   check (target_type in ('daily', 'times_per_week', 'specific_weekdays', 'monthly'));
-alter table goals add column target_count integer;
 -- A target_count of zero or negative is not a commitment, and it is not
 -- merely meaningless - Task 6 found it made the streak calculation loop
 -- forever, because the loop's step size came from this value. The database
--- must not be able to store what the app already refuses to compute.
-alter table goals add constraint goals_target_count_positive
+-- must not be able to store what the app already refuses to compute. Folded
+-- into the column add (rather than a standalone add constraint) so it needs
+-- no ACCESS EXCLUSIVE validation scan of goals.
+alter table goals add column target_count integer
   check (target_count is null or target_count > 0);
 alter table goals add column target_weekdays integer[];
 alter table goals add column status text not null default 'active'
   check (status in ('active', 'ended'));
 alter table goals add column started_at date not null default current_date;
+-- Existing goals did not start today. created_at (0001) is their real
+-- origin, and without this every historical commitment would claim it
+-- began on the day this migration was pasted into the Dashboard.
+update goals set started_at = created_at::date;
 alter table goals add column ended_at date;
 alter table goals add column ended_reason text
   check (ended_reason in ('replaced', 'migration', 'deleted', 'completed'));
@@ -88,7 +93,9 @@ create table goal_checkins (
   unique (goal_id, checkin_date)
 );
 
-create index goal_checkins_goal_date on goal_checkins (goal_id, checkin_date desc);
+-- No separate index here: the unique (goal_id, checkin_date) constraint
+-- above already builds a btree on those columns, and btree scans backward,
+-- so it already serves "this goal's check-ins, most recent first."
 
 -- ---------------------------------------------------------------------------
 -- goal_history: the archive. The goals row is NOT deleted when a commitment
@@ -104,8 +111,14 @@ create table goal_history (
   user_id uuid not null references profiles (id) on delete cascade,
   area_id uuid references areas (id),
   title text not null,
-  target_type text,
-  target_count integer,
+  -- goals enforces these same two guarantees (target_type's cadence check,
+  -- target_count's positivity check). This archive table reads back into
+  -- the history UI, so it must not be a hole where goals forbids a value
+  -- but goal_history happily stores it.
+  target_type text
+    check (target_type is null or target_type in ('daily', 'times_per_week', 'specific_weekdays', 'monthly')),
+  target_count integer
+    check (target_count is null or target_count > 0),
   target_weekdays integer[],
   started_at date,
   ended_at date not null default current_date,
@@ -116,7 +129,10 @@ create table goal_history (
   created_at timestamptz not null default now()
 );
 
-create index goal_history_member on goal_history (circle_id, user_id, area_id);
+-- Trailing ended_at desc because the query this index exists for is "this
+-- member's history, most recent first" - without it the index doesn't serve
+-- that ordering.
+create index goal_history_member on goal_history (circle_id, user_id, area_id, ended_at desc);
 
 -- ---------------------------------------------------------------------------
 -- RLS, mirroring the circle-scoped pattern established in 0001
@@ -136,9 +152,15 @@ create policy "owners and admins manage circle areas" on circle_areas
   for all using (
     exists (
       select 1 from circle_members
+      -- leave_circle (0022) soft-deletes the membership row but leaves
+      -- role='owner' sitting on it, so role alone is not authority - a
+      -- departed owner or a removed admin would otherwise keep permanent
+      -- power to toggle this circle's Areas.
       where circle_id = circle_areas.circle_id
         and user_id = auth.uid()
         and role in ('owner', 'admin')
+        and deleted_at is null
+        and status = 'active'
     )
   );
 
@@ -156,8 +178,22 @@ create policy "members check in for themselves" on goal_checkins
 create policy "members undo their own check-in" on goal_checkins
   for delete using (user_id = auth.uid());
 
+-- Deliberately no UPDATE policy on goal_checkins: this table is append-only
+-- and idempotency comes from the unique (goal_id, checkin_date) constraint
+-- above, not from updating an existing row. That means a client .upsert()
+-- will be rejected by RLS with error 42501 the moment it takes the
+-- ON CONFLICT DO UPDATE path. Check-ins must be written with
+-- `insert ... on conflict do nothing` (supabase-js:
+-- `.insert(..., { ignoreDuplicates: true })`).
+
 create policy "members read circle goal history" on goal_history
   for select using (is_circle_member(circle_id));
 
 create policy "members archive their own goals" on goal_history
   for insert with check (user_id = auth.uid() and is_circle_member(circle_id));
+
+-- needs_review is set by this migration for migrated goals and cleared by
+-- the person who owns the row, so it needs an UPDATE path - without one,
+-- RLS silently denies every attempt to clear the flag.
+create policy "members update their own goal history" on goal_history
+  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
