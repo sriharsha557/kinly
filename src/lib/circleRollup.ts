@@ -33,6 +33,14 @@ export function areaRollup({ areas, goals, checkinsByGoal, now }: RollupInput): 
   return areas.map((area) => {
     // Only members who set a goal in this Area. Someone with no goal is at
     // rest, not behind, so they are absent from both sides of the ratio.
+    //
+    // No dedupe by user_id here - correctness rests entirely on the
+    // goals_one_active_per_area unique index (created at the end of
+    // supabase/migrations/0047_areas_backfill.sql, after its backfill
+    // resolves pre-existing duplicates) guaranteeing at most one active goal
+    // per (circle_id, user_id, area_id). If that index were ever missing or
+    // bypassed, a member with two active goals in the same Area would be
+    // counted twice on both sides of the ratio.
     const inArea = goals.filter((goal) => goal.area_id === area.id);
     const showingUp = inArea.filter((goal) =>
       isShowingUp(goal, checkinsByGoal[goal.id] ?? [], now),

@@ -3,6 +3,13 @@
 -- circle. Nothing is deleted. Anything that cannot be mapped cleanly is
 -- flagged needs_review rather than dropped.
 --
+-- This file must be applied as its own, separate run - do not paste it into
+-- the Dashboard together with 0046 or 0048. It opens with `begin;` and closes
+-- with `commit;` below; pasted alongside other files in one go, `begin;`
+-- would warn "already a transaction in progress" and this file's `commit;`
+-- would commit the OUTER transaction early, silently splitting the atomicity
+-- the surrounding files rely on. Run alone, this is harmless.
+--
 -- Soft-deleted goals (deleted_at is not null) are deliberately left alone by
 -- every statement below - they keep status='active' with no area and no
 -- cadence from 0046's default. That is safe today (the one-active-per-area
@@ -125,6 +132,18 @@ where id in (
 update goals
 set target_type = 'daily'
 where deleted_at is null and status = 'active' and target_type is null;
+
+-- One active goal per member per Area, from 0046. Created here rather than
+-- in 0046 because it must run after step 1 has populated area_id and step 3
+-- has archived the collisions - created any earlier, step 1's single UPDATE
+-- would hit this constraint the moment a member had two active goals in the
+-- same category (the ordinary case: "Walk 10k steps" and "Gym 3x/week" are
+-- both 'health'), aborting the backfill before step 3's dedupe could ever
+-- run. deleted_at participates because this app soft-deletes (0019) and a
+-- deleted goal must not block its replacement.
+create unique index goals_one_active_per_area
+  on goals (circle_id, user_id, area_id)
+  where status = 'active' and deleted_at is null;
 
 -- 5. Seed each circle with Health, Learning and Finance, plus any Area its
 -- members are already using. Soft-deleted circles are excluded - there is no

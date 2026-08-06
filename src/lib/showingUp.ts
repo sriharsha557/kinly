@@ -19,7 +19,12 @@ import { toIsoDate, addDays, startOfWeek, daysRemainingInWeek, isoWeekday, start
 export type TargetType = 'daily' | 'times_per_week' | 'specific_weekdays' | 'monthly';
 
 export interface Cadence {
-  target_type: TargetType;
+  // Nullable to match Goal.target_type in src/types/models.ts: a real Goal
+  // row can have no cadence yet, and every switch below already falls
+  // through null to its `default: return false` (or equivalent neutral
+  // value) branch, so widening this costs nothing here while letting a real
+  // Goal be passed in without a cast.
+  target_type: TargetType | null;
   // Set for times_per_week and monthly; null otherwise.
   target_count: number | null;
   // ISO weekdays (1=Mon..7=Sun), set for specific_weekdays; null otherwise.

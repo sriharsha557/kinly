@@ -34,7 +34,13 @@ as $$
     when 'daily' then p_day = any(coalesce(p_checkins, '{}'::date[]))
     -- 7 - (isodow - 1) is daysRemainingInWeek, inclusive of today.
     when 'times_per_week' then
-      (select count(*) from unnest(coalesce(p_checkins, '{}'::date[])) d
+      -- count(distinct d), not count(*): src/lib/showingUp.ts runs every
+      -- check-in date through a Set before counting, so a duplicate date
+      -- (a retried write, an offline replay) collapses to one there. A plain
+      -- count(*) here would count it twice and could say "showing up" for a
+      -- day TypeScript says otherwise - a real divergence between the two
+      -- implementations, not just a theoretical one.
+      (select count(distinct d) from unnest(coalesce(p_checkins, '{}'::date[])) d
         where d >= date_trunc('week', p_day::timestamp)::date
           and d <  date_trunc('week', p_day::timestamp)::date + 7)
       + (7 - (extract(isodow from p_day)::int - 1)) >= coalesce(p_target_count, 0)
@@ -47,7 +53,10 @@ as $$
             <> all(coalesce(p_checkins, '{}'::date[]))
     )
     when 'monthly' then
-      (select count(*) from unnest(coalesce(p_checkins, '{}'::date[])) d
+      -- Same count(distinct d) reasoning as times_per_week above: the
+      -- TypeScript side de-duplicates via a Set, so a duplicate checkin_date
+      -- must not be double-counted here either.
+      (select count(distinct d) from unnest(coalesce(p_checkins, '{}'::date[])) d
         where d >= date_trunc('month', p_day::timestamp)::date
           and d <  (date_trunc('month', p_day::timestamp) + interval '1 month')::date)
       + ((date_trunc('month', p_day::timestamp) + interval '1 month')::date - p_day)
@@ -74,7 +83,13 @@ create or replace view goal_showing_up with (security_invoker = true) as
 select g.id as goal_id, g.user_id, g.circle_id, g.area_id,
        showing_up_at(
          g.target_type, g.target_count, g.target_weekdays,
-         (select array_agg(c.checkin_date) from goal_checkins c where c.goal_id = g.id),
+         -- Bounded to the last 62 days: no cadence looks back further than
+         -- one month (the monthly branch above), so 62 days is a generous
+         -- bound. Without it, this subquery pulls EVERY check-in ever
+         -- recorded for the goal, per goal, across every circle, in the
+         -- nightly digest - unbounded growth for no benefit to the answer.
+         (select array_agg(c.checkin_date) from goal_checkins c
+           where c.goal_id = g.id and c.checkin_date >= current_date - 62),
          current_date
        ) as showing_up
 from goals g

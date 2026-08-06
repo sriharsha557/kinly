@@ -71,6 +71,12 @@ export interface CircleArea {
 export type GoalStatus = 'active' | 'ended';
 export type EndedReason = 'replaced' | 'migration' | 'deleted' | 'completed';
 
+// 'habit' is the only member today (0046). Challenges, reading plans,
+// savings plans and training plans are all commitments and are the intended
+// future members of this union, sharing the goals table rather than each
+// inventing a parallel one - see 0046's comment on the `kind` column.
+export type GoalKind = 'habit';
+
 export interface GoalCheckin {
   id: string;
   goal_id: string;
@@ -117,7 +123,7 @@ export interface Goal {
   started_at: string;
   ended_at: string | null;
   ended_reason: EndedReason | null;
-  kind: string;
+  kind: GoalKind;
 }
 
 export type EventType =

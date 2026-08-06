@@ -75,9 +75,14 @@ alter table goals add column kind text not null default 'habit';
 
 -- One active goal per member per Area. deleted_at participates because this
 -- app soft-deletes (0019) and a deleted goal must not block its replacement.
-create unique index goals_one_active_per_area
-  on goals (circle_id, user_id, area_id)
-  where status = 'active' and deleted_at is null;
+--
+-- The unique index itself is NOT created here. 0047's backfill assigns
+-- area_id to every mappable goal in a single UPDATE (its step 1), and a
+-- member with two active goals in the same category - the ordinary case,
+-- not an edge case - would violate this index the instant that UPDATE wrote
+-- the second row, aborting the whole backfill before its step 3 dedupe ever
+-- ran. The index is created at the end of 0047 instead, after the backfill
+-- has resolved those collisions and the constraint can actually hold.
 
 -- ---------------------------------------------------------------------------
 -- goal_checkins: the "done" ledger. One row per goal per day.
@@ -173,6 +178,13 @@ create policy "members check in for themselves" on goal_checkins
   for insert with check (
     user_id = auth.uid()
     and exists (select 1 from goals g where g.id = goal_id and g.user_id = auth.uid())
+    -- checkin_date only DEFAULTs to current_date; a client can still send any
+    -- date it likes. current_date is not IMMUTABLE, so a CHECK constraint
+    -- can't express this, but RLS can. Without it a client could post a
+    -- future date or backfill 200 consecutive past days and manufacture a
+    -- streak, in an app whose entire social currency is streaks. Cheapest to
+    -- close now, before any writer exists to depend on the looser behavior.
+    and checkin_date <= current_date
   );
 
 create policy "members undo their own check-in" on goal_checkins
@@ -195,5 +207,13 @@ create policy "members archive their own goals" on goal_history
 -- needs_review is set by this migration for migrated goals and cleared by
 -- the person who owns the row, so it needs an UPDATE path - without one,
 -- RLS silently denies every attempt to clear the flag.
+--
+-- with check also requires is_circle_member(circle_id), not just row
+-- ownership. 0036 closed this identical gap on goals, vision_items,
+-- mood_checkins and buddy_pairs: USING alone lets a member rewrite the FK on
+-- a row they own to point at a circle they aren't in, injecting a fabricated
+-- "previous goal" into that circle's history. Without this WITH CHECK,
+-- goal_history would reopen the exact hole 0036 exists to close.
 create policy "members update their own goal history" on goal_history
-  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+  for update using (user_id = auth.uid())
+  with check (user_id = auth.uid() and is_circle_member(circle_id));

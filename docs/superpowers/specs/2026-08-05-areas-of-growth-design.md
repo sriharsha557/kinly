@@ -310,10 +310,14 @@ One schema migration plus one backfill.
 4. Per `(user_id, area_id)`, the goal with the latest `last_logged_date` stays
    active; the rest archive with `needs_review = true`, satisfying the unique
    index from the first moment it exists.
-5. All migrated goals get `target_type = 'daily'` and `started_at =` migration
-   date. `isShowingUp` evaluates only from the migration date forward, so nobody
-   opens the app to a wall of retroactive misses on a goal that was never daily.
-   `streak_count` is preserved as-is.
+5. All migrated goals get `target_type = 'daily'`. `started_at` is left as the
+   value 0046 already backfilled from `created_at` - each goal's real origin -
+   rather than re-stamped to the migration date: nothing in the app reads
+   `started_at` to judge showing-up (`isShowingUp` never looks at it), and
+   `streak()` reads only the check-in ledger, which starts empty for every
+   migrated goal regardless of the date stored here, so re-stamping it would
+   only destroy history for no behavioral benefit. `streak_count` is
+   preserved as-is.
 
 Nothing is deleted. The `needs_review` count is queryable after deploy, and
 those goals surface in the member's Previous Goals rather than vanishing.
