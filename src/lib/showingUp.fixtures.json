@@ -1,0 +1,22 @@
+[
+  { "name": "daily done today", "target_type": "daily", "target_count": null, "target_weekdays": null,
+    "checkins": ["2026-08-05"], "today": "2026-08-05", "expected": true },
+  { "name": "daily missed today", "target_type": "daily", "target_count": null, "target_weekdays": null,
+    "checkins": ["2026-08-04"], "today": "2026-08-05", "expected": false },
+  { "name": "weekly still reachable", "target_type": "times_per_week", "target_count": 4, "target_weekdays": null,
+    "checkins": ["2026-08-03", "2026-08-04"], "today": "2026-08-05", "expected": true },
+  { "name": "weekly unreachable", "target_type": "times_per_week", "target_count": 4, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-07", "expected": false },
+  { "name": "weekly exactly reachable", "target_type": "times_per_week", "target_count": 4, "target_weekdays": null,
+    "checkins": ["2026-08-03"], "today": "2026-08-07", "expected": true },
+  { "name": "weekdays today not yet elapsed", "target_type": "specific_weekdays", "target_count": null, "target_weekdays": [1, 3, 5],
+    "checkins": ["2026-08-03"], "today": "2026-08-05", "expected": true },
+  { "name": "weekdays missed monday", "target_type": "specific_weekdays", "target_count": null, "target_weekdays": [1, 3, 5],
+    "checkins": [], "today": "2026-08-05", "expected": false },
+  { "name": "monthly reachable", "target_type": "monthly", "target_count": 2, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-05", "expected": true },
+  { "name": "monthly out of days", "target_type": "monthly", "target_count": 2, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-31", "expected": false },
+  { "name": "monthly met", "target_type": "monthly", "target_count": 2, "target_weekdays": null,
+    "checkins": ["2026-08-01", "2026-08-02"], "today": "2026-08-31", "expected": true }
+]
