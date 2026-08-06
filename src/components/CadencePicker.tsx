@@ -4,7 +4,7 @@ import { AnimatedPressable } from './AnimatedPressable';
 import { WEEKDAY_LABELS, type CadenceDraft } from '../lib/cadence';
 import type { TargetType } from '../lib/showingUp';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, spacing } from '../theme/colors';
+import { fontFamily, spacing, touch } from '../theme/colors';
 
 const CADENCE_OPTIONS: { value: TargetType; label: string }[] = [
   { value: 'daily', label: 'Every day' },
@@ -145,6 +145,11 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: spacing.xs },
     chip: {
+      // paddingVertical alone on an 18px caption line lands around 38dp -
+      // under the 48dp minimum design/REDESIGN.md §2.3 sets for any tap
+      // target. minHeight is what actually guarantees the floor.
+      minHeight: touch.chip,
+      justifyContent: 'center',
       paddingVertical: spacing.s10,
       paddingHorizontal: spacing.md,
       borderRadius: radii.input,
@@ -153,8 +158,10 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       borderColor: 'transparent',
     },
     countChip: {
-      minWidth: 48,
+      minWidth: touch.min,
+      minHeight: touch.chip,
       alignItems: 'center',
+      justifyContent: 'center',
       paddingVertical: spacing.s10,
       paddingHorizontal: spacing.s10,
       borderRadius: radii.input,

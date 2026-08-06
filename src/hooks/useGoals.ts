@@ -8,10 +8,22 @@ export function useGoals(circleId: string | undefined) {
     queryKey: ['goals', circleId],
     enabled: !!circleId,
     queryFn: async (): Promise<Goal[]> => {
+      // useEndGoal sets status='ended' on the user's own action (completed /
+      // deleted) and that must disappear immediately, or the button that
+      // just fired looks like it did nothing and stays tappable for a
+      // second, contradictory history row. But migration 0047 also set
+      // status='ended' on every goal whose old category could not be mapped
+      // to an Area - a blanket `.eq('status', 'active')` would make that
+      // whole slice of every circle's goals vanish in one release, before
+      // anyone has decided what should happen to them. So this stays
+      // narrower than the real filter on purpose: hide only what a member
+      // ended themselves, leave migration-ended goals visible until that
+      // product decision lands, then switch to `.eq('status', 'active')`.
       const { data, error } = await supabase
         .from('goals')
         .select('*')
         .eq('circle_id', circleId as string)
+        .or('status.eq.active,ended_reason.eq.migration')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Goal[];

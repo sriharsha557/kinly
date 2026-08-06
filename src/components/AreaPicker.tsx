@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, spacing } from '../theme/colors';
+import { fontFamily, spacing, touch } from '../theme/colors';
 import type { Area } from '../types/models';
 
 // A circle's enabled Areas as selectable chips. The catalog is fixed and
@@ -54,6 +54,11 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.s6,
+      // paddingVertical alone on an 18px caption line lands around 38dp -
+      // under the 48dp minimum design/REDESIGN.md §2.3 sets for any tap
+      // target. minHeight is what actually guarantees the floor; padding
+      // only ever adds to it.
+      minHeight: touch.chip,
       paddingVertical: spacing.s10,
       paddingHorizontal: spacing.md,
       borderRadius: radii.input,

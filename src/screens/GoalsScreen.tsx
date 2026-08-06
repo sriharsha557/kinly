@@ -4,6 +4,7 @@ import {
   FlatList,
   Modal,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput, View,
@@ -31,6 +32,7 @@ import { useCircleAreas } from '../hooks/useAreas';
 import { validateCadence, type CadenceDraft } from '../lib/cadence';
 import { streak } from '../lib/showingUp';
 import { toIsoDate } from '../lib/periods';
+import { errorMessage } from '../lib/errorMessage';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
@@ -59,18 +61,33 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
       setError(cadenceError);
       return;
     }
-    await updateGoal.mutateAsync({ goalId: goal.id, circleId, title: title.trim(), cadence });
-    onClose();
+    try {
+      await updateGoal.mutateAsync({ goalId: goal.id, circleId, title: title.trim(), cadence });
+      onClose();
+    } catch (err) {
+      // Was an unhandled rejection: mutateAsync throws on failure and
+      // nothing here caught it, so a failed update silently left the modal
+      // open with no feedback at all. errorMessage covers supabase-js's
+      // plain-object error shape, not just Error instances.
+      setError(errorMessage(err, 'Could not save that goal.'));
+    }
   }
 
   return (
     <Modal transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Edit goal</Text>
-          <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
-          <CadencePicker value={cadence} onChange={setCadence} />
-          {error && <Text style={styles.formError}>{error}</Text>}
+          {/* The cadence row grew to a type chip row plus up to 7 weekday
+              chips - tall enough on a small device to push the Save button
+              off-screen with no way to reach it. maxHeight caps the card at
+              a fraction of the viewport; ScrollView lets the content that
+              no longer fits still be reached. */}
+          <ScrollView contentContainerStyle={styles.modalScrollContent}>
+            <Text style={styles.modalTitle}>Edit goal</Text>
+            <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
+            <CadencePicker value={cadence} onChange={setCadence} />
+            {error && <Text style={styles.formError}>{error}</Text>}
+          </ScrollView>
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
             <PillButton
@@ -114,6 +131,7 @@ function GoalCard({
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const cadence = {
     target_type: goal.target_type,
     target_count: goal.target_count,
@@ -165,8 +183,7 @@ function GoalCard({
         hadCheckins: myCheckins.length > 0,
       },
       {
-        onError: (err) =>
-          Alert.alert('Could not end this goal', err instanceof Error ? err.message : 'Please try again.'),
+        onError: (err) => Alert.alert('Could not end this goal', errorMessage(err, 'Please try again.')),
       },
     );
   }
@@ -228,27 +245,54 @@ function GoalCard({
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
-            <AnimatedPressable
-              onPress={handleLogWithPhoto}
-              disabled={isPending}
-              hitSlop={13}
-              accessibilityRole="button"
-              accessibilityLabel="Log progress with a photo"
-            >
-              <CameraIcon width={18} height={18} color={theme.colors.primary} />
-            </AnimatedPressable>
-            <AnimatedPressable
-              accessibilityRole="button"
-              style={styles.logButton}
-              disabled={checkIn.isPending || undoCheckIn.isPending}
-              onPress={() =>
-                checkedInToday
-                  ? undoCheckIn.mutate({ goalId: goal.id, circleId, date: today })
-                  : checkIn.mutate({ goalId: goal.id, circleId, userId })
-              }
-            >
-              <Text style={styles.logButtonText}>{checkedInToday ? 'Done today' : 'Check in'}</Text>
-            </AnimatedPressable>
+            {/* The camera icon writes progress/streak_count/last_logged_date
+                through log_goal_progress, which does `least(progress + n,
+                target)` in Postgres. least(NULL, x) returns x, so on a
+                cadence goal (target == null) progress would climb unbounded
+                right next to a check-in-ledger streak badge for the same
+                goal - two disagreeing streak numbers on one card. Only
+                goals that still carry a numeric target (legacy and
+                health_steps) get this control; a cadence commitment is
+                recorded by a check-in only. */}
+            {goal.target != null && (
+              <AnimatedPressable
+                onPress={handleLogWithPhoto}
+                disabled={isPending}
+                hitSlop={13}
+                accessibilityRole="button"
+                accessibilityLabel="Log progress with a photo"
+              >
+                <CameraIcon width={18} height={18} color={theme.colors.primary} />
+              </AnimatedPressable>
+            )}
+            {/* The insert policy on goal_checkins requires user_id =
+                auth.uid(), so tapping this on a friend's card can only ever
+                fail with 42501 - and checkinsByGoal[goal.id] on their card is
+                THEIR ledger, so it can even read "Done today" for something
+                the viewer never did. Someone else's card still shows their
+                cadence/streak/consistency (the point of a shared circle);
+                it just doesn't offer an action that cannot succeed. */}
+            {isMine && (
+              <AnimatedPressable
+                accessibilityRole="button"
+                accessibilityLabel={checkedInToday ? 'Undo today’s check-in' : 'Check in'}
+                style={styles.logButton}
+                disabled={checkIn.isPending || undoCheckIn.isPending}
+                onPress={() =>
+                  checkedInToday
+                    ? undoCheckIn.mutate(
+                        { goalId: goal.id, circleId, date: today },
+                        { onError: (err) => Alert.alert('Could not undo check-in', errorMessage(err, 'Please try again.')) },
+                      )
+                    : checkIn.mutate(
+                        { goalId: goal.id, circleId, userId },
+                        { onError: (err) => Alert.alert('Could not check in', errorMessage(err, 'Please try again.')) },
+                      )
+                }
+              >
+                <Text style={styles.logButtonText}>{checkedInToday ? 'Done today' : 'Check in'}</Text>
+              </AnimatedPressable>
+            )}
           </View>
         )}
       </View>
@@ -264,10 +308,43 @@ function GoalCard({
                 setEditing(true);
               },
             },
+            // Not destructive, no confirmation needed - see the comment on
+            // endWith above.
             { label: "I've finished this", onPress: () => endWith('completed') },
-            { label: 'Delete', destructive: true, onPress: () => endWith('deleted') },
+            {
+              label: 'Delete',
+              destructive: true,
+              onPress: () => {
+                setMenuOpen(false);
+                setConfirmingDelete(true);
+              },
+            },
           ]}
           onCancel={() => setMenuOpen(false)}
+        />
+      )}
+      {confirmingDelete && (
+        // A second ActionSheet, not Alert.alert: Alert.alert on Android
+        // silently keeps only buttons.slice(0, 3) and hardcodes
+        // cancelable: false, which is exactly wrong for a confirm/cancel
+        // pair the user must be able to dismiss. Delete is irreversible
+        // (it archives the goal and writes ended_reason='deleted'), so it
+        // gets the confirm step that "I've finished this" deliberately
+        // skips.
+        <ActionSheet
+          title={`Delete "${goal.title}"?`}
+          message="This can't be undone."
+          options={[
+            {
+              label: 'Delete',
+              destructive: true,
+              onPress: () => {
+                setConfirmingDelete(false);
+                endWith('deleted');
+              },
+            },
+          ]}
+          onCancel={() => setConfirmingDelete(false)}
         />
       )}
       {celebration && (
@@ -321,8 +398,11 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
     } catch (err) {
       // useCreateGoal turns the one-active-goal-per-Area constraint into
       // readable copy; anything else surfaces its own message rather than a
-      // silent failure.
-      setError(err instanceof Error ? err.message : 'Could not add that goal.');
+      // silent failure. errorMessage covers the raw-object case too - a
+      // database error like the 23502 not-null violation isn't an Error
+      // instance, so `err instanceof Error` alone would hide it behind this
+      // generic fallback.
+      setError(errorMessage(err, 'Could not add that goal.'));
     }
   }
 
@@ -384,12 +464,10 @@ export default function GoalsScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Goals</Text>
 
-      {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
-
-      {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
-
       {isLoading ? (
         <View style={{ marginTop: spacing.xs }}>
+          {userId && circleId && <GoalSuggestions circleId={circleId} userId={userId} />}
+          {userId && circleId && <AddGoalForm circleId={circleId} userId={userId} />}
           <GoalCardSkeleton />
           <GoalCardSkeleton />
           <GoalCardSkeleton />
@@ -398,6 +476,21 @@ export default function GoalsScreen() {
         <FlatList
           data={goals ?? []}
           keyExtractor={(goal) => goal.id}
+          // AddGoalForm grew to ~200dp taller (up to 8 Area chips plus a
+          // cadence row plus a 7-chip weekday row) and used to sit in a
+          // fixed region above this list, outside any scroll container -
+          // on a small device that pushed its own submit button off-screen
+          // with no way to reach it. Routing it through the list's header
+          // instead of a sibling View means it scrolls with everything
+          // else for free.
+          ListHeaderComponent={
+            userId && circleId ? (
+              <>
+                <GoalSuggestions circleId={circleId} userId={userId} />
+                <AddGoalForm circleId={circleId} userId={userId} />
+              </>
+            ) : null
+          }
           renderItem={({ item, index }) =>
             userId && circleId ? (
               <Animated.View
@@ -434,17 +527,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     form: { gap: spacing.s6 },
     fieldLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
     formError: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.danger },
-    categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    categoryChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.s6,
-      minHeight: 48,
-      borderRadius: radii.pill,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-    },
-    categoryChipLabel: { ...type.secondary, fontFamily: fontFamily.semibold },
     input: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
@@ -504,8 +586,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // Progress and the social line are secondary body, not captions - they're
     // read, not glanced at.
     cardMeta: { ...type.secondary, color: colors.textSecondary },
-    doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.s6 },
-    doneBadge: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.success },
     syncedLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     logActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.s10 },
     logButton: {
@@ -529,7 +609,13 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
       borderRadius: radii.card,
       padding: spacing.xl,
       gap: spacing.md,
+      // Edit goal's cadence row can run to a type chip row plus up to 7
+      // weekday chips - capped so the card can never exceed the screen;
+      // the ScrollView inside it is what makes the excess reachable rather
+      // than clipped.
+      maxHeight: '80%',
     },
+    modalScrollContent: { gap: spacing.md },
     modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     modalInput: {
       backgroundColor: colors.inputBg,

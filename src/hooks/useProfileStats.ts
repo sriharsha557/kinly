@@ -35,12 +35,22 @@ export function useProfileStats(userId: string | undefined, circleId: string | u
       if (achievementsError) throw achievementsError;
 
       const goalsList = goals ?? [];
-      const goalsCompleted = goalsList.filter((g) => g.progress >= g.target).length;
+      // target is nullable since migration 0049: a cadence goal has no
+      // numeric target at all, only a check-in ledger. Treating a null
+      // target as 0 is wrong twice over - `0 >= null` coerces to `0 >= 0`
+      // (true), so every cadence goal would count as "completed" and
+      // activeGoals would collapse to 0; and `0 / null` is NaN, which then
+      // propagates into completionRate and ProfileScreen renders it
+      // literally as "NaN%". Numeric goals only for both figures.
+      const numericGoals = goalsList.filter(
+        (g): g is typeof g & { target: number } => g.target != null,
+      );
+      const goalsCompleted = numericGoals.filter((g) => g.progress >= g.target).length;
       const currentStreak = goalsList.reduce((max, g) => Math.max(max, g.streak_count), 0);
       const completionRate =
-        goalsList.length > 0
+        numericGoals.length > 0
           ? Math.round(
-              (goalsList.reduce((sum, g) => sum + Math.min(g.progress / g.target, 1), 0) / goalsList.length) * 100,
+              (numericGoals.reduce((sum, g) => sum + Math.min(g.progress / g.target, 1), 0) / numericGoals.length) * 100,
             )
           : 0;
 

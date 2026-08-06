@@ -11,6 +11,7 @@ import { AreaPicker } from './AreaPicker';
 import { CadencePicker } from './CadencePicker';
 import { useCircleAreas } from '../hooks/useAreas';
 import { validateCadence, type CadenceDraft } from '../lib/cadence';
+import { errorMessage } from '../lib/errorMessage';
 import { useTheme } from '../theme/ThemeProvider';
 import IdeaIllustration from '../../assets/illustrations/kinly-idea.svg';
 
@@ -54,7 +55,9 @@ function CustomizeGoalModal({
       await createGoal.mutateAsync({ circleId, userId, areaId, title: title.trim(), cadence });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not add that goal.');
+      // errorMessage covers supabase-js's plain-object error shape, not just
+      // Error instances - see src/lib/errorMessage.ts.
+      setError(errorMessage(err, 'Could not add that goal.'));
     }
   }
 
@@ -62,14 +65,20 @@ function CustomizeGoalModal({
     <Modal transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>Customize goal</Text>
-          <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
+          {/* AreaPicker (up to 8 chips) plus CadencePicker's type row plus
+              up to 7 weekday chips can run taller than a small device's
+              screen; without a scroll container the Save button would be
+              pushed off past the bottom edge with nothing to reach it. */}
+          <ScrollView contentContainerStyle={styles.modalScrollContent}>
+            <Text style={styles.modalTitle}>Customize goal</Text>
+            <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
 
-          <AreaPicker areas={areas ?? []} selectedId={areaId} onSelect={setAreaId} />
+            <AreaPicker areas={areas ?? []} selectedId={areaId} onSelect={setAreaId} />
 
-          <CadencePicker value={cadence} onChange={setCadence} />
+            <CadencePicker value={cadence} onChange={setCadence} />
 
-          {error && <Text style={styles.formError}>{error}</Text>}
+            {error && <Text style={styles.formError}>{error}</Text>}
+          </ScrollView>
 
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
@@ -161,7 +170,11 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
       borderRadius: radii.card,
       padding: spacing.xl,
       gap: spacing.md,
+      // Capped so the card can never exceed the screen; the ScrollView
+      // inside it is what makes the excess reachable rather than clipped.
+      maxHeight: '80%',
     },
+    modalScrollContent: { gap: spacing.md },
     modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
     formError: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.danger },
     modalInput: {

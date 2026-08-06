@@ -40,6 +40,14 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
 
   const today = todayIso();
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
+  // Cadence goals (target == null) have no progress bar this component can
+  // read - their commitment lives in the check-in ledger, which this
+  // component does not read yet (a later plan moves it there). trackable
+  // is myGoals restricted to what this component actually understands, so
+  // the "Everything logged" congratulation can be scoped to that set rather
+  // than to myGoals as a whole - otherwise a member with only cadence goals
+  // and zero check-ins sees "Nice work" for nothing they did.
+  const trackable = myGoals.filter((g) => g.goal_source !== 'health_steps' && g.target != null);
   const pending = myGoals.filter(
     (g) =>
       g.goal_source !== 'health_steps' &&
@@ -97,6 +105,12 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
 
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
+      ) : trackable.length === 0 ? (
+        // All of this member's goals are cadence commitments this component
+        // can't see progress for. Rendering nothing is the honest choice -
+        // claiming "Everything logged" would be true of an empty set, not of
+        // anything the member actually did today.
+        null
       ) : pending.length === 0 ? (
         <Animated.Text entering={ZoomIn.springify().damping(motion.damping.pop)} style={styles.done}>
           ✓ Everything logged for today. Nice work.
