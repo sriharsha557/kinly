@@ -9,8 +9,14 @@
 // `array_agg` subquery (which returns NULL, not an empty array, for a goal
 // with no check-ins) are unverified by this script.
 //
-// Usage: node scripts/check-showing-up-parity.mjs
-// Requires a running local Supabase (npx supabase start).
+// Usage: node scripts/check-showing-up-parity.mjs            (linked project)
+//        PARITY_TARGET=local node scripts/check-showing-up-parity.mjs
+//
+// Defaults to --linked, because this repo has no local Postgres: migrations
+// are applied by hand through the Supabase Dashboard, so the only database
+// that actually has showing_up_at() on it is the linked project. Requires
+// `npx supabase link` once. Set PARITY_TARGET=local to run against a local
+// stack instead (npx supabase start), if one ever exists.
 //
 // This script has never actually been executed against a database in this
 // environment (no Docker, no Postgres available here) - treat a first real
@@ -44,8 +50,10 @@ const fixtures = JSON.parse(readFileSync(new URL('../src/lib/showingUp.fixtures.
 // supplies that shell just for locating/launching npx.cmd, while the SQL
 // argument itself is still passed as one untouched array element - it is
 // never re-joined into a string, so it survives.
+const TARGET = process.env.PARITY_TARGET === 'local' ? '--local' : '--linked';
+
 function sql(statement) {
-  const args = ['supabase', 'db', 'query', '--local', statement];
+  const args = ['supabase', 'db', 'query', TARGET, statement];
   if (process.platform === 'win32') {
     return execFileSync('cmd', ['/c', 'npx', ...args], { encoding: 'utf8' });
   }
