@@ -93,3 +93,44 @@ test('validateCadence rejects a missing cadence', () => {
     'Pick how often.',
   );
 });
+
+test('validateCadence rejects weekdays outside the ISO range', () => {
+  assert.equal(
+    validateCadence({ target_type: 'specific_weekdays', target_count: null, target_weekdays: [0] }),
+    'Those days are not valid.',
+  );
+  assert.equal(
+    validateCadence({ target_type: 'specific_weekdays', target_count: null, target_weekdays: [8] }),
+    'Those days are not valid.',
+  );
+  // One valid day does not excuse an invalid one - saving this would come
+  // back rendering fewer days than were chosen.
+  assert.equal(
+    validateCadence({ target_type: 'specific_weekdays', target_count: null, target_weekdays: [1, 9] }),
+    'Those days are not valid.',
+  );
+});
+
+test('validateCadence accepts the whole valid weekday range', () => {
+  assert.equal(
+    validateCadence({
+      target_type: 'specific_weekdays',
+      target_count: null,
+      target_weekdays: [1, 2, 3, 4, 5, 6, 7],
+    }),
+    null,
+  );
+});
+
+test('describeCadence never renders the literal word undefined', () => {
+  // WEEKDAY_LABELS has seven entries, so 0 and 8 index off the end. Before
+  // the guard these joined to "undefined · undefined" in product copy.
+  assert.equal(
+    describeCadence({ target_type: 'specific_weekdays', target_count: null, target_weekdays: [0, 8] }),
+    'No cadence set',
+  );
+  assert.equal(
+    describeCadence({ target_type: 'specific_weekdays', target_count: null, target_weekdays: [1, 9] }),
+    'Mon',
+  );
+});
