@@ -18,5 +18,17 @@
   { "name": "monthly out of days", "target_type": "monthly", "target_count": 2, "target_weekdays": null,
     "checkins": [], "today": "2026-08-31", "expected": false },
   { "name": "monthly met", "target_type": "monthly", "target_count": 2, "target_weekdays": null,
-    "checkins": ["2026-08-01", "2026-08-02"], "today": "2026-08-31", "expected": true }
+    "checkins": ["2026-08-01", "2026-08-02"], "today": "2026-08-31", "expected": true },
+  { "name": "weekly on a sunday differs from a sunday-start week", "target_type": "times_per_week", "target_count": 4, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-09", "expected": false },
+  { "name": "weekly checkins all in previous week", "target_type": "times_per_week", "target_count": 4, "target_weekdays": null,
+    "checkins": ["2026-08-01", "2026-08-02"], "today": "2026-08-07", "expected": false },
+  { "name": "monthly checkins all in previous month", "target_type": "monthly", "target_count": 3, "target_weekdays": null,
+    "checkins": ["2026-07-01", "2026-07-02", "2026-07-03"], "today": "2026-08-31", "expected": false },
+  { "name": "daily empty checkins", "target_type": "daily", "target_count": null, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-05", "expected": false },
+  { "name": "weekly null target_count", "target_type": "times_per_week", "target_count": null, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-05", "expected": true },
+  { "name": "unrecognised target_type", "target_type": "weekly_legacy", "target_count": null, "target_weekdays": null,
+    "checkins": [], "today": "2026-08-05", "expected": false }
 ]

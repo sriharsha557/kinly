@@ -55,6 +55,7 @@
     "web": "expo start --web",
     "test": "node --experimental-strip-types --test \"src/**/*.test.ts\" \"supabase/functions/**/*.test.ts\"",
     "test:functions": "node --env-file=.env scripts/test-edge-functions.mjs",
+    "test:parity": "node scripts/check-showing-up-parity.mjs",
     "lint": "expo lint"
   },
   "private": true
