@@ -153,27 +153,67 @@ export function useSetGoalSource() {
   });
 }
 
-export function useDeleteGoal() {
+// Ending a commitment: archive it, then mark it ended. Never delete the
+// goals row - events, streak_saves, buddy check-ins, challenges and the life
+// timeline all reference goal_id.
+//
+// A goal with no check-ins writes NO history row at all. Nothing happened,
+// so there is nothing to remember, and a "Previous Goals" list padded with
+// commitments nobody ever acted on is noise.
+export function useEndGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ goalId }: { goalId: string; circleId: string }) => {
-      // .select() is what makes this honest. An update that matches no rows -
-      // which is what RLS produces when the goal is not yours - succeeds with
-      // error === null and affects nothing, so the old version reported
-      // success, invalidated the list, and left the goal exactly where it
-      // was. That is indistinguishable from "delete is broken".
+    mutationFn: async ({
+      goal,
+      reason,
+      bestStreak,
+      hadCheckins,
+    }: {
+      goal: Goal;
+      circleId: string;
+      reason: EndedReason;
+      bestStreak: number;
+      hadCheckins: boolean;
+    }) => {
+      if (hadCheckins) {
+        const { error: historyError } = await supabase.from('goal_history').insert({
+          goal_id: goal.id,
+          circle_id: goal.circle_id,
+          user_id: goal.user_id,
+          area_id: goal.area_id,
+          title: goal.title,
+          target_type: goal.target_type,
+          target_count: goal.target_count,
+          target_weekdays: goal.target_weekdays,
+          started_at: goal.started_at,
+          best_streak: bestStreak,
+          ended_reason: reason,
+        });
+        if (historyError) throw historyError;
+      }
+
+      // .select() is what makes this honest. An update that matches no rows
+      // - which is what RLS produces when the goal is not yours - succeeds
+      // with error === null and changes nothing, so without this the UI
+      // reports success and leaves the goal exactly where it was.
       const { data, error } = await supabase
         .from('goals')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', goalId)
+        .update({
+          status: 'ended',
+          ended_at: new Date().toISOString().slice(0, 10),
+          ended_reason: reason,
+        })
+        .eq('id', goal.id)
         .select('id');
       if (error) throw error;
       if (!data || data.length === 0) {
-        throw new Error("This goal belongs to someone else, so it can't be deleted from here.");
+        throw new Error("This goal belongs to someone else, so it can't be ended from here.");
       }
     },
-    onSuccess: (_data, variables) =>
-      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] });
+      queryClient.invalidateQueries({ queryKey: ['goal-history', variables.circleId] });
+    },
   });
 }
 
