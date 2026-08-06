@@ -29,7 +29,7 @@ import { GoalCadenceRow } from '../components/GoalCadenceRow';
 import { useGoalCheckins, useCheckIn, useUndoCheckIn } from '../hooks/useCheckins';
 import { useCircleAreas } from '../hooks/useAreas';
 import { validateCadence, type CadenceDraft } from '../lib/cadence';
-import { isShowingUp, streak } from '../lib/showingUp';
+import { streak } from '../lib/showingUp';
 import { toIsoDate } from '../lib/periods';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
@@ -122,7 +122,13 @@ function GoalCard({
   const myCheckins = checkinsByGoal[goal.id] ?? [];
   const today = toIsoDate(new Date());
   const checkedInToday = myCheckins.includes(today);
-  const showingUp = isShowingUp(cadence, myCheckins, Date.now());
+  // Deliberately not computing showing-up here. On a personal card the
+  // streak and the consistency figure already carry the story, and the
+  // button says whether today is done. Showing-up is the cadence-aware
+  // rollup primitive - "is this person honoring their own commitment" -
+  // which earns its place on the circle summary and the Area grid, where
+  // one number stands in for several people. Rendering it here too would
+  // just be a fourth way of saying the same thing to an audience of one.
   const isHealthStepsGoal = goal.goal_source === 'health_steps';
   // The Goals tab lists the whole circle's goals, not just yours - the
   // collective signals below each card depend on that. But Edit and Delete
