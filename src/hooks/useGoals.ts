@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { isStepGoal } from '../lib/stepGoal';
 import { useHealthSyncStore } from '../state/useHealthSyncStore';
-import type { Goal, GoalCategory, GoalSource } from '../types/models';
+import type { Goal, GoalSource } from '../types/models';
+import type { CadenceDraft } from '../lib/cadence';
 
 export function useGoals(circleId: string | undefined) {
   return useQuery({
@@ -23,10 +24,9 @@ export function useGoals(circleId: string | undefined) {
 interface NewGoal {
   circleId: string;
   userId: string;
+  areaId: string;
   title: string;
-  target: number;
-  category?: GoalCategory | null;
-  source?: GoalSource;
+  cadence: CadenceDraft;
 }
 
 // An explicit `source` from the caller always wins; otherwise a connected
@@ -42,35 +42,55 @@ function resolveGoalSource(
   return connected && isStepGoal(title, target) ? 'health_steps' : 'manual';
 }
 
+// The numeric `target` is gone from the manual path. A cadence IS the
+// target now - "every day", "4x a week" - and the quantity, where there is
+// one, lives in the freetext title ("Walk 10,000 steps"). The old form
+// could not save "Meditate" at all without inventing a number, and then
+// rendered it as a meaningless "0 / 4" progress bar.
+//
+// target is still written for health_steps goals, where a device compares a
+// real number against it; that path is untouched by this plan.
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ circleId, userId, title, target, category, source }: NewGoal): Promise<Goal> => {
+    mutationFn: async ({ circleId, userId, areaId, title, cadence }: NewGoal): Promise<Goal> => {
       const { data, error } = await supabase
         .from('goals')
         .insert({
           circle_id: circleId,
           user_id: userId,
+          area_id: areaId,
           title,
-          target,
-          category: category ?? null,
-          goal_source: resolveGoalSource(source, title, target),
+          // target_type must never be null: the column is nullable with no
+          // default, and a null cadence makes isShowingUp return false for
+          // the life of the goal.
+          target_type: cadence.target_type,
+          target_count: cadence.target_count,
+          target_weekdays: cadence.target_weekdays,
+          status: 'active',
         })
         .select()
         .single();
-      if (error) throw error;
 
-      // Starting a goal is a moment the circle should see - previously only
-      // *finishing* one produced a feed row, so a friend planting something
-      // new was invisible until they completed it. Feed-only (migration
-      // 0039), so this adds a Moments row and no push. Deliberately not
-      // awaited into the error path: a failed event insert must not roll
-      // back a successfully created goal.
+      if (error) {
+        // 23505 is goals_one_active_per_area: one active goal per member per
+        // Area is the model's hard rule, and Postgres reports the violation
+        // as an unreadable constraint string. The user needs to know they
+        // already have a goal here and can replace it.
+        if (error.code === '23505') {
+          throw new Error('You already have a goal in this area. Edit that one instead.');
+        }
+        throw error;
+      }
+
+      // Starting a commitment is a moment the circle should see. Feed-only,
+      // no push. Deliberately not awaited into the error path: a failed
+      // event insert must not roll back a successfully created goal.
       const { error: eventError } = await supabase.from('events').insert({
         circle_id: circleId,
         user_id: userId,
         type: 'goal_started',
-        payload: { title, goal_id: (data as Goal).id },
+        payload: { title, goal_id: (data as Goal).id, area_id: areaId },
       });
       if (eventError) console.warn('goal_started event failed', eventError.message);
 
