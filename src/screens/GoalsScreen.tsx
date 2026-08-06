@@ -22,14 +22,17 @@ import { PillButton } from '../components/PillButton';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { ActionSheet } from '../components/ActionSheet';
-import { GOAL_CATEGORY_OPTIONS } from '../components/InterestPicker';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
 import { ToggleSwitch } from '../components/ToggleSwitch';
+import { AreaPicker } from '../components/AreaPicker';
+import { CadencePicker } from '../components/CadencePicker';
+import { useCircleAreas } from '../hooks/useAreas';
+import { validateCadence, describeCadence, type CadenceDraft } from '../lib/cadence';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
-import type { Goal, GoalCategory } from '../types/models';
+import type { Goal } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
@@ -273,58 +276,65 @@ function GoalCard({
 
 function AddGoalForm({ circleId, userId }: { circleId: string; userId: string }) {
   const [title, setTitle] = useState('');
-  const [target, setTarget] = useState('');
-  const [category, setCategory] = useState<GoalCategory | null>(null);
+  const [areaId, setAreaId] = useState<string | null>(null);
+  const [cadence, setCadence] = useState<CadenceDraft>({
+    target_type: 'daily',
+    target_count: null,
+    target_weekdays: null,
+  });
+  const [error, setError] = useState<string | null>(null);
+  const { data: areas } = useCircleAreas(circleId);
   const createGoal = useCreateGoal();
   const theme = useTheme();
   const { colors } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // TouchableOpacity does not dim itself when disabled, so without an
-  // explicit style the button looked tappable and silently did nothing until
-  // both fields were filled.
-  const canAdd = !createGoal.isPending && !!title.trim() && !!Number(target);
+  // No numeric target to check any more. A cadence is always set (it starts
+  // at daily), so what is actually required is a title and an Area.
+  const canAdd = !createGoal.isPending && !!title.trim() && !!areaId;
 
   async function handleAdd() {
-    const targetValue = Number(target);
-    if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({
-      circleId,
-      userId,
-      title: title.trim(),
-      target: targetValue,
-      category,
-    });
-    setTitle('');
-    setTarget('');
-    setCategory(null);
+    setError(null);
+    if (!title.trim() || !areaId) return;
+
+    const cadenceError = validateCadence(cadence);
+    if (cadenceError) {
+      setError(cadenceError);
+      return;
+    }
+
+    try {
+      await createGoal.mutateAsync({ circleId, userId, areaId, title: title.trim(), cadence });
+      setTitle('');
+      setAreaId(null);
+      setCadence({ target_type: 'daily', target_count: null, target_weekdays: null });
+    } catch (err) {
+      // useCreateGoal turns the one-active-goal-per-Area constraint into
+      // readable copy; anything else surfaces its own message rather than a
+      // silent failure.
+      setError(err instanceof Error ? err.message : 'Could not add that goal.');
+    }
   }
 
   return (
     <View style={styles.addGoalWrap}>
-      {/* Stacked, not a single row. Side by side, the narrow Target field
-          read as a white pill button next to the coloured Add one, so the
-          row looked like two unlabelled buttons and nobody could tell which
-          was which. Labels above each field, and a full-width button that
-          says what it does. */}
       <View style={styles.form}>
         <Text style={styles.fieldLabel}>Goal</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g. Drink 4L water"
+          placeholder="e.g. Walk 10,000 steps"
           placeholderTextColor={colors.textSecondary}
           value={title}
           onChangeText={setTitle}
         />
-        <Text style={styles.fieldLabel}>Target</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g. 4"
-          placeholderTextColor={colors.textSecondary}
-          keyboardType="numeric"
-          value={target}
-          onChangeText={setTarget}
-        />
+
+        <Text style={styles.fieldLabel}>Area</Text>
+        <AreaPicker areas={areas ?? []} selectedId={areaId} onSelect={setAreaId} />
+
+        <CadencePicker value={cadence} onChange={setCadence} />
+
+        {error && <Text style={styles.formError}>{error}</Text>}
+
         <AnimatedPressable
           style={[styles.addButton, !canAdd && styles.addButtonDisabled]}
           onPress={handleAdd}
@@ -337,26 +347,6 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
             {createGoal.isPending ? 'Adding…' : 'Add goal'}
           </Text>
         </AnimatedPressable>
-      </View>
-      {/* One-accent rule: resting chips are neutral with monochrome icons;
-          only the selected chip takes the user's accent. */}
-      <View style={styles.categoryRow}>
-        {GOAL_CATEGORY_OPTIONS.map(({ key, label, Icon }) => {
-          const active = category === key;
-          return (
-            <AnimatedPressable
-              key={key}
-              style={[styles.categoryChip, { backgroundColor: active ? colors.primary : colors.surfaceSubtle }]}
-              onPress={() => setCategory(active ? null : key)}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: active }}
-              accessibilityLabel={label}
-            >
-              <Icon size={15} color={active ? colors.onAccent : colors.textSecondary} />
-              <Text style={[styles.categoryChipLabel, { color: active ? colors.onAccent : colors.textPrimary }]}>{label}</Text>
-            </AnimatedPressable>
-          );
-        })}
       </View>
     </View>
   );
@@ -431,6 +421,7 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     addGoalWrap: { marginBottom: spacing.lg, gap: spacing.md },
     form: { gap: spacing.s6 },
     fieldLabel: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, marginTop: spacing.xs },
+    formError: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.danger },
     categoryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     categoryChip: {
       flexDirection: 'row',

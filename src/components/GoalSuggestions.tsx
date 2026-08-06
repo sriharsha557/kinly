@@ -7,6 +7,10 @@ import { useCreateGoal, useGoals } from '../hooks/useGoals';
 import { pickSuggestions, type GoalSuggestion } from '../lib/suggestions';
 import { PillButton } from './PillButton';
 import { INTEREST_OPTIONS } from './InterestPicker';
+import { AreaPicker } from './AreaPicker';
+import { CadencePicker } from './CadencePicker';
+import { useCircleAreas } from '../hooks/useAreas';
+import { validateCadence, type CadenceDraft } from '../lib/cadence';
 import { useTheme } from '../theme/ThemeProvider';
 import IdeaIllustration from '../../assets/illustrations/kinly-idea.svg';
 
@@ -22,22 +26,36 @@ function CustomizeGoalModal({
   onClose: () => void;
 }) {
   const [title, setTitle] = useState(suggestion.title);
-  const [target, setTarget] = useState(String(suggestion.target));
+  const [areaId, setAreaId] = useState<string | null>(null);
+  const [cadence, setCadence] = useState<CadenceDraft>({
+    target_type: 'daily',
+    target_count: null,
+    target_weekdays: null,
+  });
+  const [error, setError] = useState<string | null>(null);
+  const { data: areas } = useCircleAreas(circleId);
   const createGoal = useCreateGoal();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const canSave = !createGoal.isPending && !!title.trim() && !!areaId;
+
   async function handleSave() {
-    const targetValue = Number(target);
-    if (!title.trim() || !targetValue) return;
-    await createGoal.mutateAsync({
-      circleId,
-      userId,
-      title: title.trim(),
-      target: targetValue,
-      category: suggestion.category,
-    });
-    onClose();
+    setError(null);
+    if (!title.trim() || !areaId) return;
+
+    const cadenceError = validateCadence(cadence);
+    if (cadenceError) {
+      setError(cadenceError);
+      return;
+    }
+
+    try {
+      await createGoal.mutateAsync({ circleId, userId, areaId, title: title.trim(), cadence });
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not add that goal.');
+    }
   }
 
   return (
@@ -46,20 +64,20 @@ function CustomizeGoalModal({
         <View style={styles.modalCard}>
           <Text style={styles.modalTitle}>Customize goal</Text>
           <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
-          <TextInput
-            style={styles.modalInput}
-            value={target}
-            onChangeText={setTarget}
-            placeholder="Target"
-            keyboardType="numeric"
-          />
+
+          <AreaPicker areas={areas ?? []} selectedId={areaId} onSelect={setAreaId} />
+
+          <CadencePicker value={cadence} onChange={setCadence} />
+
+          {error && <Text style={styles.formError}>{error}</Text>}
+
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
             <PillButton
               label="Save"
               onPress={handleSave}
               loading={createGoal.isPending}
-              disabled={!title.trim() || !target}
+              disabled={!canSave}
               style={{ flex: 1 }}
             />
           </View>
@@ -145,6 +163,7 @@ function createStyles({ colors, radii, cardShell, type }: ReturnType<typeof useT
       gap: spacing.md,
     },
     modalTitle: { ...type.subheading, fontFamily: fontFamily.bold, color: colors.textPrimary },
+    formError: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.danger },
     modalInput: {
       backgroundColor: colors.inputBg,
       borderRadius: radii.input,
