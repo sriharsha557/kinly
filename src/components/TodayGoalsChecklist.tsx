@@ -43,6 +43,10 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const pending = myGoals.filter(
     (g) =>
       g.goal_source !== 'health_steps' &&
+      // A commitment with no numeric target (migration 0049) is not tracked
+      // by a filling bar at all - it is driven by the check-in ledger - so it
+      // has no notion of "progress short of target" to list here.
+      g.target != null &&
       g.progress < g.target &&
       g.last_logged_date !== today &&
       !checkedIds.has(g.id),

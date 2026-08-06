@@ -37,8 +37,13 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
   const createAchievement = useCreateAchievement();
 
   async function logGoal(goal: Goal, photoPath?: string): Promise<Celebration | null> {
-    const step = Math.max(1, Math.round(goal.target / 10));
-    const wasComplete = goal.progress >= goal.target;
+    // target is nullable since migration 0049. This whole path is the
+    // legacy accumulate-toward-a-number flow, which only ever runs for goals
+    // that have one; the fallbacks keep it total rather than pretending a
+    // cadence commitment belongs here.
+    const target = goal.target ?? 0;
+    const step = Math.max(1, Math.round(target / 10));
+    const wasComplete = goal.progress >= target;
     const previousStreak = goal.streak_count;
 
     // Only worth checking "is this the first log ever" when this specific
@@ -49,7 +54,7 @@ export function useLogGoalWithCelebration(circleId: string, userId: string, circ
 
     const updated = await logProgress.mutateAsync({ goalId: goal.id, circleId, increment: step });
 
-    const justCompleted = !wasComplete && updated.progress >= updated.target;
+    const justCompleted = !wasComplete && updated.progress >= (updated.target ?? 0);
     const hitMilestone = updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count);
 
     if (justCompleted || hitMilestone || wasFirstEver) {

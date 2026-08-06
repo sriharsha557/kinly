@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { isStepGoal } from '../lib/stepGoal';
-import { useHealthSyncStore } from '../state/useHealthSyncStore';
 import type { EndedReason, Goal, GoalSource } from '../types/models';
 import type { CadenceDraft } from '../lib/cadence';
 
@@ -29,18 +27,16 @@ interface NewGoal {
   cadence: CadenceDraft;
 }
 
-// An explicit `source` from the caller always wins; otherwise a connected
-// device auto-detects. On a device that never connected every goal is
-// 'manual', so nothing is ever marked for a sync that cannot happen.
-function resolveGoalSource(
-  source: GoalSource | undefined,
-  title: string,
-  target: number,
-): GoalSource {
-  if (source) return source;
-  const connected = useHealthSyncStore.getState().decision === 'connected';
-  return connected && isStepGoal(title, target) ? 'health_steps' : 'manual';
-}
+// resolveGoalSource lived here and auto-detected a step goal at creation
+// time from its title and its numeric target. Areas of Growth removed the
+// numeric target from the manual path, and isStepGoal cannot recognise a
+// step goal without a number, so there is nothing left to detect from and
+// the function had no caller.
+//
+// Step goals are not lost: useHealthSync still runs a convert-on-connect
+// pass over goals that already carry a target. What is gone is auto-marking
+// a NEWLY created commitment, and it stays gone until a later plan moves
+// step sync onto the check-in ledger, which is where it belongs anyway.
 
 // The numeric `target` is gone from the manual path. A cadence IS the
 // target now - "every day", "4x a week" - and the quantity, where there is
@@ -189,7 +185,18 @@ export function useEndGoal() {
           best_streak: bestStreak,
           ended_reason: reason,
         });
-        if (historyError) throw historyError;
+        // The history insert is where someone else's goal actually fails:
+        // goal_history's insert policy checks user_id = auth.uid() and
+        // is_circle_member, so it rejects with 42501 before the update below
+        // is ever reached. Without this the friendly copy on the update path
+        // would be unreachable for any goal that has check-ins, and the user
+        // would get a raw Postgres RLS string instead.
+        if (historyError) {
+          if (historyError.code === '42501') {
+            throw new Error("This goal belongs to someone else, so it can't be ended from here.");
+          }
+          throw historyError;
+        }
       }
 
       // .select() is what makes this honest. An update that matches no rows

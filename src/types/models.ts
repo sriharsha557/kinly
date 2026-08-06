@@ -108,7 +108,9 @@ export interface Goal {
   user_id: string;
   circle_id: string;
   title: string;
-  target: number;
+  // Nullable since migration 0049: manual commitments have no numeric
+  // target, only a cadence. Still set for goal_source = 'health_steps'.
+  target: number | null;
   progress: number;
   streak_count: number;
   last_logged_date: string | null;

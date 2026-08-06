@@ -45,12 +45,15 @@ export function useSyncStepGoals(circleId: string | undefined, userId: string | 
       if (cancelled) return;
 
       for (const goal of stepGoals) {
-        const wasComplete = goal.progress >= goal.target;
+        // Only health_steps goals reach here, and those always carry a real
+        // device threshold - but target is nullable since migration 0049, so
+        // the type needs the fallback even though it cannot fire.
+        const wasComplete = goal.progress >= (goal.target ?? 0);
         const previousStreak = goal.streak_count;
         const updated = await syncStepGoal.mutateAsync({ goalId: goal.id, circleId, steps });
         if (cancelled) return;
 
-        const justCompleted = !wasComplete && updated.progress >= updated.target;
+        const justCompleted = !wasComplete && updated.progress >= (updated.target ?? 0);
         const hitMilestone =
           updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count);
         if (!justCompleted && !hitMilestone) continue;

@@ -1,0 +1,21 @@
+-- goals.target has been `numeric not null` with no default since 0001, back
+-- when every goal was a number you accumulated toward. Areas of Growth
+-- replaced that for manual commitments: a cadence IS the target now
+-- ("every day", "4x a week"), and the quantity, where there is one, lives in
+-- the freetext title ("Walk 10,000 steps"). There is nothing sensible to put
+-- in this column for "Meditate".
+--
+-- Leaving it not-null would make every goal the rebuilt app creates fail
+-- with a 23502 not-null violation - and nothing would have caught it before
+-- a device did, because neither the type checker nor the test suite has a
+-- database.
+--
+-- A default was considered and rejected. 0 makes `progress >= target` true
+-- immediately, so every new commitment would render as already complete to
+-- the legacy consumers that still read those columns; any other number is a
+-- fiction the user never chose.
+--
+-- The column stays for goal_source = 'health_steps', where a device compares
+-- a real step count against a real threshold (0033). Those rows still set it
+-- explicitly.
+alter table goals alter column target drop not null;

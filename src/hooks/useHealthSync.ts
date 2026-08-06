@@ -80,6 +80,13 @@ export function useHealthSync(circleId?: string) {
           (goal) =>
             goal.user_id === userId &&
             goal.goal_source === 'manual' &&
+            // Commitments created under Areas of Growth carry no numeric
+            // target at all (migration 0049 made the column nullable), and
+            // isStepGoal needs a number to recognise a step goal by. Those
+            // can never convert, so they are skipped rather than crashing
+            // the pass. Step sync moves onto the check-in ledger in a later
+            // plan, which is what restores this for new commitments.
+            goal.target != null &&
             isStepGoal(goal.title, goal.target),
         );
         for (const goal of convertible) {
