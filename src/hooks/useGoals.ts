@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { isStepGoal } from '../lib/stepGoal';
 import { useHealthSyncStore } from '../state/useHealthSyncStore';
-import type { Goal, GoalSource } from '../types/models';
+import type { EndedReason, Goal, GoalSource } from '../types/models';
 import type { CadenceDraft } from '../lib/cadence';
 
 export function useGoals(circleId: string | undefined) {

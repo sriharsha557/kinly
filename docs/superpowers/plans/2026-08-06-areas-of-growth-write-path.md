@@ -47,6 +47,7 @@
 | `src/components/CadencePicker.tsx` (create) | Choose `target_type` and its parameters. |
 | `src/components/GoalCadenceRow.tsx` (create) | Render one goal's cadence, streak and consistency. |
 | `src/screens/GoalsScreen.tsx` (modify) | Rebuild the add form and the goal card around the above. |
+| `src/components/GoalSuggestions.tsx` (modify) | Second caller of `useCreateGoal` — its `CustomizeGoalModal` needs the same rebuild. |
 
 Tasks 1–5 are logic and hooks. Tasks 6–10 are UI.
 
@@ -1076,6 +1077,14 @@ function AddGoalForm({ circleId, userId }: { circleId: string; userId: string })
   );
 }
 ```
+
+- [ ] **Step 1b: Rebuild `CustomizeGoalModal` in `src/components/GoalSuggestions.tsx`**
+
+`GoalSuggestions` is the *second* caller of `useCreateGoal` — its `CustomizeGoalModal` is a near-copy of the old add form, with `title` and a numeric `target`. It breaks the moment Task 4 lands, and it is live code: `GoalsScreen` renders `<GoalSuggestions>`.
+
+Give it the same treatment as `AddGoalForm` above: delete the numeric target field; add `areaId` state starting `null` fed by `<AreaPicker areas={areas ?? []} selectedId={areaId} onSelect={setAreaId} />` (with `const { data: areas } = useCircleAreas(circleId);`); add `cadence` state of type `CadenceDraft` starting at daily, fed by `<CadencePicker value={cadence} onChange={setCadence} />`; gate Save on `title.trim() && areaId`; show `validateCadence` errors and any thrown message.
+
+**A suggestion prefills the title only.** Do not map `suggestion.category` — a 5-pillar value (`health | wealth | ideas | learning | relationships`) — onto an Area. Those pillars are not Areas; the catalogue is re-written against the eight Area keys in Plan 4, and a mapping encoded here would only have to be unwound. The Area starts unselected and the person picks it.
 
 - [ ] **Step 2: Update the imports and styles**
 
