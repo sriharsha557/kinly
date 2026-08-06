@@ -102,18 +102,22 @@ export function useUpdateGoal() {
   return useMutation({
     mutationFn: async ({
       goalId,
-      circleId,
       title,
-      target,
+      cadence,
     }: {
       goalId: string;
       circleId: string;
       title: string;
-      target: number;
+      cadence: CadenceDraft;
     }): Promise<Goal> => {
       const { data, error } = await supabase
         .from('goals')
-        .update({ title, target })
+        .update({
+          title,
+          target_type: cadence.target_type,
+          target_count: cadence.target_count,
+          target_weekdays: cadence.target_weekdays,
+        })
         .eq('id', goalId)
         .select()
         .single();

@@ -11,43 +11,55 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
-import { useCreateGoal, useDeleteGoal, useGoals, useSetGoalSource, useUpdateGoal } from '../hooks/useGoals';
+import { useCreateGoal, useEndGoal, useGoals, useSetGoalSource, useUpdateGoal } from '../hooks/useGoals';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { useHealthSync } from '../hooks/useHealthSync';
 import { useHasWaterMark } from '../hooks/useStreakSaves';
 import { useCircleDetail } from '../hooks/useCircles';
 import { pickAndUploadCheckinPhoto } from '../lib/checkinPhotoUpload';
-import { ProgressBar } from '../components/ProgressBar';
 import { PillButton } from '../components/PillButton';
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { MilestoneCardModal } from '../components/MilestoneCardModal';
 import { ActionSheet } from '../components/ActionSheet';
 import { GoalSuggestions } from '../components/GoalSuggestions';
 import { GoalCardSkeleton } from '../components/Skeleton';
-import { ToggleSwitch } from '../components/ToggleSwitch';
 import { AreaPicker } from '../components/AreaPicker';
 import { CadencePicker } from '../components/CadencePicker';
+import { GoalCadenceRow } from '../components/GoalCadenceRow';
+import { useGoalCheckins, useCheckIn, useUndoCheckIn } from '../hooks/useCheckins';
 import { useCircleAreas } from '../hooks/useAreas';
-import { validateCadence, describeCadence, type CadenceDraft } from '../lib/cadence';
+import { validateCadence, type CadenceDraft } from '../lib/cadence';
+import { isShowingUp, streak } from '../lib/showingUp';
+import { toIsoDate } from '../lib/periods';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
-import type { Goal } from '../types/models';
+import type { EndedReason, Goal } from '../types/models';
 import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 
 function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: string; onClose: () => void }) {
   const [title, setTitle] = useState(goal.title);
-  const [target, setTarget] = useState(String(goal.target));
+  const [cadence, setCadence] = useState<CadenceDraft>({
+    target_type: goal.target_type,
+    target_count: goal.target_count,
+    target_weekdays: goal.target_weekdays,
+  });
+  const [error, setError] = useState<string | null>(null);
   const updateGoal = useUpdateGoal();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   async function handleSave() {
-    const targetValue = Number(target);
-    if (!title.trim() || !targetValue) return;
-    await updateGoal.mutateAsync({ goalId: goal.id, circleId, title: title.trim(), target: targetValue });
+    setError(null);
+    if (!title.trim()) return;
+    const cadenceError = validateCadence(cadence);
+    if (cadenceError) {
+      setError(cadenceError);
+      return;
+    }
+    await updateGoal.mutateAsync({ goalId: goal.id, circleId, title: title.trim(), cadence });
     onClose();
   }
 
@@ -57,20 +69,15 @@ function EditGoalModal({ goal, circleId, onClose }: { goal: Goal; circleId: stri
         <View style={styles.modalCard}>
           <Text style={styles.modalTitle}>Edit goal</Text>
           <TextInput style={styles.modalInput} value={title} onChangeText={setTitle} placeholder="Goal title" />
-          <TextInput
-            style={styles.modalInput}
-            value={target}
-            onChangeText={setTarget}
-            placeholder="Target"
-            keyboardType="numeric"
-          />
+          <CadencePicker value={cadence} onChange={setCadence} />
+          {error && <Text style={styles.formError}>{error}</Text>}
           <View style={styles.modalButtons}>
             <PillButton label="Cancel" variant="outline" onPress={onClose} style={{ flex: 1 }} />
             <PillButton
               label="Save"
               onPress={handleSave}
               loading={updateGoal.isPending}
-              disabled={!title.trim() || !target}
+              disabled={!title.trim()}
               style={{ flex: 1 }}
             />
           </View>
@@ -85,6 +92,7 @@ function GoalCard({
   circleId,
   userId,
   friendsCompletedToday,
+  checkinsByGoal,
 }: {
   goal: Goal;
   circleId: string;
@@ -93,18 +101,28 @@ function GoalCard({
   // the owner's own progress so a goal reads as a shared effort, not a
   // private task-manager row.
   friendsCompletedToday: number;
+  checkinsByGoal: Record<string, string[]>;
 }) {
   const { data: circle } = useCircleDetail(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
-  const deleteGoal = useDeleteGoal();
   const setGoalSource = useSetGoalSource();
+  const endGoal = useEndGoal();
+  const checkIn = useCheckIn();
+  const undoCheckIn = useUndoCheckIn();
   const { isConnected } = useHealthSync(circleId);
   const { data: hasWaterMark } = useHasWaterMark(goal.id);
   const [editing, setEditing] = useState(false);
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const isComplete = goal.progress >= goal.target;
+  const cadence = {
+    target_type: goal.target_type,
+    target_count: goal.target_count,
+    target_weekdays: goal.target_weekdays,
+  };
+  const myCheckins = checkinsByGoal[goal.id] ?? [];
+  const today = toIsoDate(new Date());
+  const checkedInToday = myCheckins.includes(today);
+  const showingUp = isShowingUp(cadence, myCheckins, Date.now());
   const isHealthStepsGoal = goal.goal_source === 'health_steps';
   // The Goals tab lists the whole circle's goals, not just yours - the
   // collective signals below each card depend on that. But Edit and Delete
@@ -114,11 +132,6 @@ function GoalCard({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  async function handleLogProgress() {
-    const celebration = await logGoal(goal);
-    if (celebration) setCelebration(celebration);
-  }
-
   // A separate, deliberate opt-in tap - never required, never nagged. The
   // normal "Log progress" button stays exactly as fast as before; this is
   // the only path that opens the picker first.
@@ -127,6 +140,29 @@ function GoalCard({
     if (!photoPath) return; // cancelled or permission denied - no log happens
     const celebration = await logGoal(goal, photoPath);
     if (celebration) setCelebration(celebration);
+  }
+
+  // A cadence goal is open-ended and has no finish line, so ending it offers
+  // two distinct endings rather than one Delete. Without "I've finished
+  // this" nothing in the model could ever produce ended_reason ='completed',
+  // and someone who genuinely completed a commitment would have to record it
+  // as a deletion. Deleting is not a failure either - choosing not to
+  // participate in an Area for now is a valid resting state.
+  function endWith(reason: EndedReason) {
+    setMenuOpen(false);
+    endGoal.mutate(
+      {
+        goal,
+        circleId,
+        reason,
+        bestStreak: streak(cadence, myCheckins, Date.now()),
+        hadCheckins: myCheckins.length > 0,
+      },
+      {
+        onError: (err) =>
+          Alert.alert('Could not end this goal', err instanceof Error ? err.message : 'Please try again.'),
+      },
+    );
   }
 
   return (
@@ -153,7 +189,7 @@ function GoalCard({
           )}
         </View>
       </View>
-      <ProgressBar progress={goal.progress} target={goal.target} />
+      <GoalCadenceRow cadence={cadence} checkins={myCheckins} now={Date.now()} />
       {/* Shown whenever the goal IS a step goal, connected or not - the badge
           carries the only control that converts it back to manual, and
           goal_source is a database column while the connection is
@@ -179,18 +215,10 @@ function GoalCard({
       )}
       <View style={styles.cardFooter}>
         <Text style={styles.cardMeta}>
-          {goal.progress} / {goal.target}
           {friendsCompletedToday > 0 &&
-            ` · ${friendsCompletedToday} ${friendsCompletedToday === 1 ? 'friend' : 'friends'} completed today`}
+            `${friendsCompletedToday} ${friendsCompletedToday === 1 ? 'friend' : 'friends'} completed today`}
         </Text>
-        {isComplete ? (
-          <View style={styles.doneRow}>
-            {/* Celebration, not a control - the heart pops when a goal hits
-                its target. "Completed" beside it carries the meaning. */}
-            <ToggleSwitch value decorative />
-            <Text style={styles.doneBadge}>Completed</Text>
-          </View>
-        ) : isHealthStepsGoal && isConnected ? (
+        {isHealthStepsGoal && isConnected ? (
           <Text style={styles.syncedLabel}>Synced from Health Connect</Text>
         ) : (
           <View style={styles.logActions}>
@@ -204,8 +232,16 @@ function GoalCard({
               <CameraIcon width={18} height={18} color={theme.colors.primary} />
             </AnimatedPressable>
             <AnimatedPressable
-      accessibilityRole="button" style={styles.logButton} onPress={handleLogProgress} disabled={isPending}>
-              <Text style={styles.logButtonText}>Log progress</Text>
+              accessibilityRole="button"
+              style={styles.logButton}
+              disabled={checkIn.isPending || undoCheckIn.isPending}
+              onPress={() =>
+                checkedInToday
+                  ? undoCheckIn.mutate({ goalId: goal.id, circleId, date: today })
+                  : checkIn.mutate({ goalId: goal.id, circleId, userId })
+              }
+            >
+              <Text style={styles.logButtonText}>{checkedInToday ? 'Done today' : 'Check in'}</Text>
             </AnimatedPressable>
           </View>
         )}
@@ -222,42 +258,10 @@ function GoalCard({
                 setEditing(true);
               },
             },
-            {
-              label: 'Delete',
-              destructive: true,
-              onPress: () => {
-                setMenuOpen(false);
-                setConfirmingDelete(true);
-              },
-            },
+            { label: "I've finished this", onPress: () => endWith('completed') },
+            { label: 'Delete', destructive: true, onPress: () => endWith('deleted') },
           ]}
           onCancel={() => setMenuOpen(false)}
-        />
-      )}
-      {confirmingDelete && (
-        <ActionSheet
-          title="Delete this goal?"
-          message="This cannot be undone."
-          options={[
-            {
-              label: 'Delete',
-              destructive: true,
-              onPress: () => {
-                setConfirmingDelete(false);
-                deleteGoal.mutate(
-                  { goalId: goal.id, circleId },
-                  {
-                    onError: (err) =>
-                      Alert.alert(
-                        'Could not delete this goal',
-                        err instanceof Error ? err.message : 'Please try again.',
-                      ),
-                  },
-                );
-              },
-            },
-          ]}
-          onCancel={() => setConfirmingDelete(false)}
         />
       )}
       {celebration && (
@@ -356,6 +360,7 @@ export default function GoalsScreen() {
   const userId = useAuthStore((state) => state.user?.id);
   const circleId = useAuthStore((state) => state.activeCircleId);
   const { data: goals, isLoading, isFetching, refetch } = useGoals(circleId ?? undefined);
+  const { data: checkinsByGoal = {} } = useGoalCheckins(circleId ?? undefined);
   const tabBarClearance = useTabBarClearance();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -399,6 +404,7 @@ export default function GoalsScreen() {
                   circleId={circleId}
                   userId={userId}
                   friendsCompletedToday={loggedTodayUserIds.size - (loggedTodayUserIds.has(item.user_id) ? 1 : 0)}
+                  checkinsByGoal={checkinsByGoal}
                 />
               </Animated.View>
             ) : null
