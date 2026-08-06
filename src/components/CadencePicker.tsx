@@ -4,7 +4,7 @@ import { AnimatedPressable } from './AnimatedPressable';
 import { WEEKDAY_LABELS, type CadenceDraft } from '../lib/cadence';
 import type { TargetType } from '../lib/showingUp';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, spacing, type } from '../theme/colors';
+import { fontFamily, spacing } from '../theme/colors';
 
 const CADENCE_OPTIONS: { value: TargetType; label: string }[] = [
   { value: 'daily', label: 'Every day' },
@@ -139,10 +139,10 @@ export function CadencePicker({
   );
 }
 
-function createStyles({ colors, radii, type: t }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     wrap: { gap: spacing.s6 },
-    label: { ...t.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginBottom: spacing.xs },
     chip: {
       paddingVertical: spacing.s10,
@@ -163,7 +163,7 @@ function createStyles({ colors, radii, type: t }: ReturnType<typeof useTheme>) {
       borderColor: 'transparent',
     },
     chipSelected: { borderColor: colors.primary, backgroundColor: colors.background },
-    chipText: { ...t.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    chipText: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     chipTextSelected: { color: colors.textPrimary },
   });
 }

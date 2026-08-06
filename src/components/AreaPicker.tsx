@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useTheme } from '../theme/ThemeProvider';
-import { fontFamily, spacing, type } from '../theme/colors';
+import { fontFamily, spacing } from '../theme/colors';
 import type { Area } from '../types/models';
 
 // A circle's enabled Areas as selectable chips. The catalog is fixed and
@@ -47,7 +47,7 @@ export function AreaPicker({
   );
 }
 
-function createStyles({ colors, radii, type: t }: ReturnType<typeof useTheme>) {
+function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
   return StyleSheet.create({
     row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
     chip: {
@@ -63,8 +63,8 @@ function createStyles({ colors, radii, type: t }: ReturnType<typeof useTheme>) {
     },
     chipSelected: { borderColor: colors.primary, backgroundColor: colors.background },
     emoji: { fontSize: 16 },
-    label: { ...t.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
+    label: { ...type.caption, fontFamily: fontFamily.semibold, color: colors.textSecondary },
     labelSelected: { color: colors.textPrimary },
-    empty: { ...t.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    empty: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }
