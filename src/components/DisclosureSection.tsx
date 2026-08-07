@@ -27,12 +27,20 @@ export function DisclosureSection({
   return (
     <Animated.View layout={LinearTransition.springify()} style={styles.wrap}>
       <AnimatedPressable
-      accessibilityRole="button" style={styles.header} onPress={() => setOpen((prev) => !prev)}>
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${label}, ${open ? 'expanded' : 'collapsed'}`}
+        style={styles.header}
+        onPress={() => setOpen((prev) => !prev)}>
         <View style={styles.labelRow}>
           {Icon && <Icon width={18} height={18} />}
           <Text style={styles.label}>{label}</Text>
         </View>
-        <Text style={styles.chevron}>{open ? '▲' : '▼'}</Text>
+        {/* Was a bare ▲/▼ glyph. A chevron alone states neither that the
+            section opens nor what is inside it, so testers reported these
+            sections as undiscoverable - the features behind them may as well
+            not have shipped. */}
+        <Text style={styles.toggle}>{open ? 'Hide' : 'Show'}</Text>
       </AnimatedPressable>
       {open && (
         <Animated.View
@@ -62,7 +70,7 @@ function createStyles({ colors, radii, shadow, type }: ReturnType<typeof useThem
     },
     labelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     label: { ...type.body, fontFamily: fontFamily.bold, color: colors.textPrimary },
-    chevron: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
+    toggle: { ...type.caption, fontFamily: fontFamily.medium, color: colors.primary },
     body: { marginTop: spacing.md, gap: 0 },
   });
 }
