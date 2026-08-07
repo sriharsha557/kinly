@@ -41,13 +41,48 @@ Deno.serve(async (_req) => {
     // was never invoked; the moment push notifications started working it
     // became a push to someone about a goal they deleted, or about a circle
     // they left.
-    const { data: goals, error } = await supabase
+    //
+    // Only 'daily' cadence goals are considered here - deliberately, not an
+    // oversight. A daily commitment lapses the instant one day passes with
+    // no check-in, but a times_per_week/specific_weekdays/monthly goal still
+    // has the rest of its period to satisfy: it is never "at risk" on any
+    // single day. Inventing a risk moment for those would recreate exactly
+    // the manufactured pressure the ledger-and-cadence model exists to
+    // remove.
+    const { data: dailyGoals, error } = await supabase
       .from('goals')
-      .select('id, user_id, circle_id, title, streak_count')
-      .eq('last_logged_date', isoDate(yesterday))
-      .gt('streak_count', 0)
+      .select('id, user_id, circle_id, title')
+      .eq('target_type', 'daily')
+      .eq('status', 'active')
       .is('deleted_at', null);
     if (error) throw error;
+
+    // last_logged_date and streak_count (the columns this query used to
+    // filter on) are dead for cadence goals - check-ins now live in the
+    // goal_checkins ledger instead. A daily streak is "at risk" exactly when
+    // the ledger shows a check-in yesterday (so there was a streak to break)
+    // and none yet today (so it hasn't already been continued).
+    let atRiskGoals: NonNullable<typeof dailyGoals> = [];
+    if (dailyGoals && dailyGoals.length > 0) {
+      const goalIds = dailyGoals.map((g) => g.id);
+      const { data: checkins, error: checkinsError } = await supabase
+        .from('goal_checkins')
+        .select('goal_id, checkin_date')
+        .in('goal_id', goalIds)
+        .in('checkin_date', [isoDate(yesterday), isoDate(today)]);
+      if (checkinsError) throw checkinsError;
+
+      const checkedYesterday = new Set<string>();
+      const checkedToday = new Set<string>();
+      for (const c of checkins ?? []) {
+        const checkinDate = c.checkin_date as string;
+        if (checkinDate === isoDate(yesterday)) checkedYesterday.add(c.goal_id as string);
+        else if (checkinDate === isoDate(today)) checkedToday.add(c.goal_id as string);
+      }
+      atRiskGoals = dailyGoals.filter(
+        (goal) => checkedYesterday.has(goal.id) && !checkedToday.has(goal.id),
+      );
+    }
 
     // Membership is checked per (circle, user) rather than per user: leaving
     // one circle should silence reminders for that circle's goals only.
@@ -61,7 +96,7 @@ Deno.serve(async (_req) => {
       (memberships ?? []).map((m) => `${m.circle_id}:${m.user_id}`),
     );
 
-    const liveGoals = (goals ?? []).filter((goal) =>
+    const liveGoals = atRiskGoals.filter((goal) =>
       activeMembers.has(`${goal.circle_id}:${goal.user_id}`),
     );
 
@@ -90,7 +125,12 @@ Deno.serve(async (_req) => {
           type: 'reminder',
           payload: {
             goal_id: goal.id,
-            message: `Your ${goal.streak_count}-day streak on "${goal.title}" is at risk - log progress today!`,
+            // No unit named ("N-day"): a streak is now counted in each
+            // goal's own periods (days, weeks or months depending on
+            // cadence), so "day" would be false for anyone not on a daily
+            // cadence - and this function only handles daily goals, whose
+            // streak length isn't even fetched above anymore.
+            message: `Your streak on "${goal.title}" is at risk - check in today!`,
           },
         });
         if (!insertError) inserted++;
