@@ -421,7 +421,7 @@ git commit -m "Grow the garden from check-ins instead of a column nothing writes
 **Files:**
 - Modify: `src/lib/needsAttention.ts`
 - Modify: `src/lib/needsAttention.test.ts`
-- Modify: `src/components/CircleTodaySection.tsx` (the caller)
+- Modify: `src/screens/CircleScreen.tsx` (the actual caller — `CircleTodaySection` only renders the rows it is handed)
 
 **Interfaces:**
 - Consumes: `MemberActivity`, `EMPTY_ACTIVITY` (Task 1).
@@ -474,7 +474,7 @@ In `src/lib/needsAttention.ts`:
 
 - [ ] **Step 4: Update the caller**
 
-`src/components/CircleTodaySection.tsx` calls `needsAttention`. Give it `useMemberActivity(circleId)` for the map, and build `atRiskGoalByMember` from `useGoals` — for each member, the id of their goal with the longest streak. Read the file first and follow its existing loading/error precedence; a previous review found this component rendering "no one needs support" before its queries resolved, so **error and loading must both be handled before the empty state**.
+`src/screens/CircleScreen.tsx` calls `needsAttention` — `CircleTodaySection` only renders the `rows` prop it is handed. Give `CircleScreen` `useMemberActivity(circleId)` for the map, and build `atRiskGoalByMember` from `useGoals` — for each member, the id of their goal with the longest streak. Read the file first and follow its existing loading/error precedence; a previous review found this component rendering "no one needs support" before its queries resolved, so **error and loading must both be handled before the empty state**.
 
 - [ ] **Step 5: Test and commit**
 
