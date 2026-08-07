@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { calendarDaysSince } from '../lib/needsAttention';
 import { growthVisual } from '../lib/gardenGrowth';
+import { useMemberActivity } from './useMemberActivity';
+import { EMPTY_ACTIVITY } from '../lib/memberActivity';
 
 export type GardenStage = 'wilted' | 'seed' | 'sprout' | 'tree' | 'bloom';
 
@@ -34,52 +37,42 @@ function stageFor(maxStreak: number, mostRecentDate: string | null): GardenStage
   return growthVisual(maxStreak).stage;
 }
 
-// Derived entirely from goals.streak_count / last_logged_date - no garden
-// table needed, so it can never drift out of sync with actual activity.
 export function useGardenState(circleId: string | undefined) {
-  return useQuery({
-    queryKey: ['garden', circleId],
+  const { activity } = useMemberActivity(circleId);
+  const membersQuery = useQuery({
+    queryKey: ['garden-members', circleId],
     enabled: !!circleId,
-    queryFn: async (): Promise<GardenState> => {
-      const [{ data: members, error: membersError }, { data: goals, error: goalsError }] = await Promise.all([
-        supabase
-          .from('circle_members')
-          .select('user_id, profiles(name)')
-          .eq('circle_id', circleId as string)
-          .eq('status', 'active'),
-        supabase
-          .from('goals')
-          .select('user_id, streak_count, last_logged_date')
-          .eq('circle_id', circleId as string),
-      ]);
-      if (membersError) throw membersError;
-      if (goalsError) throw goalsError;
-
-      const byUser = new Map<string, { maxStreak: number; mostRecent: string | null }>();
-      for (const g of goals ?? []) {
-        const entry = byUser.get(g.user_id) ?? { maxStreak: 0, mostRecent: null };
-        entry.maxStreak = Math.max(entry.maxStreak, g.streak_count);
-        if (g.last_logged_date && (!entry.mostRecent || g.last_logged_date > entry.mostRecent)) {
-          entry.mostRecent = g.last_logged_date;
-        }
-        byUser.set(g.user_id, entry);
-      }
-
-      const memberStates: MemberGardenState[] = (members ?? []).map((m) => {
-        const agg = byUser.get(m.user_id) ?? { maxStreak: 0, mostRecent: null };
-        const profile = m.profiles as unknown as { name: string } | null;
-        return {
-          userId: m.user_id,
-          name: profile?.name ?? 'Member',
-          stage: stageFor(agg.maxStreak, agg.mostRecent),
-          streak: agg.maxStreak,
-        };
-      });
-
-      const activeCount = memberStates.filter((m) => m.stage !== 'wilted').length;
-      const health = memberStates.length > 0 ? Math.round((activeCount / memberStates.length) * 100) : 0;
-
-      return { members: memberStates, health };
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('circle_members')
+        .select('user_id, profiles(name)')
+        .eq('circle_id', circleId as string)
+        .eq('status', 'active');
+      if (error) throw error;
+      return data ?? [];
     },
   });
+
+  const data: GardenState | undefined = useMemo(() => {
+    if (!membersQuery.data) return undefined;
+    const members: MemberGardenState[] = membersQuery.data.map((m) => {
+      const agg = activity.get(m.user_id) ?? EMPTY_ACTIVITY;
+      const profile = m.profiles as unknown as { name: string } | null;
+      return {
+        userId: m.user_id,
+        name: profile?.name ?? 'Member',
+        // Same two inputs as before - a best streak and a most recent date -
+        // but sourced from the check-in ledger rather than from
+        // goals.streak_count / last_logged_date, which nothing writes for a
+        // cadence commitment.
+        stage: stageFor(agg.bestStreak, agg.lastCheckinDate),
+        streak: agg.bestStreak,
+      };
+    });
+    const activeCount = members.filter((m) => m.stage !== 'wilted').length;
+    const health = members.length > 0 ? Math.round((activeCount / members.length) * 100) : 0;
+    return { members, health };
+  }, [membersQuery.data, activity]);
+
+  return { ...membersQuery, data };
 }
