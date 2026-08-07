@@ -23,7 +23,8 @@ export type FeatureFlag =
   | 'visionBoard'
   | 'meetups'
   | 'circleAI'
-  | 'weeklyRecap';
+  | 'weeklyRecap'
+  | 'lifeTimeline';
 
 export const FEATURES: Record<FeatureFlag, boolean> = {
   // Phase 2 - first back. Guess Who is a deferral, not a retirement: it is
@@ -41,4 +42,12 @@ export const FEATURES: Record<FeatureFlag, boolean> = {
   meetups: false,
   circleAI: false,
   weeklyRecap: false,
+  // Gates the "Your Story" timeline on ProfileScreen. useLifeTimeline reads
+  // the SAME `achievements` rows the Achievements badge grid renders directly
+  // above it, so the two sections were showing one dataset twice - the same
+  // "Completed ..." entry appearing under both headings. The badges survive
+  // because they are tappable through to a milestone card; the timeline was
+  // the thinner of the two renderings. Re-enabling this without giving the
+  // timeline its own source would restore the duplication.
+  lifeTimeline: false,
 };

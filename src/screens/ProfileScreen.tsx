@@ -20,6 +20,7 @@ import { DeleteAccountModal } from '../components/DeleteAccountModal';
 import { FutureSelfCard } from '../components/FutureSelfCard';
 import { LifeTimeline } from '../components/LifeTimeline';
 import { ThemePicker } from '../components/ThemePicker';
+import { FEATURES } from '../lib/features';
 import { HealthSyncRow } from '../components/HealthSyncRow';
 import { useThemeStore } from '../state/useThemeStore';
 import { setThemePrefs } from '../lib/themePrefs';
@@ -195,8 +196,14 @@ export default function ProfileScreen() {
           <Text style={styles.empty}>No achievements yet — complete a goal to earn your first badge.</Text>
         )}
 
-        <Text style={styles.sectionTitle}>Your Story</Text>
-        {user && <LifeTimeline userId={user.id} />}
+        {/* Heading gated together with the timeline it labels, so deferring
+            this does not strand a "Your Story" header over nothing. */}
+        {FEATURES.lifeTimeline && (
+          <>
+            <Text style={styles.sectionTitle}>Your Story</Text>
+            {user && <LifeTimeline userId={user.id} />}
+          </>
+        )}
 
         <Text style={styles.sectionTitle}>Future Self</Text>
         {user && <FutureSelfCard userId={user.id} />}

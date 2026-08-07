@@ -13,6 +13,7 @@ const EXPECTED: FeatureFlag[] = [
   'meetups',
   'circleAI',
   'weeklyRecap',
+  'lifeTimeline',
 ];
 
 test('every declared flag is present and boolean', () => {
