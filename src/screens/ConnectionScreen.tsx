@@ -1,5 +1,6 @@
 import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useMemo, useState } from 'react';
+import { FEATURES } from '../lib/features';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -223,11 +224,10 @@ export default function ConnectionScreen() {
         >
           <Text style={styles.title}>Together</Text>
           <View style={styles.titleHint}>
-            <ConceptHint id="connection-moments" text="A daily prompt your circle answers together." />
+            <ConceptHint id="connection-moments" text="Ask your circle for advice, and weigh in on theirs." />
           </View>
 
-          {/* Support: daily check-in + advice from your circle */}
-          {userId && circleId && (
+          {FEATURES.circleCard && userId && circleId && (
             <Animated.View entering={FadeInDown.duration(motion.duration.entrance)}>
               <DailyCircleCard circleId={circleId} userId={userId} />
             </Animated.View>
@@ -301,16 +301,25 @@ export default function ConnectionScreen() {
             <Text style={styles.empty}>No open questions yet — ask your circle something above.</Text>
           )}
 
-          {/* Play: lighter, lower-stakes moments — tucked away so they don't outweigh accountability */}
-          <View style={styles.gamesSection}>
-            <DisclosureSection label="Light Moments" icon={DiceIcon}>
-              {userId && circleId && <WouldYouRatherCard circleId={circleId} userId={userId} />}
-              {userId && circleId && <GuessWhoCard circleId={circleId} userId={userId} />}
-            </DisclosureSection>
-            <View style={styles.gamesHint}>
-              <ConceptHint id="light-moments" text="A daily moment of reflection." />
+          {/* Play: lighter, lower-stakes moments - tucked away so they don't
+              outweigh accountability. Gated on its children so the section
+              does not survive as an empty shell once both games are
+              deferred. */}
+          {(FEATURES.wouldYouRather || FEATURES.guessWho) && (
+            <View style={styles.gamesSection}>
+              <DisclosureSection label="Light Moments" icon={DiceIcon}>
+                {FEATURES.wouldYouRather && userId && circleId && (
+                  <WouldYouRatherCard circleId={circleId} userId={userId} />
+                )}
+                {FEATURES.guessWho && userId && circleId && (
+                  <GuessWhoCard circleId={circleId} userId={userId} />
+                )}
+              </DisclosureSection>
+              <View style={styles.gamesHint}>
+                <ConceptHint id="light-moments" text="A daily moment of reflection." />
+              </View>
             </View>
-          </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
