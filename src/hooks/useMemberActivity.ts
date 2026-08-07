@@ -23,6 +23,13 @@ export function useMemberActivity(circleId: string | undefined): {
       target_count: g.target_count,
       target_weekdays: g.target_weekdays,
     }));
+    // Date.now() is captured per data-change, not per render, so a screen
+    // left open across midnight keeps yesterday's idea of "today" until
+    // something refetches. Accepted rather than fixed: TanStack's
+    // refetch-on-focus corrects it the moment the user returns, and any
+    // check-in invalidates the ledger query and recomputes immediately. The
+    // alternative - recomputing every render - throws away the memo for a
+    // boundary almost nobody is awake to cross.
     return memberActivity(goals, checkinsQuery.data ?? {}, Date.now());
   }, [goalsQuery.data, checkinsQuery.data]);
 
