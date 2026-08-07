@@ -1,7 +1,8 @@
 import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { errorMessage } from '../lib/errorMessage';
 import { useCreateGuessWho, useGuessWhoPosts, useSubmitGuess, type GuessWhoPostWithGuesses } from '../hooks/useGuessWho';
 import { useCircleMembers } from '../hooks/useCircles';
 import { PillButton } from './PillButton';
@@ -27,7 +28,12 @@ function NewFactModal({
 
   async function handlePost() {
     if (!fact.trim() || !answerUserId) return;
-    await createPost.mutateAsync({ userId, fact: fact.trim(), answerUserId });
+    try {
+      await createPost.mutateAsync({ userId, fact: fact.trim(), answerUserId });
+    } catch (err) {
+      Alert.alert('Could not post that fact', errorMessage(err, 'Please try again.'));
+      return;
+    }
     onClose();
   }
 
@@ -102,10 +108,19 @@ function GuessWhoPostRow({
               ?.filter((m) => m.user_id !== post.created_by)
               .map((m) => (
                 <AnimatedPressable
-      accessibilityRole="button"
+                  accessibilityRole="button"
                   key={m.user_id}
                   style={styles.chip}
-                  onPress={() => submitGuess.mutate({ postId: post.id, userId, guessedUserId: m.user_id })}
+                  disabled={submitGuess.isPending}
+                  onPress={() =>
+                    submitGuess.mutate(
+                      { postId: post.id, userId, guessedUserId: m.user_id },
+                      {
+                        onError: (err) =>
+                          Alert.alert('Could not submit your guess', errorMessage(err, 'Please try again.')),
+                      },
+                    )
+                  }
                 >
                   <Text style={styles.chipText}>{m.profiles?.name ?? 'Member'}</Text>
                 </AnimatedPressable>
