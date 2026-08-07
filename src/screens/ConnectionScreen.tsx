@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 import { FEATURES } from '../lib/features';
 import {
   KeyboardAvoidingView,
-  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -214,7 +213,13 @@ export default function ConnectionScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* 'padding' on BOTH platforms, not just iOS. Android used to be left
+          on `undefined` because adjustResize shrank the window for us - but
+          SDK 54 turns edge-to-edge on by default, and an edge-to-edge window
+          does not resize when the keyboard opens. So on Android this view was
+          doing nothing at all: the keyboard covered the composer and the
+          reply box, and you could not see what you were typing. */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         <ScrollView
           contentContainerStyle={[styles.page, { paddingBottom: tabBarClearance }]}
           keyboardShouldPersistTaps="handled"
@@ -410,9 +415,13 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       color: colors.textPrimary,
       ...type.caption, fontFamily: fontFamily.regular,
     },
+    // Same shape as postButton above. These are the two send affordances on
+    // one screen and they were drawn differently - a pill for Post, a rounded
+    // rectangle for Send - which reads as two unrelated controls rather than
+    // the same action at two levels.
     replySend: {
       backgroundColor: colors.primary,
-      borderRadius: radii.input,
+      borderRadius: radii.pill,
       paddingHorizontal: spacing.lg,
       minHeight: 48,
       justifyContent: 'center',

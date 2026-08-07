@@ -12,6 +12,20 @@ export interface AskReplyWithProfile extends AskReply {
   profiles: { name: string } | null;
 }
 
+// ask_posts.reply_count is a denormalised column maintained by the
+// on_ask_reply_created trigger (migration 0004). It was reading 0 on posts
+// that visibly had replies, which means the trigger is not incrementing it on
+// this database - either it was never applied, or the replies predate it.
+//
+// Rather than repair the column and hope, the count is derived from the rows
+// themselves via a PostgREST count embed, which is correct whether or not the
+// trigger ever fires. `*` still selects the stale column, so the mapping below
+// deliberately overrides it - nothing should read that value again.
+interface AskPostRow extends Omit<AskPostWithProfile, 'reply_count'> {
+  reply_count: number;
+  ask_replies: { count: number }[] | null;
+}
+
 export function useAskPosts(circleId: string | undefined) {
   return useQuery({
     queryKey: ['askPosts', circleId],
@@ -19,7 +33,7 @@ export function useAskPosts(circleId: string | undefined) {
     queryFn: async (): Promise<AskPostWithProfile[]> => {
       const { data, error } = await supabase
         .from('ask_posts')
-        .select('*, profiles(name), goals(title)')
+        .select('*, profiles(name), goals(title), ask_replies(count)')
         .eq('circle_id', circleId as string)
         .order('created_at', { ascending: false });
       // Printing after '5' means the refetch fired and the only question left
@@ -31,7 +45,12 @@ export function useAskPosts(circleId: string | undefined) {
         debugLog('askPosts', '6. query ran. key:', JSON.stringify(['askPosts', circleId]), '| rows:', data?.length ?? 0, '| error:', error);
       }
       if (error) throw error;
-      return data as unknown as AskPostWithProfile[];
+      return ((data ?? []) as unknown as AskPostRow[]).map((row) => ({
+        ...row,
+        // PostgREST returns a count embed as [{ count: n }], and as [] when
+        // the post has no replies at all.
+        reply_count: row.ask_replies?.[0]?.count ?? 0,
+      }));
     },
   });
 }
