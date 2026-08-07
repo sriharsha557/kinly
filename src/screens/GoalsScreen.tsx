@@ -37,7 +37,6 @@ import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
 import type { EndedReason, Goal } from '../types/models';
-import StreakIcon from '../../assets/icons/nudges/streak.svg';
 import WaterIcon from '../../assets/icons/nudges/water.svg';
 import CameraIcon from '../../assets/icons/feed/camera.svg';
 
@@ -193,13 +192,11 @@ function GoalCard({
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{goal.title}</Text>
         <View style={styles.cardHeaderRight}>
-          {goal.streak_count > 0 && (
-            <View style={styles.streakRow}>
-              <StreakIcon width={14} height={14} color={theme.colors.textSecondary} />
-              <Text style={styles.streak}>{goal.streak_count}</Text>
-              {hasWaterMark && <WaterIcon width={13} height={13} color={theme.colors.primary} />}
-            </View>
-          )}
+          {/* GoalCadenceRow below is the one place a streak is stated now -
+              goal.streak_count used to render a second, disagreeing number
+              right beside it. The water mark itself is unrelated to that
+              dead column, so it keeps rendering on its own. */}
+          {hasWaterMark && <WaterIcon width={13} height={13} color={theme.colors.primary} />}
           {isMine && (
             <AnimatedPressable
               onPress={() => setMenuOpen(true)}
@@ -451,14 +448,26 @@ export default function GoalsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // Everyone who logged anything today, so each goal row can carry a
-  // collective signal ("· 3 friends completed today") alongside the owner's
-  // own progress. useGoals already returns the whole circle's goals.
+  // Everyone who checked in today, so each goal row can carry a collective
+  // signal ("· 3 friends completed today") alongside the owner's own
+  // progress - a goal reads as a shared effort, not a private
+  // task-manager row. Built from the check-in ledger, keyed back to the
+  // goal's owner, since checkinsByGoal carries no user_id of its own.
   const today = new Date().toISOString().slice(0, 10);
-  const loggedTodayUserIds = useMemo(
-    () => new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id)),
-    [goals, today],
-  );
+  const goalOwnerById = useMemo(() => {
+    const byId = new Map<string, string>();
+    for (const g of goals ?? []) byId.set(g.id, g.user_id);
+    return byId;
+  }, [goals]);
+  const checkedInTodayUserIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [goalId, dates] of Object.entries(checkinsByGoal)) {
+      if (!dates.includes(today)) continue;
+      const ownerId = goalOwnerById.get(goalId);
+      if (ownerId) ids.add(ownerId);
+    }
+    return ids;
+  }, [checkinsByGoal, goalOwnerById, today]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -502,7 +511,7 @@ export default function GoalsScreen() {
                   goal={item}
                   circleId={circleId}
                   userId={userId}
-                  friendsCompletedToday={loggedTodayUserIds.size - (loggedTodayUserIds.has(item.user_id) ? 1 : 0)}
+                  friendsCompletedToday={checkedInTodayUserIds.size - (checkedInTodayUserIds.has(item.user_id) ? 1 : 0)}
                   checkinsByGoal={checkinsByGoal}
                 />
               </Animated.View>
@@ -560,8 +569,6 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     // The goal title is the object this whole card is about - it reads as the
     // card's heading, not as body text alongside the meta row.
     cardTitle: { ...type.subheading, color: colors.textPrimary, flex: 1 },
-    streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-    streak: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textPrimary },
     // Raw size on purpose: this renders the "⋯" glyph, not text. Its size is
     // the affordance's diameter rather than a step in the type hierarchy, so
     // it has no business following the type scale.

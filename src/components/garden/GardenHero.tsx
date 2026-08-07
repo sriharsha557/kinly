@@ -8,7 +8,7 @@ import { SkyGradient } from './SkyGradient';
 import { PlantRow } from './PlantRow';
 import { GardenFooter } from './GardenFooter';
 import { useGardenState } from '../../hooks/useGarden';
-import { useGoals } from '../../hooks/useGoals';
+import { useMemberActivity } from '../../hooks/useMemberActivity';
 import { useDaylight } from '../../hooks/useDaylight';
 import { useAuthStore } from '../../state/useAuthStore';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -58,7 +58,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const userId = useAuthStore((state) => state.user?.id);
   const { data } = useGardenState(circleId);
-  const { data: goals } = useGoals(circleId);
+  const { activity } = useMemberActivity(circleId);
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -73,8 +73,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
   const Weather = WEATHER[state];
 
   const today = new Date().toISOString().slice(0, 10);
-  const loggedToday = new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id));
-  const checkedInToday = members.filter((m) => loggedToday.has(m.userId)).length;
+  const checkedInToday = members.filter((m) => activity.get(m.userId)?.lastCheckinDate === today).length;
   const bestStreak = members.reduce((max, m) => Math.max(max, m.streak), 0);
   const droopiest = members.find((m) => m.stage === 'wilted') ?? null;
 

@@ -127,13 +127,20 @@ export default function CircleScreen() {
     [garden, activity, atRiskGoalByMember, moods, userId],
   );
 
-  // Same definition Home's GardenHero uses: distinct users whose
-  // last_logged_date is today, not mood check-ins - see GardenHero.tsx.
+  // Distinct users with a check-in today, not mood check-ins - built from
+  // the ledger, not goals.last_logged_date, which nothing writes for a
+  // cadence commitment.
   const today = new Date().toISOString().slice(0, 10);
-  const checkedInToday = useMemo(
-    () => new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id)).size,
-    [goals, today],
-  );
+  const checkedInToday = useMemo(() => {
+    const goalOwnerById = new Map((goals ?? []).map((g) => [g.id, g.user_id] as const));
+    const ids = new Set<string>();
+    for (const [goalId, dates] of Object.entries(goalCheckinsQuery.data ?? {})) {
+      if (!dates.includes(today)) continue;
+      const ownerId = goalOwnerById.get(goalId);
+      if (ownerId) ids.add(ownerId);
+    }
+    return ids.size;
+  }, [goals, goalCheckinsQuery.data, today]);
 
   return (
     <SafeAreaView style={styles.container}>

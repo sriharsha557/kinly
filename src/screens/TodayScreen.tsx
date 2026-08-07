@@ -162,7 +162,10 @@ function describeEvent(event: EventWithProfile): string {
     case 'goal_completed':
       return `${name} completed "${payload.title ?? 'a goal'}"`;
     case 'streak':
-      return `${name} hit a ${payload.streak_count ?? ''} day streak`.trim();
+      // No unit named: this only renders for legacy 'streak' events already
+      // in the feed (the goal_source that wrote them no longer does), and a
+      // streak is counted in each goal's own periods now, not days.
+      return `${name} hit a ${payload.streak_count ?? ''} streak`.trim();
     case 'reminder':
       return `${name} could use a nudge: ${payload.message ?? ''}`.trim();
     case 'ask':
