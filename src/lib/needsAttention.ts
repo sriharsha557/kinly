@@ -6,13 +6,25 @@
 // have two different answers in two different components - which is exactly
 // what happened before, with the grace-window rule inlined in BuddyCard.
 //
-// Dependency-free so node:test can import it under --experimental-strip-types.
+// Dependency-free apart from memberActivity.ts and showingUp.ts, so
+// node:test can import it under --experimental-strip-types.
+
+import { EMPTY_ACTIVITY, type MemberActivity } from './memberActivity.ts';
 
 export type AttentionReason = 'streak_at_risk' | 'tough_day' | 'quiet';
 
 export interface AttentionInput {
   members: readonly { userId: string; name: string }[];
-  goals: readonly { id: string; user_id: string; last_logged_date: string | null; streak_count: number }[];
+  // One row per member, built from the check-in ledger (memberActivity.ts) -
+  // not goals.last_logged_date / goals.streak_count, which nothing writes
+  // for a cadence commitment.
+  activity: ReadonlyMap<string, MemberActivity>;
+  // Which goal to water for a member whose streak is at risk. A streak is a
+  // member-level fact here (the longest across their goals), but
+  // water_streak() still needs one specific goal id, and that choice cannot
+  // be recovered from `activity` alone - so the caller builds this from each
+  // member's longest-streak goal and hands it in.
+  atRiskGoalByMember: Readonly<Record<string, string>>;
   toughToday: readonly string[];
   viewerId: string;
   // Injected rather than read from Date.now() inside, so tests can pin a
@@ -61,9 +73,9 @@ function daysSince(isoDate: string, now: number): number {
 // Mirrored here only to decide whether to offer the action at all - the RPC
 // re-validates everything, so being slightly generous here is safe and being
 // wrong here cannot corrupt a streak.
-export function isInGraceWindow(lastLoggedDate: string | null, now: number): boolean {
-  if (!lastLoggedDate) return false;
-  return daysSince(lastLoggedDate, now) === 2;
+export function isInGraceWindow(lastCheckinDate: string | null, now: number): boolean {
+  if (!lastCheckinDate) return false;
+  return daysSince(lastCheckinDate, now) === 2;
 }
 
 // Ordered most urgent first: an at-risk streak expires today, while a tough
@@ -71,26 +83,28 @@ export function isInGraceWindow(lastLoggedDate: string | null, now: number): boo
 const REASON_RANK: AttentionReason[] = ['streak_at_risk', 'tough_day', 'quiet'];
 
 export function needsAttention(input: AttentionInput): AttentionRow[] {
-  const { members, goals, toughToday, viewerId, now } = input;
+  const { members, activity, atRiskGoalByMember, toughToday, viewerId, now } = input;
   const tough = new Set(toughToday);
   const rows: AttentionRow[] = [];
 
   for (const member of members) {
     if (member.userId === viewerId) continue;
 
-    const theirGoals = goals.filter((g) => g.user_id === member.userId);
+    const summary = activity.get(member.userId) ?? EMPTY_ACTIVITY;
 
-    // Most to lose wins when several goals expire the same day.
-    const atRisk = theirGoals
-      .filter((g) => isInGraceWindow(g.last_logged_date, now))
-      .sort((a, b) => b.streak_count - a.streak_count)[0];
-    if (atRisk) {
+    if (isInGraceWindow(summary.lastCheckinDate, now)) {
       rows.push({
         userId: member.userId,
         name: member.name,
         reason: 'streak_at_risk',
-        detail: `${atRisk.streak_count}-day streak ends today`,
-        goalId: atRisk.id,
+        // A streak used to be one number in one unit - days - so
+        // "N-day streak ends today" was always true. Now it is counted in
+        // each goal's own periods (days for a daily goal, weeks for a
+        // 4x/week one), so no single number and unit can describe every
+        // member's at-risk goal correctly. Say only what is true for all of
+        // them: the streak ends today, with no number attached.
+        detail: 'streak ends today',
+        goalId: atRiskGoalByMember[member.userId],
       });
       continue;
     }
@@ -100,17 +114,13 @@ export function needsAttention(input: AttentionInput): AttentionRow[] {
       continue;
     }
 
-    // A member who has never logged anything is not "quiet" - stageFor()
+    // A member who has never checked in is not "quiet" - stageFor()
     // renders them wilted because it has no date to work from, but there is
     // nothing for them to have lapsed from, and prompting the circle to
     // chase someone who joined yesterday is hostile.
-    const logged = theirGoals
-      .map((g) => g.last_logged_date)
-      .filter((d): d is string => d !== null);
-    if (logged.length === 0) continue;
+    if (summary.lastCheckinDate === null) continue;
 
-    const mostRecent = logged.reduce((latest, d) => (d > latest ? d : latest));
-    const quietDays = daysSince(mostRecent, now);
+    const quietDays = daysSince(summary.lastCheckinDate, now);
     // > 3, not >= 3: this is exactly useGarden.stageFor()'s wilt threshold,
     // and the two must agree or a member shows wilted art in the Members
     // list while being absent from Circle Today.

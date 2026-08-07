@@ -20,8 +20,11 @@ import { CircleTodaySection } from '../components/CircleTodaySection';
 import { CircleMembersSection } from '../components/CircleMembersSection';
 import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
+import { useGoalCheckins } from '../hooks/useCheckins';
+import { useMemberActivity } from '../hooks/useMemberActivity';
 import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
+import { streak } from '../lib/showingUp';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing } from '../theme/colors';
@@ -72,13 +75,23 @@ export default function CircleScreen() {
     isError: moodsError,
     refetch: refetchMoods,
   } = useTodayMoodCheckins(circleId ?? undefined);
+  const goalCheckinsQuery = useGoalCheckins(circleId ?? undefined);
+  // The ledger-derived summary needsAttention now reads instead of
+  // goals.last_logged_date / goals.streak_count. Its own isLoading/isError
+  // fold in BOTH the goals and check-ins queries, so this screen does not
+  // have to re-derive that from useGoals alone - which used to miss the
+  // ledger query entirely and could show "no one needs support" while the
+  // check-ins query was still in flight.
+  const { activity, isLoading: activityLoading, isError: activityError } = useMemberActivity(
+    circleId ?? undefined,
+  );
 
   // Cold start (every query still []) must not be mistaken for "checked, and
   // everyone is fine" - and a query error must not settle on that same
   // all-clear forever. CircleTodaySection needs both signals to tell the
   // difference.
-  const isLoading = gardenPending || goalsPending || moodsPending;
-  const isError = gardenError || goalsError || moodsError;
+  const isLoading = gardenPending || goalsPending || moodsPending || activityLoading;
+  const isError = gardenError || goalsError || moodsError || activityError;
   const isRefreshing = (gardenFetching || goalsFetching || moodsFetching) && !isLoading;
 
   const handleRefresh = useCallback(() => {
@@ -87,6 +100,26 @@ export default function CircleScreen() {
     refetchMoods();
   }, [refetchGarden, refetchGoals, refetchMoods]);
 
+  // needsAttention no longer resolves goalId from goals itself - a streak is
+  // a member-level fact under the ledger, so it can't derive which goal to
+  // water. This picks each member's longest-streak goal (in that goal's OWN
+  // cadence) so water_streak() still has a specific goal id. Ties don't
+  // matter: any tied goal is a legitimate thing to water.
+  const atRiskGoalByMember = useMemo(() => {
+    const bestByMember: Record<string, { goalId: string; streak: number }> = {};
+    for (const goal of goals ?? []) {
+      const checkins = goalCheckinsQuery.data?.[goal.id] ?? [];
+      const goalStreak = streak(goal, checkins, Date.now());
+      const current = bestByMember[goal.user_id];
+      if (!current || goalStreak > current.streak) {
+        bestByMember[goal.user_id] = { goalId: goal.id, streak: goalStreak };
+      }
+    }
+    const byMember: Record<string, string> = {};
+    for (const [memberId, best] of Object.entries(bestByMember)) byMember[memberId] = best.goalId;
+    return byMember;
+  }, [goals, goalCheckinsQuery.data]);
+
   // The screen owns no rules - needsAttention is the single definition of
   // all three signals, so this cannot drift from what BuddyCard believes.
   const attentionRows = useMemo(
@@ -94,13 +127,14 @@ export default function CircleScreen() {
       userId
         ? needsAttention({
             members: garden?.members ?? [],
-            goals: goals ?? [],
+            activity,
+            atRiskGoalByMember,
             toughToday: (moods ?? []).filter((m) => m.mood === 'tough').map((m) => m.user_id),
             viewerId: userId,
             now: Date.now(),
           })
         : [],
-    [garden, goals, moods, userId],
+    [garden, activity, atRiskGoalByMember, moods, userId],
   );
 
   // Same definition Home's GardenHero uses: distinct users whose
