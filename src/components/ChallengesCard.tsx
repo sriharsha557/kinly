@@ -1,7 +1,8 @@
 import { AnimatedPressable } from './AnimatedPressable';
 import { fontFamily, spacing, type } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
+import { errorMessage } from '../lib/errorMessage';
 import {
   useChallenges,
   useCreateChallenge,
@@ -95,11 +96,22 @@ function LogContributionModal({
   const createAchievement = useCreateAchievement();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const mine = challenge.contributions.find((c) => c.user_id === userId);
 
   async function handleLog() {
     const value = Number(amount);
-    if (!value) return;
-    await logContribution.mutateAsync({ challengeId: challenge.id, userId, amount: value });
+    // isPending is the real double-submit guard (PillButton disables on it),
+    // but two presses can land in the same frame before that state commits,
+    // and challenge_logs has no unique constraint to reject the second row -
+    // it would silently double the contribution. Checking here closes that
+    // window, since the handler body runs to the first await synchronously.
+    if (!value || logContribution.isPending) return;
+    try {
+      await logContribution.mutateAsync({ challengeId: challenge.id, userId, amount: value });
+    } catch (err) {
+      Alert.alert('Could not log that', errorMessage(err, 'Please try again.'));
+      return;
+    }
 
     const justCompleted = challenge.progress < challenge.target && challenge.progress + value >= challenge.target;
     if (justCompleted) {
@@ -126,6 +138,15 @@ function LogContributionModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalCard}>
           <Text style={styles.modalTitle}>{challenge.title}</Text>
+          {/* Tapping Log progress twice is a legitimate second contribution,
+              not a mis-tap the app should reject - but with nothing on screen
+              saying what you already put in, the only feedback was the shared
+              total jumping again, which reads as a duplicate. */}
+          <Text style={styles.modalMeta}>
+            {mine
+              ? `You've logged ${mine.amount} so far. Anything you add here counts on top.`
+              : "You haven't logged anything toward this yet."}
+          </Text>
           <TextInput
             style={styles.modalInput}
             value={amount}
@@ -183,15 +204,28 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
               <Text style={styles.challengeTitle}>{challenge.title}</Text>
               <ProgressBar progress={challenge.progress} target={challenge.target} />
               <View style={styles.challengeFooter}>
+                {/* Was a bare "1 / 7", which named neither unit nor subject -
+                    testers read it as days, members, or challenges by turns.
+                    Both halves say what they count now. */}
                 <Text style={styles.challengeMeta}>
-                  {challenge.progress} / {challenge.target} · {challenge.contributors}{' '}
-                  {challenge.contributors === 1 ? 'member' : 'members'}
+                  {challenge.progress} of {challenge.target} logged ·{' '}
+                  {challenge.contributors} {challenge.contributors === 1 ? 'member' : 'members'}{' '}
+                  chipping in
                 </Text>
-                <AnimatedPressable
-      accessibilityRole="button" onPress={() => setLogging(challenge)}>
+                <AnimatedPressable accessibilityRole="button" onPress={() => setLogging(challenge)}>
                   <Text style={styles.logLink}>Log progress</Text>
                 </AnimatedPressable>
               </View>
+              {/* Whose progress this is. The bar is a circle total, so without
+                  names a member cannot tell their own contribution from
+                  everyone else's - or confirm their tap landed at all. */}
+              {challenge.contributions.length > 0 && (
+                <Text style={styles.contributors}>
+                  {challenge.contributions
+                    .map((c) => `${c.user_id === userId ? 'You' : c.name} ${c.amount}`)
+                    .join('  ·  ')}
+                </Text>
+              )}
             </View>
           ))}
         </View>
@@ -238,8 +272,15 @@ function createStyles({ colors, radii, cardShell }: ReturnType<typeof useTheme>)
     newLink: { ...type.secondary, fontFamily: fontFamily.medium, color: colors.primary },
     challenge: { gap: spacing.s6 },
     challengeTitle: { ...type.body, fontFamily: fontFamily.semibold, color: colors.textPrimary },
-    challengeFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    challengeMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    challengeFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    challengeMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary, flex: 1 },
+    contributors: { ...type.caption, fontFamily: fontFamily.regular, color: colors.shellSecondary },
+    modalMeta: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     logLink: { ...type.secondary, fontFamily: fontFamily.bold, color: colors.primary },
     empty: { ...type.secondary, color: colors.shellSecondary },
     modalOverlay: {
