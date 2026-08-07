@@ -15,7 +15,7 @@
 // "Enforce JWT verification" (pg_cron's call carries no user JWT, same as
 // notify-circle's Database Webhook).
 //
-// Known limitation: last_logged_date has no per-user timezone, so the cron
+// Known limitation: checkin_date has no per-user timezone, so the cron
 // fires at one fixed UTC time for everyone rather than "end of day, your
 // time" - an approximation, not exact.
 
@@ -32,6 +32,10 @@ Deno.serve(async (_req) => {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
+    // The health snapshot's "active" window, computed once: a member counts
+    // as active if the ledger has a check-in from them in the last 3 days.
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(today.getDate() - 3);
 
     // Every query in this function runs with the service-role key, which
     // bypasses RLS - so the soft-delete filters the app gets for free from
@@ -154,19 +158,29 @@ Deno.serve(async (_req) => {
         .is('deleted_at', null);
       if (!members || members.length === 0) continue;
 
-      const { data: circleGoals } = await supabase
-        .from('goals')
-        .select('user_id, last_logged_date')
-        .eq('circle_id', circle.id)
-        // A deleted goal must not keep a member counting as active.
-        .is('deleted_at', null);
+      // The ledger, not goals.last_logged_date. Nothing writes that column
+      // for a cadence commitment, so this snapshot stored 0% for every
+      // cadence circle every night - and this table is the only source of
+      // "health a week ago", so the weekly recap's health-climbed line
+      // fired unconditionally: "Your garden is greener than it was last
+      // week", every week, for a circle that had not moved.
+      //
+      // Read through goal_checkins' join to goals so a deleted goal cannot
+      // keep a member counting as active, matching the old query's filter.
+      const { data: circleCheckins } = await supabase
+        .from('goal_checkins')
+        .select('user_id, checkin_date, goals!inner(circle_id, deleted_at)')
+        .eq('goals.circle_id', circle.id)
+        .is('goals.deleted_at', null)
+        .gte('checkin_date', isoDate(threeDaysAgo));
 
       const mostRecentByUser = new Map<string, string>();
-      for (const g of circleGoals ?? []) {
-        if (!g.last_logged_date) continue;
-        const existing = mostRecentByUser.get(g.user_id as string);
-        if (!existing || (g.last_logged_date as string) > existing) {
-          mostRecentByUser.set(g.user_id as string, g.last_logged_date as string);
+      for (const c of circleCheckins ?? []) {
+        const checkinDate = c.checkin_date as string;
+        if (!checkinDate) continue;
+        const existing = mostRecentByUser.get(c.user_id as string);
+        if (!existing || checkinDate > existing) {
+          mostRecentByUser.set(c.user_id as string, checkinDate);
         }
       }
 
