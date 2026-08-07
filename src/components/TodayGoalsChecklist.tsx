@@ -50,23 +50,29 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
   // Every goal this component can meaningfully call "pending" - all but the
   // auto-tracked health_steps goal, whose own sync (not a tap here) decides
-  // whether today counts. Cadence goals (target == null, migration 0049)
-  // belong here too: their commitment lives in the check-in ledger rather
-  // than a numeric target, but that ledger is exactly what pending below
-  // reads for them. Scoping the "Everything logged" congratulation to
+  // whether today counts. Cadence goals belong here too: their commitment
+  // lives in the check-in ledger rather than a numeric target, and that
+  // ledger is exactly what pending below reads for them. Scoping the
+  // "Everything logged" congratulation to
   // trackable rather than myGoals as a whole keeps a member with only a
   // health_steps goal from seeing "Nice work" for nothing this component
   // can vouch for.
   const trackable = myGoals.filter((g) => g.goal_source !== 'health_steps');
   const pending = trackable.filter((g) => {
     if (checkedIds.has(g.id)) return false;
-    if (g.target != null) {
-      // Legacy goals still carry a numeric target and fill a progress bar.
-      return g.progress < g.target && g.last_logged_date !== today;
+    // Cadence decides, never `target`. Migration 0047 step 4 set
+    // target_type = 'daily' on every surviving goal but left `target`
+    // populated, so every pre-existing goal in the live database is both
+    // "numeric" and "cadence" at once - `target != null` has never meant
+    // "not a commitment". Branching on it sent those goals down the
+    // progress-bar path here while the Goals tab wrote them a ledger row,
+    // so doneToday and pending could both claim the same goal: "1 of 2
+    // completed" for one goal, still listed as outstanding.
+    if (g.target_type != null) {
+      return !(checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin);
     }
-    // No target - this is a cadence commitment, so "done today" means a
-    // check-in dated today, not a progress comparison.
-    return !(checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin);
+    // No cadence at all - a legacy numeric goal that fills a progress bar.
+    return g.target != null && g.progress < g.target && g.last_logged_date !== today;
   });
 
   // Collective context for the mission rows: how many of the others in this
@@ -91,13 +97,15 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const context = collectiveContext(friendsDoneToday, friendIds.size);
 
   // "X of Y completed" for today's mission - what's already logged today
-  // plus what's still waiting.
-  const doneToday = myGoals.filter(
-    (g) =>
-      g.last_logged_date === today ||
-      (checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin) ||
-      checkedIds.has(g.id),
-  ).length;
+  // plus what's still waiting. Asked the same way `pending` asks it, so the
+  // two can never both claim one goal: while this counted either signal and
+  // pending counted only the numeric one, a goal checked in from the Goals
+  // tab read "1 of 2 completed" and stayed in the list underneath.
+  const doneToday = myGoals.filter((g) => {
+    if (checkedIds.has(g.id)) return true;
+    if (g.target_type != null) return (checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin);
+    return g.last_logged_date === today;
+  }).length;
   const missionTotal = doneToday + pending.length;
 
   function markChecked(goalId: string) {
@@ -135,8 +143,20 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
     );
   }
 
+  // logGoal survives for one case only: a health_steps goal, a device
+  // threshold with no cadence at all. Anything carrying a target_type is a
+  // commitment and must go to the ledger, because migration 0047 left
+  // `target` populated on every migrated goal - branching on `target` here
+  // sent those to log_goal_progress, which writes no ledger row, so a
+  // member who tapped Today's Mission every day for a week appeared in the
+  // garden, the attention list, Profile and the digest as having done
+  // nothing, while the same goal's "Check in" button on the Goals tab did
+  // the right thing. One goal, two buttons, two systems.
+  // (health_steps goals are filtered out of `trackable` above, so in
+  // practice every row rendered here takes the check-in branch - the guard
+  // stays so the two paths cannot drift apart if that filter ever changes.)
   function handleTap(goal: Goal) {
-    if (goal.target != null) {
+    if (goal.goal_source === 'health_steps') {
       void handleLogNumeric(goal);
     } else {
       handleCheckIn(goal);
