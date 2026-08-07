@@ -1,6 +1,7 @@
 import { fontFamily, spacing } from '../theme/colors';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { errorMessage } from '../lib/errorMessage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAnswerCircleCard, useCircleCard } from '../hooks/useCircleCard';
 import { PillButton } from './PillButton';
@@ -17,9 +18,22 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
   const myAnswer = answers?.find((a) => a.user_id === userId);
   const hasAnswered = !!myAnswer;
 
+  // Everyone else's answers are hidden until you write your own, and there is
+  // one answer per person per day (a unique constraint on circle_id, user_id,
+  // prompt_date - migration 0018). Both are deliberate: answer-first keeps
+  // people from anchoring on what was already said. Neither was stated
+  // anywhere on screen, so testers read the pair as two bugs - "posts are
+  // invisible" and "I can only post once".
+  const othersWaiting = (answers?.length ?? 0) - (hasAnswered ? 1 : 0);
+
   async function handleSubmit() {
-    if (!draft.trim()) return;
-    await answerMutation.mutateAsync({ userId, promptDate: date, promptText: prompt, answer: draft.trim() });
+    if (!draft.trim() || answerMutation.isPending) return;
+    try {
+      await answerMutation.mutateAsync({ userId, promptDate: date, promptText: prompt, answer: draft.trim() });
+    } catch (err) {
+      Alert.alert('Could not share your answer', errorMessage(err, 'Please try again.'));
+      return;
+    }
     setDraft('');
   }
 
@@ -33,6 +47,11 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
 
       {!hasAnswered ? (
         <View style={styles.answerRow}>
+          <Text style={styles.gate}>
+            {othersWaiting > 0
+              ? `${othersWaiting} ${othersWaiting === 1 ? 'answer' : 'answers'} waiting — share yours to see them.`
+              : 'Answer first, then you’ll see everyone else’s.'}
+          </Text>
           <TextInput
             style={styles.input}
             value={draft}
@@ -52,10 +71,13 @@ export function DailyCircleCard({ circleId, userId }: { circleId: string; userId
         <View style={styles.answers}>
           {answers?.map((a) => (
             <View key={a.id} style={styles.answerBubble}>
-              <Text style={styles.answerAuthor}>{a.profiles?.name ?? 'Someone'}</Text>
+              <Text style={styles.answerAuthor}>
+                {a.user_id === userId ? 'You' : a.profiles?.name ?? 'Someone'}
+              </Text>
               <Text style={styles.answerText}>{a.answer}</Text>
             </View>
           ))}
+          <Text style={styles.gate}>That’s today’s card — a new prompt lands tomorrow.</Text>
         </View>
       )}
     </LinearGradient>
@@ -69,6 +91,7 @@ function createStyles({ colors, radii, type }: ReturnType<typeof useTheme>) {
     title: { ...type.body, fontFamily: fontFamily.bold, color: colors.onAccent },
     prompt: { ...type.body, fontFamily: fontFamily.bold, color: colors.onAccent, lineHeight: 22 },
     answerRow: { gap: spacing.sm },
+    gate: { ...type.caption, fontFamily: fontFamily.regular, color: colors.onAccentFaint },
     input: {
       backgroundColor: colors.onAccentGlaze,
       borderRadius: radii.input,
