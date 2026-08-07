@@ -32,7 +32,11 @@ export function composeDigest(
   // garden growth, then aggregated check-in participation.
   const streaks = events
     .filter((e) => e.type === 'streak' && typeof e.payload.streak_count === 'number' && e.payload.streak_count > 0)
-    .map((e) => `${e.actor_name} reached a ${e.payload.streak_count}-day streak`);
+    // No unit. Only legacy 'streak' events (written by log_goal_progress)
+    // still carry a day-counted streak_count, but a streak is counted in
+    // each goal's own cadence periods now, and a digest line that says
+    // "day" would be false the moment a non-daily commitment reaches one.
+    .map((e) => `${e.actor_name} reached a ${e.payload.streak_count}-streak`);
 
   const completions = events
     .filter((e) => e.type === 'goal_completed')

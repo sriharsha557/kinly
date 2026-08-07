@@ -22,7 +22,7 @@ test('streak milestones outrank goal completions', () => {
     ],
     5,
   );
-  assert.deepEqual(lines, ['Rahul reached a 10-day streak', 'Priya completed "Run 5km"']);
+  assert.deepEqual(lines, ['Rahul reached a 10-streak', 'Priya completed "Run 5km"']);
 });
 
 test('everyone checking in aggregates into one celebratory line', () => {
@@ -60,8 +60,8 @@ test('a busy day caps at three lines plus a tail', () => {
     5,
   );
   assert.deepEqual(lines, [
-    'A reached a 3-day streak',
-    'B reached a 7-day streak',
+    'A reached a 3-streak',
+    'B reached a 7-streak',
     'C completed "Read"',
     'and 2 more',
   ]);
@@ -78,7 +78,7 @@ test('a streak event with no streak_count produces no digest at all', () => {
 
 test('a streak event with streak_count 1 still renders normally', () => {
   const lines = composeDigest([ev('streak', 'A', { streak_count: 1 })], 5);
-  assert.deepEqual(lines, ['A reached a 1-day streak']);
+  assert.deepEqual(lines, ['A reached a 1-streak']);
 });
 
 test('a goal check-in with no mood check-in still counts as participation', () => {

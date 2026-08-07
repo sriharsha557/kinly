@@ -133,7 +133,10 @@ export function Plant({
       <Text style={[styles.plantName, isSelf && styles.plantNameSelf]} numberOfLines={1}>
         {isSelf ? 'You' : member.name}
       </Text>
-      {member.streak > 0 && <Text style={styles.plantStreak}>{member.streak}d</Text>}
+      {/* The bare count, not "5d": the same period-not-days reason as the
+          label below, and this badge is the one place the wrong unit sat
+          directly under the plant it was describing. */}
+      {member.streak > 0 && <Text style={styles.plantStreak}>{member.streak}</Text>}
     </View>
   );
 
@@ -144,7 +147,10 @@ export function Plant({
     <AnimatedPressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${isSelf ? 'Your' : `${member.name}'s`} plant, ${member.stage}, ${member.streak} day streak`}
+      // No unit in "N streak": member.streak is counted in the goal's own
+      // cadence periods, so announcing "day" would tell a screen-reader
+      // user something that is false for any non-daily commitment.
+      accessibilityLabel={`${isSelf ? 'Your' : `${member.name}'s`} plant, ${member.stage}, ${member.streak} streak`}
     >
       {body}
     </AnimatedPressable>

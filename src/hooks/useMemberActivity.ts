@@ -16,13 +16,21 @@ export function useMemberActivity(circleId: string | undefined): {
   const checkinsQuery = useGoalCheckins(circleId);
 
   const activity = useMemo(() => {
-    const goals: ActivityGoal[] = (goalsQuery.data ?? []).map((g) => ({
-      id: g.id,
-      user_id: g.user_id,
-      target_type: g.target_type,
-      target_count: g.target_count,
-      target_weekdays: g.target_weekdays,
-    }));
+    // Active goals only. useGoals deliberately still returns
+    // ended_reason='migration' rows so a member can see what happened to
+    // their old goals - but an ended goal can never be shown up for, so
+    // every one of them landed in goalCount with showingUp false forever,
+    // inflating Profile's "goals" tile and dragging its completion rate
+    // down for something the member has already stopped doing.
+    const goals: ActivityGoal[] = (goalsQuery.data ?? [])
+      .filter((g) => g.status === 'active')
+      .map((g) => ({
+        id: g.id,
+        user_id: g.user_id,
+        target_type: g.target_type,
+        target_count: g.target_count,
+        target_weekdays: g.target_weekdays,
+      }));
     // Date.now() is captured per data-change, not per render, so a screen
     // left open across midnight keeps yesterday's idea of "today" until
     // something refetches. Accepted rather than fixed: TanStack's

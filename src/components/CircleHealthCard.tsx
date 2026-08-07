@@ -39,9 +39,10 @@ export function CircleHealthCard({
   // "1 needs support" is omitted entirely at zero rather than rendered as
   // "0 need support" - a good day should not be phrased as an absence.
   //
-  // "checked in today" means goal logs today (last_logged_date === today),
-  // matching GardenHero on Home - not mood check-ins, so the same copy
-  // never disagrees between the two tabs.
+  // "checked in today" means a goal_checkins row dated today - the value
+  // arrives ledger-derived now, not from goals.last_logged_date, which
+  // nothing writes for a cadence commitment. Still not mood check-ins, so
+  // the same copy never disagrees between the two tabs.
   const facts = [
     `${checkedInToday}/${members.length} checked in today`,
     `${activeStreaks} active ${activeStreaks === 1 ? 'streak' : 'streaks'}`,

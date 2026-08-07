@@ -73,7 +73,9 @@ export function CircleMembersSection({
         const mood = moodByUser.get(member.userId);
         const isMe = member.userId === userId;
         const detail = [
-          member.streak > 0 ? `${member.streak}-day streak` : 'no streak yet',
+          // No unit: member.streak is counted in each goal's own cadence
+          // periods, so "6-day" is false for anyone not on a daily cadence.
+          member.streak > 0 ? `${member.streak}-streak` : 'no streak yet',
           mood ? MOOD_WORD[mood] : null,
         ]
           .filter(Boolean)
