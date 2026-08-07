@@ -112,6 +112,20 @@ action repoints at `Circle`.
 This extraction is the bulk of the work and the main risk: the screen is
 ~400 lines and mixes composer state, moderation sheets, and reply threading.
 
+To keep the component boundary and the navigation change from ever being in
+flight together, the extraction proceeds in place first:
+
+1. Fix the Ask Friends refresh bug (issue 14) while the code is still where
+   the bug was reported.
+2. Extract `AskFriendsSection`, still rendered inside `ConnectionScreen`.
+3. Verify nothing changed — same screen, same behaviour.
+4. Render the same component inside the Circle tab.
+5. Remove the Connection tab and repoint `QuickActionsRow`.
+6. Delete `ConnectionScreen.tsx` once the Circle placement is stable.
+
+Each step is independently verifiable, and a regression at any point has
+exactly one candidate cause.
+
 ### 4. Reachable tutorial
 
 `TutorialScreen` already exists (four illustrated slides) but renders only
@@ -138,6 +152,26 @@ Tracked, but not part of this work:
   Its own project.
 - **The unlabelled share toggle after finishing a goal.** Not reproduced;
   awaiting the screen name from the reporter.
+
+## Delivery phases
+
+1. **Stabilization** — fix Ask Friends refresh, Health Connect, the check-in
+   screen, and session-timeout handling. Verify every core flow.
+2. **Simplification** — add the flag module, gate the hidden features, remove
+   the two emptied disclosure sections.
+3. **Navigation** — the six-step extraction above.
+4. **Polish** — reachable tutorial, textual affordance on the remaining
+   "Advanced" disclosure, loading/success feedback on any surface still
+   lacking it.
+
+Already shipped to `preview` on 2026-08-07, ahead of this plan: Guess Who
+repaired (259c6a6), challenge progress labelled and attributed to members
+(c9b377d), Circle Card answer gate stated (786e065). Phase 1 and Phase 4 do
+not need to revisit those.
+
+Phase 1 carries the only genuinely unknown work: Health Connect, the check-in
+screen, and session timeout have not been root-caused yet, so they can be
+sequenced but not yet estimated or specified.
 
 ## Verification
 
