@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { weeklyHighlight } from '../lib/weeklyHighlight';
+import { useMemberActivity } from './useMemberActivity';
 
 export interface WeeklyRecap {
   goalsCompleted: number;
@@ -18,6 +19,11 @@ export interface WeeklyRecap {
 }
 
 export function useWeeklyRecap(circleId: string | undefined) {
+  // The circle's per-member summary, sourced from goals + the check-in
+  // ledger - the same map the garden and Circle Today read, so this card
+  // cannot disagree with them about who has been showing up.
+  const { activity } = useMemberActivity(circleId);
+
   return useQuery({
     queryKey: ['weeklyRecap', circleId],
     enabled: !!circleId,
@@ -42,13 +48,15 @@ export function useWeeklyRecap(circleId: string | undefined) {
         .gte('created_at', since);
       if (nudgesError) throw nudgesError;
 
-      const { data: goalsForStreak } = await supabase
-        .from('goals')
-        .select('streak_count')
-        .eq('circle_id', circleId as string)
-        .order('streak_count', { ascending: false })
-        .limit(1);
-      const bestStreak = goalsForStreak?.[0]?.streak_count ?? 0;
+      // Best streak across the circle, from the check-in ledger rather than
+      // goals.streak_count, which the ledger never writes. This is a max
+      // across goals in different cadences (a 5-day daily streak and a
+      // 2-month monthly streak are not the same unit) - accepted, which is
+      // why no copy below states "days".
+      let bestStreak = 0;
+      for (const memberActivity of activity.values()) {
+        bestStreak = Math.max(bestStreak, memberActivity.bestStreak);
+      }
 
       const { data: waters } = await supabase
         .from('streak_saves')
@@ -71,19 +79,12 @@ export function useWeeklyRecap(circleId: string | undefined) {
         .select('user_id')
         .eq('circle_id', circleId as string)
         .eq('status', 'active');
-      const { data: allGoals } = await supabase
-        .from('goals')
-        .select('user_id, last_logged_date')
-        .eq('circle_id', circleId as string);
-      const mostRecentByUser = new Map<string, string>();
-      for (const g of allGoals ?? []) {
-        if (!g.last_logged_date) continue;
-        const existing = mostRecentByUser.get(g.user_id);
-        if (!existing || g.last_logged_date > existing) mostRecentByUser.set(g.user_id, g.last_logged_date);
-      }
+      // Most recent check-in per member, from the same activity map -
+      // replaces the old goals.last_logged_date read, which the ledger
+      // never writes.
       const totalMembers = members?.length ?? 0;
       const activeMembers = (members ?? []).filter((m) => {
-        const mostRecent = mostRecentByUser.get(m.user_id);
+        const mostRecent = activity.get(m.user_id)?.lastCheckinDate;
         if (!mostRecent) return false;
         const daysSince = Math.floor((Date.now() - new Date(mostRecent).getTime()) / 86_400_000);
         return daysSince <= 3;

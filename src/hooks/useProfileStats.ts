@@ -1,27 +1,37 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Achievement } from '../types/models';
+import { useMemberActivity } from './useMemberActivity';
 
 interface ProfileStats {
+  // Of the member's goals, how many they are showing up for right now (see
+  // MemberActivity.showingUp) - not a numeric "progress >= target", which
+  // has no meaning for a cadence commitment: there is no number to reach.
   goalsCompleted: number;
+  // The member's active goals.
   goalsTotal: number;
+  // The member's active goals (unchanged in spirit from before this hook
+  // read the check-in ledger).
   activeGoals: number;
-  // Average fractional progress across all goals (not just the completed
-  // ones) - deliberately distinct from goalsCompleted/goalsTotal, which
-  // only counts goals that hit 100%. Someone with three goals at 50/80/20%
-  // has 0 "done" but a real 50% completion rate worth showing.
+  // showingUp / goalCount as a percentage. Guarded against goalCount === 0
+  // so a member with no goals reads as 0%, not NaN.
   completionRate: number;
   currentStreak: number;
   achievements: Achievement[];
 }
 
 export function useProfileStats(userId: string | undefined, circleId: string | undefined) {
+  // The same per-member summary the garden, Circle Today and the weekly
+  // recap read, so this screen cannot disagree with them about what a
+  // member has been doing.
+  const { activity } = useMemberActivity(circleId);
+
   return useQuery({
     queryKey: ['profileStats', userId, circleId],
     enabled: !!userId && !!circleId,
     queryFn: async (): Promise<ProfileStats> => {
       const [{ data: goals, error: goalsError }, { data: achievements, error: achievementsError }] = await Promise.all([
-        supabase.from('goals').select('progress, target, streak_count').eq('user_id', userId as string).eq('circle_id', circleId as string),
+        supabase.from('goals').select('streak_count').eq('user_id', userId as string).eq('circle_id', circleId as string),
         supabase
           .from('achievements')
           .select('*')
@@ -35,29 +45,17 @@ export function useProfileStats(userId: string | undefined, circleId: string | u
       if (achievementsError) throw achievementsError;
 
       const goalsList = goals ?? [];
-      // target is nullable since migration 0049: a cadence goal has no
-      // numeric target at all, only a check-in ledger. Treating a null
-      // target as 0 is wrong twice over - `0 >= null` coerces to `0 >= 0`
-      // (true), so every cadence goal would count as "completed" and
-      // activeGoals would collapse to 0; and `0 / null` is NaN, which then
-      // propagates into completionRate and ProfileScreen renders it
-      // literally as "NaN%". Numeric goals only for both figures.
-      const numericGoals = goalsList.filter(
-        (g): g is typeof g & { target: number } => g.target != null,
-      );
-      const goalsCompleted = numericGoals.filter((g) => g.progress >= g.target).length;
       const currentStreak = goalsList.reduce((max, g) => Math.max(max, g.streak_count), 0);
-      const completionRate =
-        numericGoals.length > 0
-          ? Math.round(
-              (numericGoals.reduce((sum, g) => sum + Math.min(g.progress / g.target, 1), 0) / numericGoals.length) * 100,
-            )
-          : 0;
+
+      const memberSummary = activity.get(userId as string);
+      const goalsTotal = memberSummary?.goalCount ?? 0;
+      const goalsCompleted = memberSummary?.showingUp ?? 0;
+      const completionRate = goalsTotal === 0 ? 0 : Math.round((goalsCompleted / goalsTotal) * 100);
 
       return {
         goalsCompleted,
-        goalsTotal: goalsList.length,
-        activeGoals: goalsList.length - goalsCompleted,
+        goalsTotal,
+        activeGoals: goalsTotal,
         completionRate,
         currentStreak,
         achievements: (achievements ?? []) as Achievement[],
