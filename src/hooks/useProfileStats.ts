@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Achievement } from '../types/models';
@@ -26,45 +27,46 @@ export function useProfileStats(userId: string | undefined, circleId: string | u
   // member has been doing.
   const { activity } = useMemberActivity(circleId);
 
-  return useQuery({
+  // Only the achievements fetch belongs in the query. Everything derived
+  // from `activity` is computed below instead: the queryKey names nothing
+  // that changes when the goals and check-ins queries resolve, so TanStack
+  // would never re-run this function - on a cold mount `activity` is still
+  // empty and the zeros it produced were cached permanently. A member on a
+  // three-day streak opened Profile and read "0" while the garden two tabs
+  // away drew them a sprout.
+  const query = useQuery({
     queryKey: ['profileStats', userId, circleId],
     enabled: !!userId && !!circleId,
-    queryFn: async (): Promise<ProfileStats> => {
-      // The goals query that used to live here is gone: every number this
-      // hook returns now comes from useMemberActivity, which reads goals and
-      // the check-in ledger together. Querying goals again here would have
-      // fetched a column nothing writes, to compute a streak that is already
-      // computed correctly one line down.
-      const [{ data: achievements, error: achievementsError }] = await Promise.all([
-        supabase
-          .from('achievements')
-          .select('*')
-          .eq('user_id', userId as string)
-          .eq('circle_id', circleId as string)
-          .order('achieved_at', { ascending: false })
-          .limit(6),
-      ]);
-
-      if (achievementsError) throw achievementsError;
-
-      const memberSummary = activity.get(userId as string);
-      // From the ledger, not goals.streak_count - that column is not written
-      // for a cadence commitment, so this tile read 0 for someone who had
-      // checked in every day for a month. Counted in each goal's own
-      // periods, which is why the tile beside it must not name a unit.
-      const currentStreak = memberSummary?.bestStreak ?? 0;
-      const goalsTotal = memberSummary?.goalCount ?? 0;
-      const goalsCompleted = memberSummary?.showingUp ?? 0;
-      const completionRate = goalsTotal === 0 ? 0 : Math.round((goalsCompleted / goalsTotal) * 100);
-
-      return {
-        goalsCompleted,
-        goalsTotal,
-        activeGoals: goalsTotal,
-        completionRate,
-        currentStreak,
-        achievements: (achievements ?? []) as Achievement[],
-      };
+    queryFn: async (): Promise<Achievement[]> => {
+      const { data, error } = await supabase
+        .from('achievements')
+        .select('*')
+        .eq('user_id', userId as string)
+        .eq('circle_id', circleId as string)
+        .order('achieved_at', { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return (data ?? []) as Achievement[];
     },
   });
+
+  const derived = useMemo(() => {
+    const memberSummary = userId ? activity.get(userId) : undefined;
+    // From the ledger, not goals.streak_count - that column is not written
+    // for a cadence commitment, so this tile read 0 for someone who had
+    // checked in every day for a month. Counted in each goal's own
+    // periods, which is why the tile beside it must not name a unit.
+    const currentStreak = memberSummary?.bestStreak ?? 0;
+    const goalsTotal = memberSummary?.goalCount ?? 0;
+    const goalsCompleted = memberSummary?.showingUp ?? 0;
+    const completionRate = goalsTotal === 0 ? 0 : Math.round((goalsCompleted / goalsTotal) * 100);
+    return { currentStreak, goalsTotal, goalsCompleted, activeGoals: goalsTotal, completionRate };
+  }, [activity, userId]);
+
+  const data: ProfileStats | undefined = useMemo(
+    () => (query.data ? { ...derived, achievements: query.data } : undefined),
+    [query.data, derived],
+  );
+
+  return { ...query, data };
 }

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { weeklyHighlight } from '../lib/weeklyHighlight';
@@ -24,10 +25,16 @@ export function useWeeklyRecap(circleId: string | undefined) {
   // cannot disagree with them about who has been showing up.
   const { activity } = useMemberActivity(circleId);
 
-  return useQuery({
+  // The server fetches, and nothing else. Anything derived from `activity`
+  // is computed outside this query: the queryKey names nothing that changes
+  // when the goals and check-ins queries resolve, so TanStack never re-runs
+  // the function - on a cold mount `activity` is empty, and this card
+  // cached "0% circle health" and "A quiet week. Next one is yours." for a
+  // circle the garden was drawing as thriving.
+  const query = useQuery({
     queryKey: ['weeklyRecap', circleId],
     enabled: !!circleId,
-    queryFn: async (): Promise<WeeklyRecap> => {
+    queryFn: async () => {
       const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
       const { data: events, error: eventsError } = await supabase
@@ -47,16 +54,6 @@ export function useWeeklyRecap(circleId: string | undefined) {
         .eq('events.circle_id', circleId as string)
         .gte('created_at', since);
       if (nudgesError) throw nudgesError;
-
-      // Best streak across the circle, from the check-in ledger rather than
-      // goals.streak_count, which the ledger never writes. This is a max
-      // across goals in different cadences (a 5-day daily streak and a
-      // 2-month monthly streak are not the same unit) - accepted, which is
-      // why no copy below states "days".
-      let bestStreak = 0;
-      for (const memberActivity of activity.values()) {
-        bestStreak = Math.max(bestStreak, memberActivity.bestStreak);
-      }
 
       const { data: waters } = await supabase
         .from('streak_saves')
@@ -79,17 +76,7 @@ export function useWeeklyRecap(circleId: string | undefined) {
         .select('user_id')
         .eq('circle_id', circleId as string)
         .eq('status', 'active');
-      // Most recent check-in per member, from the same activity map -
-      // replaces the old goals.last_logged_date read, which the ledger
-      // never writes.
-      const totalMembers = members?.length ?? 0;
-      const activeMembers = (members ?? []).filter((m) => {
-        const mostRecent = activity.get(m.user_id)?.lastCheckinDate;
-        if (!mostRecent) return false;
-        const daysSince = Math.floor((Date.now() - new Date(mostRecent).getTime()) / 86_400_000);
-        return daysSince <= 3;
-      }).length;
-      const healthNow = totalMembers > 0 ? Math.round((activeMembers / totalMembers) * 100) : 0;
+      const memberIds = (members ?? []).map((m) => m.user_id as string);
 
       const weekAgoIso = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
       const { data: snapshot } = await supabase
@@ -102,20 +89,55 @@ export function useWeeklyRecap(circleId: string | undefined) {
         .maybeSingle();
       const healthWeekAgo = snapshot?.health ?? null;
 
-      const stats = { goalsCompleted, streakMilestones, nudgesSent: nudgesSent ?? 0, asksPosted };
-
-      // Assembled locally from the numbers just computed above, rather than
-      // sent to an API to be phrased. No network call, so nothing here can
-      // fail and no tolerate-failure path is needed.
-      const highlight = weeklyHighlight({
-        ...stats,
-        bestStreak,
+      return {
+        goalsCompleted,
+        streakMilestones,
+        nudgesSent: nudgesSent ?? 0,
+        asksPosted,
         mostWateredFriendName,
-        healthNow,
         healthWeekAgo,
-      });
-
-      return { ...stats, highlight, bestStreak, mostWateredFriendName, healthNow, healthWeekAgo };
+        memberIds,
+      };
     },
   });
+
+  const derived = useMemo(() => {
+    // Best streak across the circle, from the check-in ledger rather than
+    // goals.streak_count, which the ledger never writes. This is a max
+    // across goals in different cadences (a 5-period daily streak and a
+    // 2-period monthly streak are not the same unit) - accepted, which is
+    // why no copy states "days".
+    let bestStreak = 0;
+    for (const memberActivity of activity.values()) {
+      bestStreak = Math.max(bestStreak, memberActivity.bestStreak);
+    }
+
+    // Most recent check-in per member, from the same activity map -
+    // replaces the old goals.last_logged_date read, which the ledger
+    // never writes.
+    const memberIds = query.data?.memberIds ?? [];
+    const activeMembers = memberIds.filter((id) => {
+      const mostRecent = activity.get(id)?.lastCheckinDate;
+      if (!mostRecent) return false;
+      const daysSince = Math.floor((Date.now() - new Date(mostRecent).getTime()) / 86_400_000);
+      return daysSince <= 3;
+    }).length;
+    const healthNow = memberIds.length > 0 ? Math.round((activeMembers / memberIds.length) * 100) : 0;
+
+    return { bestStreak, healthNow };
+  }, [activity, query.data]);
+
+  const data: WeeklyRecap | undefined = useMemo(() => {
+    if (!query.data) return undefined;
+    const { memberIds: _memberIds, ...stats } = query.data;
+    // Assembled locally from the numbers above, rather than sent to an API
+    // to be phrased. No network call, so nothing here can fail and no
+    // tolerate-failure path is needed. It lives out here with the numbers
+    // it reads: phrased inside the query it would have quoted the empty
+    // activity map and then never been re-phrased.
+    const highlight = weeklyHighlight({ ...stats, ...derived });
+    return { ...stats, ...derived, highlight };
+  }, [query.data, derived]);
+
+  return { ...query, data };
 }
