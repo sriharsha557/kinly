@@ -26,7 +26,13 @@ const PENDING_POLL_INTERVAL_MS = 5000;
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function TutorialRoute({ navigation }: NativeStackScreenProps<RootStackParamList, 'Tutorial'>) {
-  return <TutorialScreen onFinish={() => navigation.goBack()} />;
+  // Pushed with `headerShown: true`, which already consumes the top inset
+  // and gives a native back affordance - so this route hides TutorialScreen's
+  // own Skip pill (it would otherwise double the top inset and land a
+  // status-bar height into the content) and its SafeAreaView only pads the
+  // bottom edge. The pre-sign-in call site below is untouched and keeps its
+  // Skip button and all-edges inset.
+  return <TutorialScreen onFinish={() => navigation.goBack()} showSkip={false} edges={['bottom']} />;
 }
 
 export default function RootNavigator() {

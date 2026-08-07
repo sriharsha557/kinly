@@ -39,7 +39,24 @@ const SLIDES: { Illustration: FC<{ size?: number }>; title: string; body: string
 // hasSeenTutorial doc comment) - a swipeable "how Kinly works" carousel
 // distinct from LaunchVideoScreen, which plays on every cold start and
 // exists for brand impact, not explanation.
-export function TutorialScreen({ onFinish }: { onFinish: () => void }) {
+export function TutorialScreen({
+  onFinish,
+  showSkip = true,
+  edges,
+}: {
+  onFinish: () => void;
+  // Off for the post-sign-in route, which is pushed with a native header
+  // (`headerShown: true`) that already provides its own back affordance -
+  // with Skip also shown there, the screen had three ways out (native back,
+  // Skip, Get started) all doing the same thing.
+  showSkip?: boolean;
+  // Passed through to this screen's SafeAreaView. Defaults to all four edges
+  // (the original pre-sign-in behaviour, where this is a full-screen surface
+  // with no native header). The post-sign-in route passes bottom-only edges
+  // because its native header already consumes the top inset - applying it
+  // again here pushed Skip roughly a status-bar height into the content.
+  edges?: ('top' | 'right' | 'bottom' | 'left')[];
+}) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -60,17 +77,21 @@ export function TutorialScreen({ onFinish }: { onFinish: () => void }) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={edges}>
       {/* Absolute children ignore SafeAreaView padding, so the inset is
-          applied explicitly - without it, Skip sat under the status bar. */}
-      <AnimatedPressable
-        style={[styles.skip, { top: insets.top + 12 }]}
-        onPress={onFinish}
-        hitSlop={12}
-        accessibilityRole="button"
-      >
-        <Text style={styles.skipText}>Skip</Text>
-      </AnimatedPressable>
+          applied explicitly - without it, Skip sat under the status bar.
+          Only rendered when this screen owns the top inset itself (see
+          `showSkip` doc above). */}
+      {showSkip && (
+        <AnimatedPressable
+          style={[styles.skip, { top: insets.top + 12 }]}
+          onPress={onFinish}
+          hitSlop={12}
+          accessibilityRole="button"
+        >
+          <Text style={styles.skipText}>Skip</Text>
+        </AnimatedPressable>
+      )}
 
       <ScrollView
         ref={scrollRef}

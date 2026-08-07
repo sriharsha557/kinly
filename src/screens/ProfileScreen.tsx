@@ -149,10 +149,6 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        {/* Renders its own "Connect Health" heading and card, and nothing at
-            all on a device without Health Connect - so this must not be
-            wrapped in a section header here. It used to sit inside Appearance,
-            where a step-sync toggle is not what anyone is looking for. */}
         <Text style={styles.sectionTitle}>Help</Text>
         <AnimatedPressable
           accessibilityRole="button"
@@ -163,6 +159,10 @@ export default function ProfileScreen() {
           <Text style={styles.helpRowLabel}>Help &amp; Getting Started</Text>
         </AnimatedPressable>
 
+        {/* Renders its own "Connect Health" heading and card, and nothing at
+            all on a device without Health Connect - so this must not be
+            wrapped in a section header here. It used to sit inside Appearance,
+            where a step-sync toggle is not what anyone is looking for. */}
         <HealthSyncRow />
 
         <Text style={styles.sectionTitle}>Appearance</Text>

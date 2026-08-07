@@ -31,6 +31,8 @@ export const FEATURES: Record<FeatureFlag, boolean> = {
   // 2026-08-07 (commit 259c6a6) after being broken by an ambiguous PostgREST
   // embed that 400'd every fetch.
   guessWho: false,
+  // Gates DailyCircleCard, on the Together (Connection) tab - NOT the Circle
+  // tab's CircleHealthCard/CircleMembersSection, despite the name.
   circleCard: false,
 
   // Phase 3 - delight features, back once the core experience is polished.

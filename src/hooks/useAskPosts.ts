@@ -1,9 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { debugLog } from '../lib/debugLog';
+import { debugEnabled, debugLog } from '../lib/debugLog';
 import type { AskPost, AskReply } from '../types/models';
-
-declare const __DEV__: boolean;
 
 export interface AskPostWithProfile extends AskPost {
   profiles: { name: string } | null;
@@ -27,7 +25,11 @@ export function useAskPosts(circleId: string | undefined) {
       // Printing after '5' means the refetch fired and the only question left
       // is whether the new row came back; never printing means the
       // invalidation is not reaching this query at all.
-      debugLog('askPosts', '6. query ran. key:', JSON.stringify(['askPosts', circleId]), '| rows:', data?.length ?? 0, '| error:', error);
+      // JSON.stringify-ing the key is expensive enough to guard explicitly
+      // rather than leave to debugLog's internal no-op.
+      if (debugEnabled('askPosts')) {
+        debugLog('askPosts', '6. query ran. key:', JSON.stringify(['askPosts', circleId]), '| rows:', data?.length ?? 0, '| error:', error);
+      }
       if (error) throw error;
       return data as unknown as AskPostWithProfile[];
     },
@@ -81,16 +83,20 @@ export function useCreateAskPost() {
       // Observer count is the decisive field: invalidateQueries only refetches
       // queries that have a live observer, so a key that matches with zero
       // observers explains the symptom exactly.
-      debugLog(
-        'askPosts',
-        '5. askPosts queries in cache:',
-        JSON.stringify(
-          queryClient
-            .getQueryCache()
-            .findAll({ queryKey: ['askPosts'] })
-            .map((q) => ({ key: q.queryKey, observers: q.getObserversCount(), status: q.state.status })),
-        ),
-      );
+      // Walking and stringifying the whole query cache is expensive enough
+      // to guard explicitly rather than leave to debugLog's internal no-op.
+      if (debugEnabled('askPosts')) {
+        debugLog(
+          'askPosts',
+          '5. askPosts queries in cache:',
+          JSON.stringify(
+            queryClient
+              .getQueryCache()
+              .findAll({ queryKey: ['askPosts'] })
+              .map((q) => ({ key: q.queryKey, observers: q.getObserversCount(), status: q.state.status })),
+          ),
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['askPosts', variables.circleId] });
       queryClient.invalidateQueries({ queryKey: ['events', variables.circleId] });
     },

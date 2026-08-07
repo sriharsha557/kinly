@@ -224,7 +224,15 @@ export default function ConnectionScreen() {
         >
           <Text style={styles.title}>Together</Text>
           <View style={styles.titleHint}>
-            <ConceptHint id="connection-moments" text="Ask your circle for advice, and weigh in on theirs." />
+            {FEATURES.circleCard ? (
+              <ConceptHint id="connection-moments" text="A daily prompt your circle answers together." />
+            ) : (
+              // Different id from the circleCard variant on purpose: dismissal
+              // is persisted per id, so a tester who already dismissed the
+              // "daily prompt" copy still sees this Ask-Friends explanation
+              // rather than having it silently suppressed.
+              <ConceptHint id="connection-ask" text="Ask your circle for advice, and weigh in on theirs." />
+            )}
           </View>
 
           {FEATURES.circleCard && userId && circleId && (
@@ -316,7 +324,14 @@ export default function ConnectionScreen() {
                 )}
               </DisclosureSection>
               <View style={styles.gamesHint}>
-                <ConceptHint id="light-moments" text="A daily moment of reflection." />
+                <ConceptHint
+                  id="light-moments"
+                  text={
+                    FEATURES.wouldYouRather
+                      ? 'A daily moment of reflection.'
+                      : 'A member posts a fact about themselves - guess who in your circle it is.'
+                  }
+                />
               </View>
             </View>
           )}
