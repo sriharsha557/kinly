@@ -25,6 +25,7 @@ import { useMemberActivity } from '../hooks/useMemberActivity';
 import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
 import { longestStreakGoalByMember } from '../lib/memberActivity';
+import { FEATURES } from '../lib/features';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing } from '../theme/colors';
@@ -209,19 +210,34 @@ export default function CircleScreen() {
           </Reveal>
         )}
 
-        {/* Secondary: lower-frequency extras, tucked behind a tap so they don't compete for attention */}
-        <DisclosureSection label="More for your circle">
-          {userId && circleId && <VisionBoardCard circleId={circleId} userId={userId} />}
-          {userId && circleId && <MeetUpCard circleId={circleId} userId={userId} />}
-          {userId && circleId && (
-            <CircleAICard
-              circleId={circleId}
-              userId={userId}
-              onChallengeStarted={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-            />
-          )}
-          {circleId && <WeeklyRecapCard circleId={circleId} />}
-        </DisclosureSection>
+        {/* Secondary: lower-frequency extras, tucked behind a tap so they
+            don't compete for attention.
+
+            The section is gated on its own children as well as each child
+            being gated individually. With all four deferred it would
+            otherwise render as an empty shell - a labelled chevron that
+            opens onto nothing, which is worse than no section at all. The
+            per-child gates are what keep the reversibility promise: flip one
+            flag and that card comes back, inside a section that reappears
+            with it. */}
+        {(FEATURES.visionBoard || FEATURES.meetups || FEATURES.circleAI || FEATURES.weeklyRecap) && (
+          <DisclosureSection label="More for your circle">
+            {FEATURES.visionBoard && userId && circleId && (
+              <VisionBoardCard circleId={circleId} userId={userId} />
+            )}
+            {FEATURES.meetups && userId && circleId && (
+              <MeetUpCard circleId={circleId} userId={userId} />
+            )}
+            {FEATURES.circleAI && userId && circleId && (
+              <CircleAICard
+                circleId={circleId}
+                userId={userId}
+                onChallengeStarted={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+              />
+            )}
+            {FEATURES.weeklyRecap && circleId && <WeeklyRecapCard circleId={circleId} />}
+          </DisclosureSection>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
