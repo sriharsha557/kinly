@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSyncStepGoal } from './useGoals';
+import { useGoalCheckins } from './useCheckins';
 import { useLogEvent } from './useEvents';
 import { useCreateAchievement } from './useAchievements';
 import { STREAK_MILESTONES, type Celebration } from './useLogGoalWithCelebration';
 import { getHealthConnectStatus, readTodaysSteps } from '../lib/healthConnect';
+import { streak } from '../lib/showingUp';
+import { toIsoDate } from '../lib/periods';
 import { useHealthSyncStore } from '../state/useHealthSyncStore';
 import type { Goal } from '../types/models';
 
@@ -24,6 +27,17 @@ export function useSyncStepGoals(circleId: string | undefined, userId: string | 
 
   const stepGoals = useMemo(() => (goals ?? []).filter((g) => g.goal_source === 'health_steps'), [goals]);
   const stepGoalsKey = stepGoals.map((g) => `${g.id}:${g.progress}:${g.streak_count}`).join(',');
+
+  // The ledger a step goal's streak is actually counted from since migration
+  // 0050. Held in a ref rather than added to the effect's dependency list:
+  // this effect must fire on mount and on foreground, not every time the
+  // check-ins query refetches, which would re-sync the device on every
+  // invalidation this hook itself causes.
+  const { data: checkinsByGoal } = useGoalCheckins(circleId);
+  const checkinsRef = useRef<Record<string, string[]> | undefined>(undefined);
+  useEffect(() => {
+    checkinsRef.current = checkinsByGoal;
+  }, [checkinsByGoal]);
 
   const isConnected = useHealthSyncStore((state) => state.decision === 'connected');
 
@@ -49,13 +63,27 @@ export function useSyncStepGoals(circleId: string | undefined, userId: string | 
         // device threshold - but target is nullable since migration 0049, so
         // the type needs the fallback even though it cannot fire.
         const wasComplete = goal.progress >= (goal.target ?? 0);
-        const previousStreak = goal.streak_count;
+        // From the ledger, never goals.streak_count. Migration 0050's
+        // sync_step_goal stopped touching that column - it inserts a
+        // goal_checkins row instead - so `updated.streak_count >
+        // previousStreak` became permanently false and step-goal users lost
+        // every milestone celebration the moment 0050 was applied.
+        const before = checkinsRef.current?.[goal.id] ?? [];
+        const previousStreak = streak(goal, before, Date.now());
+
         const updated = await syncStepGoal.mutateAsync({ goalId: goal.id, circleId, steps });
         if (cancelled) return;
 
         const justCompleted = !wasComplete && updated.progress >= (updated.target ?? 0);
-        const hitMilestone =
-          updated.streak_count > previousStreak && STREAK_MILESTONES.includes(updated.streak_count);
+        // Today's row is added locally rather than refetched: the RPC has
+        // just inserted it when the threshold was reached, and waiting for
+        // the invalidated query to come back would put the celebration a
+        // network round-trip after the moment it belongs to.
+        const today = toIsoDate(new Date());
+        const reachedToday = updated.target != null && updated.progress >= updated.target;
+        const after = reachedToday && !before.includes(today) ? [...before, today] : before;
+        const newStreak = streak(goal, after, Date.now());
+        const hitMilestone = newStreak > previousStreak && STREAK_MILESTONES.includes(newStreak);
         if (!justCompleted && !hitMilestone) continue;
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -74,15 +102,18 @@ export function useSyncStepGoals(circleId: string | undefined, userId: string | 
             circleId,
             userId,
             type: 'streak',
-            payload: { title: goal.title, streak_count: updated.streak_count },
+            payload: { title: goal.title, streak_count: newStreak },
           });
+          // No unit: a streak is counted in the goal's own cadence periods
+          // now, so "day" would be false for a step goal on anything but a
+          // daily cadence.
           await createAchievement.mutateAsync({
             userId,
             circleId,
             type: 'streak',
-            title: `${updated.streak_count}-day streak on "${goal.title}"`,
+            title: `${newStreak}-streak on "${goal.title}"`,
           });
-          setCelebration({ title: `${updated.streak_count}-day streak!`, subtitle: goal.title });
+          setCelebration({ title: `${newStreak}-streak!`, subtitle: goal.title });
         }
       }
     };

@@ -263,7 +263,11 @@ export function useSyncStepGoal() {
       queryClient.invalidateQueries({ queryKey: ['goals', variables.circleId] });
       // The garden is derived from the goals and goal-checkins queries now,
       // not a ['garden', circleId] query of its own, so invalidating those is
-      // what refreshes it.
+      // what refreshes it. goal-checkins is the one that matters since
+      // migration 0050: crossing the step threshold inserts a ledger row,
+      // and without this the plant, the streak and Today's Mission all keep
+      // showing the pre-sync state until something else happens to refetch.
+      queryClient.invalidateQueries({ queryKey: ['goal-checkins', variables.circleId] });
     },
   });
 }
