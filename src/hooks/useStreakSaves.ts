@@ -12,7 +12,13 @@ export function useWaterStreak(circleId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals', circleId] });
-      queryClient.invalidateQueries({ queryKey: ['garden', circleId] });
+      // The ledger, not ['garden']: the garden is derived from goals plus
+      // check-ins now and has no query of its own. Watering a streak writes
+      // a check-in for the missed day (migration 0050), so without this the
+      // saved streak would not appear until some later refetch happened to
+      // run - the one action a friend takes on your behalf producing no
+      // visible response.
+      queryClient.invalidateQueries({ queryKey: ['goal-checkins', circleId] });
       queryClient.invalidateQueries({ queryKey: ['events', circleId] });
     },
   });

@@ -75,7 +75,10 @@ export function useNudgeMember(circleId: string | undefined) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['events', circleId] });
-      queryClient.invalidateQueries({ queryKey: ['garden', circleId] });
+      // Nudging changes no goal and no check-in, so there is nothing
+      // derived to refresh - the old ['garden'] key it invalidated here no
+      // longer exists at all, the garden being derived from goals plus the
+      // check-in ledger.
     },
   });
 }
