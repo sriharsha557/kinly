@@ -25,7 +25,7 @@ function buildShareText(circleName: string, data: ReturnType<typeof useWeeklyRec
     `${circleName} — this week on Kinly`,
     '',
     `✅ ${data.goalsCompleted} goals completed`,
-    `🔥 Best streak: ${data.bestStreak} days`,
+    `🔥 Best streak: ${data.bestStreak}`,
     `💧 ${data.nudgesSent} nudges sent`,
   ];
   if (data.mostWateredFriendName) lines.push(`Most watered: ${data.mostWateredFriendName}`);

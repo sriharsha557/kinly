@@ -40,17 +40,17 @@ test('a saved streak names the person and outranks everything else', () => {
 
 test('a long streak leads when nobody needed saving', () => {
   const line = weeklyHighlight(week({ bestStreak: 21, goalsCompleted: 20, nudgesSent: 20 }));
-  assert.equal(line, 'A 21-day streak is carrying this circle.');
+  assert.equal(line, 'A 21-streak is carrying this circle.');
 });
 
 test('fourteen days is long enough to lead', () => {
-  assert.equal(weeklyHighlight(week({ bestStreak: 14 })), 'A 14-day streak is carrying this circle.');
+  assert.equal(weeklyHighlight(week({ bestStreak: 14 })), 'A 14-streak is carrying this circle.');
 });
 
-test('thirteen days is not', () => {
+test('thirteen periods is not', () => {
   assert.notEqual(
     weeklyHighlight(week({ bestStreak: 13, goalsCompleted: 6 })),
-    'A 13-day streak is carrying this circle.',
+    'A 13-streak is carrying this circle.',
   );
 });
 

@@ -72,7 +72,10 @@ export function weeklyHighlight(stats: WeeklyHighlightStats): string {
     return `Someone had ${mostWateredFriendName}'s back this week - their streak survived.`;
   }
 
-  if (bestStreak >= LONG_STREAK) return `A ${bestStreak}-day streak is carrying this circle.`;
+  // No unit: bestStreak is counted in each goal's own periods now - days
+  // for a daily commitment, weeks for a 4x/week one - so naming one would be
+  // false for whichever member's streak is actually the longest.
+  if (bestStreak >= LONG_STREAK) return `A ${bestStreak}-streak is carrying this circle.`;
 
   if (healthClimbed) {
     return 'Your garden is greener than it was last week.';

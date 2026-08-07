@@ -30,8 +30,12 @@ export function useProfileStats(userId: string | undefined, circleId: string | u
     queryKey: ['profileStats', userId, circleId],
     enabled: !!userId && !!circleId,
     queryFn: async (): Promise<ProfileStats> => {
-      const [{ data: goals, error: goalsError }, { data: achievements, error: achievementsError }] = await Promise.all([
-        supabase.from('goals').select('streak_count').eq('user_id', userId as string).eq('circle_id', circleId as string),
+      // The goals query that used to live here is gone: every number this
+      // hook returns now comes from useMemberActivity, which reads goals and
+      // the check-in ledger together. Querying goals again here would have
+      // fetched a column nothing writes, to compute a streak that is already
+      // computed correctly one line down.
+      const [{ data: achievements, error: achievementsError }] = await Promise.all([
         supabase
           .from('achievements')
           .select('*')
@@ -41,13 +45,14 @@ export function useProfileStats(userId: string | undefined, circleId: string | u
           .limit(6),
       ]);
 
-      if (goalsError) throw goalsError;
       if (achievementsError) throw achievementsError;
 
-      const goalsList = goals ?? [];
-      const currentStreak = goalsList.reduce((max, g) => Math.max(max, g.streak_count), 0);
-
       const memberSummary = activity.get(userId as string);
+      // From the ledger, not goals.streak_count - that column is not written
+      // for a cadence commitment, so this tile read 0 for someone who had
+      // checked in every day for a month. Counted in each goal's own
+      // periods, which is why the tile beside it must not name a unit.
+      const currentStreak = memberSummary?.bestStreak ?? 0;
       const goalsTotal = memberSummary?.goalCount ?? 0;
       const goalsCompleted = memberSummary?.showingUp ?? 0;
       const completionRate = goalsTotal === 0 ? 0 : Math.round((goalsCompleted / goalsTotal) * 100);
