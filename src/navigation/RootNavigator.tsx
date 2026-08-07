@@ -3,6 +3,7 @@ import { LogoSplashScreen } from '../components/LogoSplashScreen';
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeProvider';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import CircleSettingsScreen from '../screens/CircleSettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
@@ -23,6 +24,10 @@ import type { RootStackParamList } from './types';
 const PENDING_POLL_INTERVAL_MS = 5000;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function TutorialRoute({ navigation }: NativeStackScreenProps<RootStackParamList, 'Tutorial'>) {
+  return <TutorialScreen onFinish={() => navigation.goBack()} />;
+}
 
 export default function RootNavigator() {
   useBootstrapSession();
@@ -126,6 +131,17 @@ export default function RootNavigator() {
               name="EditProfile"
               component={EditProfileScreen}
               options={{ headerShown: true, title: 'Edit Profile' }}
+            />
+            {/* The same four slides shown before first sign-in, now
+                reachable again. It only ever rendered under
+                `!user && !hasSeenTutorial`, so anyone past onboarding had no
+                way back to the one place the app explains itself. Here
+                onFinish just pops - hasSeenTutorial is already true and
+                re-setting it would mean nothing. */}
+            <Stack.Screen
+              name="Tutorial"
+              component={TutorialRoute}
+              options={{ headerShown: true, title: 'How Kinly works' }}
             />
           </>
         ) : (

@@ -13,4 +13,5 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>;
   CircleSettings: undefined;
   EditProfile: undefined;
+  Tutorial: undefined;
 };

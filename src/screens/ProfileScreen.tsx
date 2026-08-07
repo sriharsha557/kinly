@@ -153,6 +153,16 @@ export default function ProfileScreen() {
             all on a device without Health Connect - so this must not be
             wrapped in a section header here. It used to sit inside Appearance,
             where a step-sync toggle is not what anyone is looking for. */}
+        <Text style={styles.sectionTitle}>Help</Text>
+        <AnimatedPressable
+          accessibilityRole="button"
+          accessibilityLabel="View the getting started tutorial"
+          style={styles.helpRow}
+          onPress={() => navigation.navigate('Tutorial')}
+        >
+          <Text style={styles.helpRowLabel}>Help &amp; Getting Started</Text>
+        </AnimatedPressable>
+
         <HealthSyncRow />
 
         <Text style={styles.sectionTitle}>Appearance</Text>
@@ -242,6 +252,16 @@ function createStyles({ colors, cardShell }: ReturnType<typeof useTheme>) {
       ...cardShell,
       padding: spacing.lg,
     },
+    helpRow: {
+      ...cardShell,
+      paddingVertical: spacing.lg,
+      paddingHorizontal: spacing.lg,
+      // 48 is the minimum touch target used elsewhere in this file (see the
+      // Privacy Policy link below).
+      minHeight: 48,
+      justifyContent: 'center',
+    },
+    helpRowLabel: { ...type.body, fontFamily: fontFamily.medium, color: colors.textPrimary },
     empty: { color: colors.textSecondary },
     privacyLink: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.textSecondary, textDecorationLine: 'underline' },
     deleteLink: { ...type.secondary, fontFamily: fontFamily.semibold, color: colors.danger },
