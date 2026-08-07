@@ -73,14 +73,31 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   // circle have logged anything today. useGoals returns the whole circle's
   // goals, so this needs no extra fetch.
   const friendIds = new Set((members ?? []).filter((m) => m.user_id !== userId && m.status === 'active').map((m) => m.user_id));
+  // Either kind of "done today" counts: a check-in for a cadence
+  // commitment, or last_logged_date for a legacy numeric goal. Reading only
+  // the column showed nobody active the moment a circle moved to cadences,
+  // and this line exists to make a goal read as a shared effort - a zero
+  // here quietly turns it back into a private task list.
   const friendsDoneToday = new Set(
-    (goals ?? []).filter((g) => friendIds.has(g.user_id) && g.last_logged_date === today).map((g) => g.user_id),
+    (goals ?? [])
+      .filter(
+        (g) =>
+          friendIds.has(g.user_id) &&
+          (g.last_logged_date === today ||
+            (checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin)),
+      )
+      .map((g) => g.user_id),
   ).size;
   const context = collectiveContext(friendsDoneToday, friendIds.size);
 
   // "X of Y completed" for today's mission - what's already logged today
   // plus what's still waiting.
-  const doneToday = myGoals.filter((g) => g.last_logged_date === today || checkedIds.has(g.id)).length;
+  const doneToday = myGoals.filter(
+    (g) =>
+      g.last_logged_date === today ||
+      (checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin) ||
+      checkedIds.has(g.id),
+  ).length;
   const missionTotal = doneToday + pending.length;
 
   function markChecked(goalId: string) {
