@@ -704,6 +704,56 @@ git commit -m "Base Circle Ideas on Areas and real streaks"
 
 ---
 
+### Task 12: The last stale reads
+
+**Files:**
+- Modify: `src/components/garden/GardenHero.tsx`
+- Modify: `src/screens/GoalsScreen.tsx`
+- Modify: `src/screens/TodayScreen.tsx`
+
+Found by auditing `grep -rln "streak_count\|last_logged_date" src supabase/functions` against the tasks above. Four reads no earlier task covers.
+
+- [ ] **Step 1: `GardenHero.tsx:76` — who checked in today**
+
+```ts
+const loggedToday = new Set((goals ?? []).filter((g) => g.last_logged_date === today).map((g) => g.user_id));
+```
+
+Dead for every cadence commitment. Replace with the set of members whose `lastCheckinDate` from `useMemberActivity` equals today. The hero is the app's centrepiece; showing nobody as active is the loudest possible version of this whole plan's bug.
+
+- [ ] **Step 2: `GoalsScreen.tsx:196-199` — the second streak number**
+
+The card renders `goal.streak_count` as a badge, directly beside the ledger-derived streak in `GoalCadenceRow`. For a cadence commitment `streak_count` is 0 so the badge hides itself, but for a legacy goal both render and disagree. Delete the badge — `GoalCadenceRow` is the one place a streak is stated now. Remove any style keys and imports left orphaned; grep before deleting.
+
+- [ ] **Step 3: `GoalsScreen.tsx:459` — `friendsCompletedToday`**
+
+Built from `last_logged_date`, so it is now always 0 and the footer renders an empty `<Text>` whose `space-between` layout depends on an invisible element. Rebuild it from `useGoalCheckins`: the number of *other* members with a check-in today. Keep the existing copy and the "a goal reads as a shared effort, not a private task-manager row" intent from its comment.
+
+- [ ] **Step 4: `TodayScreen.tsx:165` — the streak-milestone copy**
+
+```ts
+return `${name} hit a ${payload.streak_count ?? ''} day streak`.trim();
+```
+
+Two problems: it says **"day streak"**, which is false for any non-daily cadence, and the events carrying that payload are written by the legacy `log_goal_progress` path, which cadence commitments no longer use — so this line is both wrong and increasingly unreachable. Change the copy to state no unit: `` `${name} hit a ${payload.streak_count ?? ''} streak`.trim() ``. Do not remove the branch; legacy events already in the feed still render through it.
+
+- [ ] **Step 5: Verify the audit is clean**
+
+```bash
+grep -rn "last_logged_date" src --include=*.tsx --include=*.ts | grep -v "types/models\|useLogGoalWithCelebration\|useSyncStepGoals\|useHealthSync"
+```
+Expected: no matches. The excluded files are the legacy numeric and Health Connect paths, which a later plan retires.
+
+- [ ] **Step 6: Verify and commit**
+
+```bash
+npx tsc --noEmit && npm test && npx eslint src/components/garden/GardenHero.tsx src/screens/GoalsScreen.tsx src/screens/TodayScreen.tsx
+git add src/components/garden/GardenHero.tsx src/screens/GoalsScreen.tsx src/screens/TodayScreen.tsx
+git commit -m "Clear the last reads of the columns nothing writes"
+```
+
+---
+
 ## Verification
 
 ```bash
