@@ -96,7 +96,12 @@ function LogContributionModal({
   const createAchievement = useCreateAchievement();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const mine = challenge.contributions.find((c) => c.user_id === userId);
+  // `?? []` despite the type promising an array: a challenge rehydrated from
+  // the persisted query cache is whatever an OLDER build's queryFn returned,
+  // so a field added after that entry was written is absent at runtime.
+  // The persister's buster is the real guard (see lib/persister.ts); this
+  // keeps a missed bump from being a crash rather than a cosmetic gap.
+  const mine = (challenge.contributions ?? []).find((c) => c.user_id === userId);
 
   async function handleLog() {
     const value = Number(amount);
@@ -219,9 +224,13 @@ export function ChallengesCard({ circleId, userId }: { circleId: string; userId:
               {/* Whose progress this is. The bar is a circle total, so without
                   names a member cannot tell their own contribution from
                   everyone else's - or confirm their tap landed at all. */}
-              {challenge.contributions.length > 0 && (
+              {/* `?? []` for the same reason as in LogContributionModal above:
+                  this exact read - `.length` on a field absent from a
+                  pre-c9b377d cache entry - is what took the whole app down to
+                  the error boundary. */}
+              {(challenge.contributions ?? []).length > 0 && (
                 <Text style={styles.contributors}>
-                  {challenge.contributions
+                  {(challenge.contributions ?? [])
                     .map((c) => `${c.user_id === userId ? 'You' : c.name} ${c.amount}`)
                     .join('  ·  ')}
                 </Text>
