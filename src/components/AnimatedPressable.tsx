@@ -13,6 +13,21 @@ import type { ReactNode } from 'react';
 // rather than StyleSheet values.
 import { motion } from '../theme/colors';
 
+// `style` has to reach the Pressable itself, not a View inside it.
+//
+// This used to render <Pressable><Animated.View style={style}/></Pressable>,
+// which quietly dropped every LAYOUT property callers passed: `flex: 1` and
+// `alignSelf` landed on a child, while the Pressable - the actual flex child
+// of the parent row - kept sizing itself to its content. That is why the
+// Appearance chips came out three different widths despite each carrying
+// `flex: 1`, and why paired modal buttons passing `style={{ flex: 1 }}` never
+// split their row evenly.
+//
+// Animating the Pressable directly fixes the layout and also makes the press
+// scale the whole control, background included, rather than just its
+// contents.
+const AnimatedPressableBase = Animated.createAnimatedComponent(Pressable);
+
 interface AnimatedPressableProps {
   onPress?: () => void;
   // Long-press and hitSlop exist so this can replace a plain TouchableOpacity
@@ -48,7 +63,7 @@ export function AnimatedPressable({
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Pressable
+    <AnimatedPressableBase
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={delayLongPress}
@@ -58,6 +73,7 @@ export function AnimatedPressable({
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={accessibilityState}
+      style={[style, animatedStyle]}
       onPressIn={() => {
         scale.value = withSpring(0.94, motion.spring.pressIn);
       }}
@@ -65,7 +81,7 @@ export function AnimatedPressable({
         scale.value = withSpring(1, motion.spring.pressOut);
       }}
     >
-      <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressableBase>
   );
 }
