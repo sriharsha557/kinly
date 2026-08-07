@@ -1,13 +1,18 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutRight, LinearTransition, ZoomIn } from 'react-native-reanimated';
 import { AnimatedPressable } from './AnimatedPressable';
 import { useGoals } from '../hooks/useGoals';
+import { useCheckIn, useGoalCheckins } from '../hooks/useCheckins';
 import { useLogGoalWithCelebration, type Celebration } from '../hooks/useLogGoalWithCelebration';
 import { MilestoneCardModal } from './MilestoneCardModal';
 import { useCircleDetail, useCircleMembers } from '../hooks/useCircles';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing, type } from '../theme/colors';
+import { describeCadence } from '../lib/cadence';
+import { errorMessage } from '../lib/errorMessage';
+import { toIsoDate } from '../lib/periods';
+import type { Goal } from '../types/models';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -30,7 +35,9 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const { data: goals, isLoading } = useGoals(circleId);
   const { data: circle } = useCircleDetail(circleId);
   const { data: members } = useCircleMembers(circleId);
+  const { data: checkinsByGoal } = useGoalCheckins(circleId);
   const { logGoal, isPending } = useLogGoalWithCelebration(circleId, userId, circle);
+  const checkIn = useCheckIn();
   const [celebration, setCelebration] = useState<Celebration | null>(null);
   const [loggingId, setLoggingId] = useState<string | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
@@ -39,26 +46,28 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const today = todayIso();
+  const todayForCheckin = toIsoDate(new Date());
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
-  // Cadence goals (target == null) have no progress bar this component can
-  // read - their commitment lives in the check-in ledger, which this
-  // component does not read yet (a later plan moves it there). trackable
-  // is myGoals restricted to what this component actually understands, so
-  // the "Everything logged" congratulation can be scoped to that set rather
-  // than to myGoals as a whole - otherwise a member with only cadence goals
-  // and zero check-ins sees "Nice work" for nothing they did.
-  const trackable = myGoals.filter((g) => g.goal_source !== 'health_steps' && g.target != null);
-  const pending = myGoals.filter(
-    (g) =>
-      g.goal_source !== 'health_steps' &&
-      // A commitment with no numeric target (migration 0049) is not tracked
-      // by a filling bar at all - it is driven by the check-in ledger - so it
-      // has no notion of "progress short of target" to list here.
-      g.target != null &&
-      g.progress < g.target &&
-      g.last_logged_date !== today &&
-      !checkedIds.has(g.id),
-  );
+  // Every goal this component can meaningfully call "pending" - all but the
+  // auto-tracked health_steps goal, whose own sync (not a tap here) decides
+  // whether today counts. Cadence goals (target == null, migration 0049)
+  // belong here too: their commitment lives in the check-in ledger rather
+  // than a numeric target, but that ledger is exactly what pending below
+  // reads for them. Scoping the "Everything logged" congratulation to
+  // trackable rather than myGoals as a whole keeps a member with only a
+  // health_steps goal from seeing "Nice work" for nothing this component
+  // can vouch for.
+  const trackable = myGoals.filter((g) => g.goal_source !== 'health_steps');
+  const pending = trackable.filter((g) => {
+    if (checkedIds.has(g.id)) return false;
+    if (g.target != null) {
+      // Legacy goals still carry a numeric target and fill a progress bar.
+      return g.progress < g.target && g.last_logged_date !== today;
+    }
+    // No target - this is a cadence commitment, so "done today" means a
+    // check-in dated today, not a progress comparison.
+    return !(checkinsByGoal?.[g.id] ?? []).includes(todayForCheckin);
+  });
 
   // Collective context for the mission rows: how many of the others in this
   // circle have logged anything today. useGoals returns the whole circle's
@@ -74,19 +83,46 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
   const doneToday = myGoals.filter((g) => g.last_logged_date === today || checkedIds.has(g.id)).length;
   const missionTotal = doneToday + pending.length;
 
-  async function handleLog(goalId: string) {
-    const goal = myGoals.find((g) => g.id === goalId);
-    if (!goal) return;
-    setLoggingId(goalId);
+  function markChecked(goalId: string) {
+    setJustChecked((prev) => new Set(prev).add(goalId));
+    setTimeout(() => {
+      setCheckedIds((prev) => new Set(prev).add(goalId));
+    }, CHECKED_VISIBLE_MS);
+  }
+
+  async function handleLogNumeric(goal: Goal) {
+    setLoggingId(goal.id);
     try {
       const result = await logGoal(goal);
-      setJustChecked((prev) => new Set(prev).add(goalId));
-      setTimeout(() => {
-        setCheckedIds((prev) => new Set(prev).add(goalId));
-      }, CHECKED_VISIBLE_MS);
+      markChecked(goal.id);
       if (result) setCelebration(result);
     } finally {
       setLoggingId(null);
+    }
+  }
+
+  // Cadence commitments (no numeric target) are recorded by a check-in, not
+  // by logGoal - logGoal writes progress against a target that does not
+  // exist for these. A silent failure here is the worst case in the app:
+  // this component's whole job is to say what is still outstanding, so a
+  // tap that quietly does nothing leaves that claim wrong.
+  function handleCheckIn(goal: Goal) {
+    setLoggingId(goal.id);
+    checkIn.mutate(
+      { goalId: goal.id, circleId, userId },
+      {
+        onSuccess: () => markChecked(goal.id),
+        onError: (err) => Alert.alert('Could not check in', errorMessage(err, 'Please try again.')),
+        onSettled: () => setLoggingId(null),
+      },
+    );
+  }
+
+  function handleTap(goal: Goal) {
+    if (goal.target != null) {
+      void handleLogNumeric(goal);
+    } else {
+      handleCheckIn(goal);
     }
   }
 
@@ -106,10 +142,11 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
       {myGoals.length === 0 ? (
         <Text style={styles.empty}>Your journey starts today — add your first goal to get going.</Text>
       ) : trackable.length === 0 ? (
-        // All of this member's goals are cadence commitments this component
-        // can't see progress for. Rendering nothing is the honest choice -
-        // claiming "Everything logged" would be true of an empty set, not of
-        // anything the member actually did today.
+        // Every one of this member's goals is the auto-tracked health_steps
+        // goal, whose sync (not a tap here) decides whether today counts.
+        // Rendering nothing is the honest choice - claiming "Everything
+        // logged" would be true of an empty set, not of anything the member
+        // did today.
         null
       ) : pending.length === 0 ? (
         <Animated.Text entering={ZoomIn.springify().damping(motion.damping.pop)} style={styles.done}>
@@ -119,6 +156,7 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
         <View style={styles.list}>
           {pending.map((goal, index) => {
             const checked = justChecked.has(goal.id);
+            const loadingThis = loggingId === goal.id && (isPending || checkIn.isPending);
             return (
               <Animated.View
                 key={goal.id}
@@ -128,9 +166,10 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
               >
                 <AnimatedPressable
       accessibilityRole="button"
+      accessibilityLabel={`Log “${goal.title}”`}
                   style={styles.row}
-                  onPress={() => handleLog(goal.id)}
-                  disabled={checked || (isPending && loggingId === goal.id)}
+                  onPress={() => handleTap(goal)}
+                  disabled={checked || loadingThis}
                 >
                   <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
                     {checked ? (
@@ -141,11 +180,12 @@ export function TodayGoalsChecklist({ circleId, userId }: { circleId: string; us
                         ✓
                       </Animated.Text>
                     ) : (
-                      isPending && loggingId === goal.id && <Text style={styles.checkboxLoading}>…</Text>
+                      loadingThis && <Text style={styles.checkboxLoading}>…</Text>
                     )}
                   </View>
                   <View style={styles.rowBody}>
                     <Text style={[styles.rowText, checked && styles.rowTextChecked]}>Log “{goal.title}”</Text>
+                    <Text style={styles.rowCadence}>{describeCadence(goal)}</Text>
                     {context && !checked && <Text style={styles.rowContext}>{context}</Text>}
                   </View>
                 </AnimatedPressable>
@@ -204,6 +244,7 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
     rowBody: { flex: 1, gap: spacing.s2 },
     rowText: { ...type.body, fontFamily: fontFamily.regular, color: colors.textPrimary },
     rowTextChecked: { opacity: 0.5, textDecorationLine: 'line-through' },
+    rowCadence: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
     rowContext: { ...type.caption, fontFamily: fontFamily.regular, color: colors.textSecondary },
   });
 }
