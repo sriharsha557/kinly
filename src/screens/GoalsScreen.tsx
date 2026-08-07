@@ -245,13 +245,20 @@ function GoalCard({
             {/* The camera icon writes progress/streak_count/last_logged_date
                 through log_goal_progress, which does `least(progress + n,
                 target)` in Postgres. least(NULL, x) returns x, so on a
-                cadence goal (target == null) progress would climb unbounded
-                right next to a check-in-ledger streak badge for the same
-                goal - two disagreeing streak numbers on one card. Only
-                goals that still carry a numeric target (legacy and
-                health_steps) get this control; a cadence commitment is
-                recorded by a check-in only. */}
-            {goal.target != null && (
+                cadence goal progress would climb unbounded right next to
+                a check-in-ledger streak badge for the same goal - two
+                disagreeing streak numbers on one card.
+
+                Gated on goal_source, NOT on `target != null`. Migration 0047
+                set target_type='daily' on every surviving goal but left
+                `target` populated, so a migrated goal is both "numeric" and
+                a cadence commitment at once. Testing `target` here sent every
+                one of them down the log_goal_progress path, which writes
+                progress/streak_count and no ledger row - so the same goal had
+                a Check in button writing the ledger and a camera button
+                writing the dead columns. Only a device-synced step goal,
+                which has a real threshold and no cadence, gets this. */}
+            {isHealthStepsGoal && (
               <AnimatedPressable
                 onPress={handleLogWithPhoto}
                 disabled={isPending}
