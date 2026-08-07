@@ -7,8 +7,11 @@ import { useMyBuddy, useSetBuddy, useCheckInOnBuddy } from '../hooks/useBuddy';
 import { useCircleMembers } from '../hooks/useCircles';
 import { useGardenState } from '../hooks/useGarden';
 import { useGoals } from '../hooks/useGoals';
+import { useGoalCheckins } from '../hooks/useCheckins';
+import { useMemberActivity } from '../hooks/useMemberActivity';
 import { useWaterStreak } from '../hooks/useStreakSaves';
 import { isInGraceWindow } from '../lib/needsAttention';
+import { EMPTY_ACTIVITY, longestStreakGoalByMember } from '../lib/memberActivity';
 import { ConceptHint } from './ConceptHint';
 import { PillButton } from './PillButton';
 import { useTheme } from '../theme/ThemeProvider';
@@ -60,6 +63,8 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
   const { data: buddy } = useMyBuddy(circleId, userId);
   const { data: garden } = useGardenState(circleId);
   const { data: goals } = useGoals(circleId);
+  const goalCheckinsQuery = useGoalCheckins(circleId);
+  const { activity } = useMemberActivity(circleId);
   const checkIn = useCheckInOnBuddy(circleId);
   const waterStreak = useWaterStreak(circleId);
   const [picking, setPicking] = useState(false);
@@ -68,17 +73,24 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
 
   const buddyGarden = garden?.members.find((m) => m.userId === buddy?.buddy_id);
   const isInactive = buddyGarden?.stage === 'wilted';
-  // needsAttention owns this rule now, so the Circle tab and this card can
-  // never disagree about whether a streak is still savable.
-  const waterableGoal = (goals ?? []).find(
-    (g) => g.user_id === buddy?.buddy_id && isInGraceWindow(g.last_logged_date, Date.now()),
+  const buddyActivity = buddy ? activity.get(buddy.buddy_id) ?? EMPTY_ACTIVITY : EMPTY_ACTIVITY;
+  // The same rule needsAttention uses, fed the buddy's ledger-derived last
+  // check-in instead of goals.last_logged_date, so the Circle tab and this
+  // card can never disagree about whether a streak is still savable.
+  const atRiskGoalByMember = useMemo(
+    () => longestStreakGoalByMember(goals ?? [], goalCheckinsQuery.data ?? {}, Date.now()),
+    [goals, goalCheckinsQuery.data],
   );
+  const waterableGoalId =
+    buddy && isInGraceWindow(buddyActivity.lastCheckinDate, Date.now())
+      ? atRiskGoalByMember[buddy.buddy_id]
+      : undefined;
 
   async function handleWater() {
-    if (!waterableGoal) return;
+    if (!waterableGoalId) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      await waterStreak.mutateAsync({ goalId: waterableGoal.id });
+      await waterStreak.mutateAsync({ goalId: waterableGoalId });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
       Alert.alert('Could not water this streak', err instanceof Error ? err.message : 'Please try again.');
@@ -118,7 +130,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
               style={{ marginTop: spacing.s10 }}
             />
           )}
-          {waterableGoal && (
+          {waterableGoalId && (
             <PillButton
               label={`💧 Water ${buddy.buddy_name}'s streak`}
               variant="outline"
@@ -134,7 +146,7 @@ export function BuddyCard({ circleId, userId }: { circleId: string; userId: stri
         </>
       ) : (
         <>
-          <Text style={styles.empty}>Pick a buddy to keep each other on track.</Text>
+          <Text style={styles.empty}>Pick a buddy to keep each other going.</Text>
           <PillButton label="Choose a buddy" onPress={() => setPicking(true)} style={{ marginTop: spacing.s10 }} />
         </>
       )}
