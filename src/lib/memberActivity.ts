@@ -35,6 +35,34 @@ export const EMPTY_ACTIVITY: MemberActivity = {
   goalCount: 0,
 };
 
+// Which goal to offer when a member's streak is about to lapse: the one
+// with the most to lose.
+//
+// This rule used to live inside needsAttention, which picked the at-risk
+// goal itself. It moved out when the attention list started reading a
+// per-member summary that deliberately carries no goal ids - water-streak
+// concerns have no business in a module nine features share. Extracting it
+// here rather than inlining it in the screen keeps the rule testable; it
+// briefly lived in a component with no tests at all, which is how a product
+// decision loses its only guard.
+export function longestStreakGoalByMember(
+  goals: readonly ActivityGoal[],
+  checkinsByGoal: Readonly<Record<string, CheckinDates>>,
+  now: number,
+): Record<string, string> {
+  const best: Record<string, { goalId: string; streak: number }> = {};
+  for (const goal of goals) {
+    const goalStreak = streak(goal, checkinsByGoal[goal.id] ?? [], now);
+    const current = best[goal.user_id];
+    if (!current || goalStreak > current.streak) {
+      best[goal.user_id] = { goalId: goal.id, streak: goalStreak };
+    }
+  }
+  const byMember: Record<string, string> = {};
+  for (const [memberId, entry] of Object.entries(best)) byMember[memberId] = entry.goalId;
+  return byMember;
+}
+
 export function memberActivity(
   goals: readonly ActivityGoal[],
   checkinsByGoal: Readonly<Record<string, CheckinDates>>,

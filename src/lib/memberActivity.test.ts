@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { memberActivity, EMPTY_ACTIVITY, type ActivityGoal } from './memberActivity.ts';
+import {
+  memberActivity,
+  longestStreakGoalByMember,
+  EMPTY_ACTIVITY,
+  type ActivityGoal,
+} from './memberActivity.ts';
 
 // Wednesday 2026-08-05, midday.
 const WED = new Date(2026, 7, 5, 12).getTime();
@@ -74,4 +79,32 @@ test('a goal with no check-ins contributes nothing but still counts', () => {
   assert.equal(activity?.bestStreak, 0);
   assert.equal(activity?.lastCheckinDate, null);
   assert.equal(activity?.goalCount, 1);
+});
+
+// Restored from needsAttention.test.ts, where this rule was tested until the
+// attention list stopped picking the goal itself. Deleting it there without
+// re-homing it left the rule live in a component with no tests.
+test('with several at-risk goals the longest streak wins - most to lose', () => {
+  const goals = [daily('g1', 'u1'), daily('g2', 'u1')];
+  const checkins = {
+    g1: ['2026-08-05', '2026-08-04'],
+    g2: ['2026-08-05', '2026-08-04', '2026-08-03', '2026-08-02'],
+  };
+  assert.equal(longestStreakGoalByMember(goals, checkins, WED).u1, 'g2');
+});
+
+test('longestStreakGoalByMember keeps members apart', () => {
+  const goals = [daily('g1', 'u1'), daily('g2', 'u2')];
+  const checkins = { g1: ['2026-08-05'], g2: ['2026-08-05', '2026-08-04'] };
+  const byMember = longestStreakGoalByMember(goals, checkins, WED);
+  assert.equal(byMember.u1, 'g1');
+  assert.equal(byMember.u2, 'g2');
+});
+
+test('a member whose goals all have zero streak still gets one to water', () => {
+  // Nothing logged anywhere: there is still a goal to offer, because the
+  // grace window - not the streak length - is what decides whether the row
+  // appears at all.
+  const byMember = longestStreakGoalByMember([daily('g1', 'u1')], {}, WED);
+  assert.equal(byMember.u1, 'g1');
 });

@@ -24,7 +24,7 @@ import { useGoalCheckins } from '../hooks/useCheckins';
 import { useMemberActivity } from '../hooks/useMemberActivity';
 import { useTodayMoodCheckins } from '../hooks/useMoodCheckins';
 import { needsAttention } from '../lib/needsAttention';
-import { streak } from '../lib/showingUp';
+import { longestStreakGoalByMember } from '../lib/memberActivity';
 import { useTabBarClearance } from '../hooks/useTabBarClearance';
 import { useTheme } from '../theme/ThemeProvider';
 import { fontFamily, motion, spacing } from '../theme/colors';
@@ -105,20 +105,10 @@ export default function CircleScreen() {
   // water. This picks each member's longest-streak goal (in that goal's OWN
   // cadence) so water_streak() still has a specific goal id. Ties don't
   // matter: any tied goal is a legitimate thing to water.
-  const atRiskGoalByMember = useMemo(() => {
-    const bestByMember: Record<string, { goalId: string; streak: number }> = {};
-    for (const goal of goals ?? []) {
-      const checkins = goalCheckinsQuery.data?.[goal.id] ?? [];
-      const goalStreak = streak(goal, checkins, Date.now());
-      const current = bestByMember[goal.user_id];
-      if (!current || goalStreak > current.streak) {
-        bestByMember[goal.user_id] = { goalId: goal.id, streak: goalStreak };
-      }
-    }
-    const byMember: Record<string, string> = {};
-    for (const [memberId, best] of Object.entries(bestByMember)) byMember[memberId] = best.goalId;
-    return byMember;
-  }, [goals, goalCheckinsQuery.data]);
+  const atRiskGoalByMember = useMemo(
+    () => longestStreakGoalByMember(goals ?? [], goalCheckinsQuery.data ?? {}, Date.now()),
+    [goals, goalCheckinsQuery.data],
+  );
 
   // The screen owns no rules - needsAttention is the single definition of
   // all three signals, so this cannot drift from what BuddyCard believes.
