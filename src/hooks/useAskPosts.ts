@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { debugLog } from '../lib/debugLog';
 import type { AskPost, AskReply } from '../types/models';
+
+declare const __DEV__: boolean;
 
 export interface AskPostWithProfile extends AskPost {
   profiles: { name: string } | null;
@@ -21,6 +24,10 @@ export function useAskPosts(circleId: string | undefined) {
         .select('*, profiles(name), goals(title)')
         .eq('circle_id', circleId as string)
         .order('created_at', { ascending: false });
+      // Printing after '5' means the refetch fired and the only question left
+      // is whether the new row came back; never printing means the
+      // invalidation is not reaching this query at all.
+      debugLog('askPosts', '6. query ran. key:', JSON.stringify(['askPosts', circleId]), '| rows:', data?.length ?? 0, '| error:', error);
       if (error) throw error;
       return data as unknown as AskPostWithProfile[];
     },
@@ -41,16 +48,49 @@ export function useCreateAskPost() {
       question: string;
       goalId?: string | null;
     }) => {
+      // Deliberately NOT .select()-ing the inserted row. Adding a select here
+      // would change the request this path actually makes, so the shape being
+      // debugged would stop being the shape that ships. The readback below is
+      // a separate, debug-only query for exactly that reason.
       const { error } = await supabase
         .from('ask_posts')
         .insert({ circle_id: circleId, user_id: userId, question, goal_id: goalId ?? null });
+      debugLog('askPosts', '1. insert error:', error);
       if (error) throw error;
 
-      await supabase
+      // Debug-only readback: distinguishes "the row was written but is not
+      // readable" (a SELECT-policy problem) from "the row is readable but the
+      // cache never refetched". Never runs in a release build.
+      if (__DEV__) {
+        const { count, error: readbackError } = await supabase
+          .from('ask_posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('circle_id', circleId);
+        debugLog('askPosts', '2. rows readable for this circle:', count, '| error:', readbackError);
+      }
+
+      const { error: eventError } = await supabase
         .from('events')
         .insert({ circle_id: circleId, user_id: userId, type: 'ask', payload: { question } });
+      // This error was previously discarded outright, so a failing events
+      // insert was invisible even though it is on the success path.
+      debugLog('askPosts', '3. events insert error:', eventError);
     },
     onSuccess: (_data, variables) => {
+      debugLog('askPosts', '4. onSuccess. invalidating:', JSON.stringify(['askPosts', variables.circleId]));
+      // Observer count is the decisive field: invalidateQueries only refetches
+      // queries that have a live observer, so a key that matches with zero
+      // observers explains the symptom exactly.
+      debugLog(
+        'askPosts',
+        '5. askPosts queries in cache:',
+        JSON.stringify(
+          queryClient
+            .getQueryCache()
+            .findAll({ queryKey: ['askPosts'] })
+            .map((q) => ({ key: q.queryKey, observers: q.getObserversCount(), status: q.state.status })),
+        ),
+      );
       queryClient.invalidateQueries({ queryKey: ['askPosts', variables.circleId] });
       queryClient.invalidateQueries({ queryKey: ['events', variables.circleId] });
     },
