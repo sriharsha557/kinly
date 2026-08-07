@@ -38,7 +38,8 @@ function stageFor(maxStreak: number, mostRecentDate: string | null): GardenStage
 }
 
 export function useGardenState(circleId: string | undefined) {
-  const { activity } = useMemberActivity(circleId);
+  const activityQuery = useMemberActivity(circleId);
+  const { activity } = activityQuery;
   const membersQuery = useQuery({
     queryKey: ['garden-members', circleId],
     enabled: !!circleId,
@@ -74,5 +75,15 @@ export function useGardenState(circleId: string | undefined) {
     return { members, health };
   }, [membersQuery.data, activity]);
 
-  return { ...membersQuery, data };
+  // The activity hook's failure has to travel with the data it feeds.
+  // Discarded, every number below is derived from an empty map and the
+  // garden confidently reports that nobody has done anything: 0/4 checked
+  // in, every plant wilted, rain over the whole circle - a failed fetch
+  // rendered as a failed circle, which is the worst thing this app can say.
+  return {
+    ...membersQuery,
+    data,
+    isError: membersQuery.isError || activityQuery.isError,
+    isLoading: membersQuery.isLoading || activityQuery.isLoading,
+  };
 }

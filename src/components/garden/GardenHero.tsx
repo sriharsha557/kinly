@@ -57,7 +57,7 @@ function statusCopy(state: CircleGardenState, droopiestName: string | null, chec
 export function GardenHero({ circleId }: { circleId: string }) {
   const navigation = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
   const userId = useAuthStore((state) => state.user?.id);
-  const { data } = useGardenState(circleId);
+  const { data, isError } = useGardenState(circleId);
   const { activity } = useMemberActivity(circleId);
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
@@ -77,8 +77,21 @@ export function GardenHero({ circleId }: { circleId: string }) {
   const bestStreak = members.reduce((max, m) => Math.max(max, m.streak), 0);
   const droopiest = members.find((m) => m.stage === 'wilted') ?? null;
 
-  const statusParts = [`${checkedInToday}/${members.length} checked in today`];
-  if (bestStreak > 0) statusParts.push(`${bestStreak}-day streak`);
+  // Suppressed entirely on a failed fetch rather than rendered as zeros.
+  // "0/4 checked in today" is a claim about four people's week; if the
+  // check-ins query failed we do not know it, and a wrong zero here tells
+  // the circle nobody is doing anything. Silence rather than an error
+  // banner: this is a decorative hero, and the screens that actually need
+  // the data report their own failures.
+  //
+  // No unit on the streak: bestStreak is a max across goals counted in
+  // their own cadence periods, so a 4x/week member with six good weeks
+  // reads "6" - calling that "6-day" states something that did not happen.
+  const statusParts: string[] = [];
+  if (!isError) {
+    statusParts.push(`${checkedInToday}/${members.length} checked in today`);
+    if (bestStreak > 0) statusParts.push(`${bestStreak}-streak`);
+  }
 
   const hero = (
     <SkyGradient phase={phase}>
@@ -99,7 +112,7 @@ export function GardenHero({ circleId }: { circleId: string }) {
 
       <GardenFooter
         status={statusCopy(state, droopiest && state === 'needsCare' ? droopiest.name : null, checkedInToday)}
-        meta={members.length > 0 ? statusParts.join(' · ') : null}
+        meta={members.length > 0 && statusParts.length > 0 ? statusParts.join(' · ') : null}
       />
     </SkyGradient>
   );
