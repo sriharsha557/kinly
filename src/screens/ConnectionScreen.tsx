@@ -2,6 +2,7 @@ import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useMemo, useState } from 'react';
 import { FEATURES } from '../lib/features';
 import {
+  Alert,
   KeyboardAvoidingView,
   RefreshControl,
   ScrollView,
@@ -9,6 +10,8 @@ import {
   Text,
   TextInput, View,
 } from 'react-native';
+import { errorMessage } from '../lib/errorMessage';
+import { debugLog } from '../lib/debugLog';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuthStore } from '../state/useAuthStore';
@@ -47,9 +50,28 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // Step R4. Logs what the component actually RENDERS, which is the only
+  // signal that separates "the refetch returned the new reply" from "the user
+  // can see the new reply". If R3 reports a higher row count and no R4 follows
+  // with it, the data arrived and the re-render is what is missing.
+  debugLog('askReplies', 'R4. rendering. replies:', replies?.length ?? 0, '| isLoading:', isLoading);
+
   async function handleSend() {
-    if (!body.trim()) return;
-    await createReply.mutateAsync({ askPostId, userId, body: body.trim() });
+    // isPending disables the button, but two taps can land in the same frame
+    // before that state commits, and ask_replies has no unique constraint to
+    // reject the second row - it would post the reply twice. This handler runs
+    // synchronously to the first await, so checking here closes that window.
+    if (!body.trim() || createReply.isPending) return;
+    try {
+      await createReply.mutateAsync({ askPostId, userId, body: body.trim() });
+    } catch (err) {
+      // The text is deliberately NOT cleared on failure: it is the only copy
+      // of what the user wrote, and clearing it made a failed send look like a
+      // successful one that vanished. Previously this rejection escaped as an
+      // unhandled promise rejection, so a failed reply said nothing at all.
+      Alert.alert('Could not send that reply', errorMessage(err, 'Please try again.'));
+      return;
+    }
     setBody('');
   }
 
@@ -88,9 +110,18 @@ function ReplyThread({ askPostId, circleId, userId }: { askPostId: string; circl
           value={body}
           onChangeText={setBody}
         />
+        {/* Label swap rather than a spinner: AnimatedPressable takes no
+            `loading` prop, and "Sending..." says more than a spinner does in a
+            control this small. Width is held steady by minWidth on replySend so
+            the row does not jump as the text changes. */}
         <AnimatedPressable
-      accessibilityRole="button" style={styles.replySend} onPress={handleSend} disabled={createReply.isPending}>
-          <Text style={styles.replySendText}>Send</Text>
+          accessibilityRole="button"
+          style={styles.replySend}
+          onPress={handleSend}
+          disabled={createReply.isPending}
+          accessibilityState={{ disabled: createReply.isPending, busy: createReply.isPending }}
+        >
+          <Text style={styles.replySendText}>{createReply.isPending ? 'Sending...' : 'Send'}</Text>
         </AnimatedPressable>
       </View>
     </View>
@@ -204,9 +235,17 @@ export default function ConnectionScreen() {
 
   const myGoals = (goals ?? []).filter((g) => g.user_id === userId);
 
+  // Same shape as ReplyThread's handleSend, for the same reasons: a synchronous
+  // double-tap guard, the user's text preserved on failure, and a rejection
+  // that reaches the user instead of becoming an unhandled promise rejection.
   async function handlePost() {
-    if (!question.trim() || !circleId || !userId) return;
-    await createPost.mutateAsync({ circleId, userId, question: question.trim(), goalId });
+    if (!question.trim() || !circleId || !userId || createPost.isPending) return;
+    try {
+      await createPost.mutateAsync({ circleId, userId, question: question.trim(), goalId });
+    } catch (err) {
+      Alert.alert('Could not post that question', errorMessage(err, 'Please try again.'));
+      return;
+    }
     setQuestion('');
     setGoalId(null);
   }
@@ -279,8 +318,13 @@ export default function ConnectionScreen() {
               </ScrollView>
             )}
             <AnimatedPressable
-      accessibilityRole="button" style={styles.postButton} onPress={handlePost} disabled={createPost.isPending}>
-              <Text style={styles.postButtonText}>Post</Text>
+              accessibilityRole="button"
+              style={styles.postButton}
+              onPress={handlePost}
+              disabled={createPost.isPending}
+              accessibilityState={{ disabled: createPost.isPending, busy: createPost.isPending }}
+            >
+              <Text style={styles.postButtonText}>{createPost.isPending ? 'Posting...' : 'Post'}</Text>
             </AnimatedPressable>
           </View>
 
@@ -382,6 +426,9 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       borderRadius: radii.pill,
       paddingHorizontal: spacing.lg,
       minHeight: 48,
+      // Holds width through the "Post" -> "Posting..." swap, as on replySend.
+      minWidth: 104,
+      alignItems: 'center',
       justifyContent: 'center',
     },
     postButtonText: { ...type.secondary, color: colors.onAccent, fontFamily: fontFamily.bold },
@@ -424,6 +471,10 @@ function createStyles({ colors, radii, shadow }: ReturnType<typeof useTheme>) {
       borderRadius: radii.pill,
       paddingHorizontal: spacing.lg,
       minHeight: 48,
+      // Sized for the wider "Sending..." label so the button keeps its width
+      // through the swap instead of growing mid-press and shoving the input.
+      minWidth: 104,
+      alignItems: 'center',
       justifyContent: 'center',
     },
     replySendText: { ...type.secondary, color: colors.onAccent, fontFamily: fontFamily.bold },

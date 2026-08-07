@@ -143,6 +143,15 @@ export function useAskReplies(askPostId: string | undefined) {
         .select('*, profiles(name)')
         .eq('ask_post_id', askPostId as string)
         .order('created_at', { ascending: true });
+      // Step R3. This printing at all means the refetch FIRED; the row count
+      // says whether the new reply came back with it. Together with R4 (which
+      // renders) these separate the three possibilities: no R3 after R2 means
+      // the invalidation never reached a live observer; R3 with an unchanged
+      // count means the write is not readable yet; R3 with the new count but
+      // no R4 means the data arrived and the component failed to re-render.
+      if (debugEnabled('askReplies')) {
+        debugLog('askReplies', 'R3. query ran. key:', JSON.stringify(['askReplies', askPostId]), '| rows:', data?.length ?? 0, '| error:', error);
+      }
       if (error) throw error;
       return data as unknown as AskReplyWithProfile[];
     },
@@ -162,9 +171,38 @@ export function useCreateReply(circleId: string | undefined) {
       body: string;
     }) => {
       const { error } = await supabase.from('ask_replies').insert({ ask_post_id: askPostId, user_id: userId, body });
+      // Step R1. An error here means nothing downstream can work, and until
+      // now this path swallowed it into an unhandled rejection.
+      debugLog('askReplies', 'R1. insert error:', error);
       if (error) throw error;
     },
     onSuccess: (_data, variables) => {
+      // Step R2. Observer count is the decisive field, exactly as it was on
+      // the posts path: invalidateQueries only refetches a query that has a
+      // live observer, so a key that matches with zero observers would
+      // explain "nothing happens until I navigate away and back" precisely -
+      // remounting creates the observer that the invalidation needed.
+      //
+      // circleId is worth printing beside the key it builds: it comes from a
+      // hook argument rather than from `variables`, so it is the one part of
+      // this key that can silently be undefined while the askReplies key
+      // beside it is correct.
+      if (debugEnabled('askReplies')) {
+        debugLog(
+          'askReplies',
+          'R2. invalidating:',
+          JSON.stringify(['askReplies', variables.askPostId]),
+          'and',
+          JSON.stringify(['askPosts', circleId]),
+          '| observers:',
+          JSON.stringify(
+            queryClient
+              .getQueryCache()
+              .findAll({ queryKey: ['askReplies'] })
+              .map((q) => ({ key: q.queryKey, observers: q.getObserversCount(), status: q.state.status })),
+          ),
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['askReplies', variables.askPostId] });
       queryClient.invalidateQueries({ queryKey: ['askPosts', circleId] });
     },

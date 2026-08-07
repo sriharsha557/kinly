@@ -24,7 +24,12 @@
 // client, false in a release bundle. Metro substitutes the literal at build
 // time, so a guarded block like the one above is dead code the minifier
 // strips from production, including its arguments.
-export type DebugScope = 'askPosts';
+// 'askReplies' is scoped separately from 'askPosts' even though both live in
+// useAskPosts.ts: sending a reply invalidates BOTH queries, so tracing the
+// reply path with one shared scope interleaves two query lifecycles in the
+// console and the ordering - which is the whole question - stops being
+// readable.
+export type DebugScope = 'askPosts' | 'askReplies';
 
 // Per-scope so turning one path's noise on does not drown the console in
 // every other path's. Set a scope to `false` to silence it while leaving its
@@ -36,6 +41,7 @@ export type DebugScope = 'askPosts';
 // module would throw a ReferenceError before any test body runs.
 const SCOPES: Record<DebugScope, boolean> = {
   askPosts: typeof __DEV__ !== 'undefined' && __DEV__,
+  askReplies: typeof __DEV__ !== 'undefined' && __DEV__,
 };
 
 // Hoistable guard for call sites whose arguments are expensive to build.
