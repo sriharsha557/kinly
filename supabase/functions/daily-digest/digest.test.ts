@@ -80,3 +80,27 @@ test('a streak event with streak_count 1 still renders normally', () => {
   const lines = composeDigest([ev('streak', 'A', { streak_count: 1 })], 5);
   assert.deepEqual(lines, ['A reached a 1-day streak']);
 });
+
+test('a goal check-in with no mood check-in still counts as participation', () => {
+  const lines = composeDigest([], 5, ['a', 'b']);
+  assert.deepEqual(lines, ['2 friends checked in']);
+});
+
+test('a goal check-in alone is not an empty day', () => {
+  assert.notEqual(composeDigest([], 5, ['a']), null);
+});
+
+test('a member who both mood-checked-in and goal-checked-in counts once', () => {
+  const lines = composeDigest([ev('mood_checkin', 'A', {}, 'a')], 5, ['a']);
+  assert.deepEqual(lines, ['1 friend checked in']);
+});
+
+test('mood check-ins and goal check-ins union into one participation count', () => {
+  const lines = composeDigest([ev('mood_checkin', 'A', {}, 'a')], 5, ['b']);
+  assert.deepEqual(lines, ['2 friends checked in']);
+});
+
+test('everyone checking in via goal check-ins alone reads the same as mood check-ins', () => {
+  const lines = composeDigest([], 3, ['a', 'b', 'c']);
+  assert.deepEqual(lines, ['Everyone checked in today 🎉']);
+});

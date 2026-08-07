@@ -20,6 +20,13 @@ const MAX_LINES = 3;
 export function composeDigest(
   events: readonly DigestEvent[],
   activeMemberCount: number,
+  // Distinct user_ids with a goal_checkins row in the digest window - the
+  // ledger Areas of Growth commitments append to. mood_checkin is a
+  // separate, smaller signal (an events row) and keeps working on its own;
+  // this is additive, not a replacement, so a member who only logged a
+  // commitment (no mood check-in) still shows up in "N friends checked in"
+  // instead of the circle reading as silent no matter what its members did.
+  checkedInUserIds: readonly string[] = [],
 ): string[] | null {
   // Priority order from the spec: streak milestones, goal completions,
   // garden growth, then aggregated check-in participation.
@@ -41,8 +48,13 @@ export function composeDigest(
 
   // Participation is one aggregated line, never one per person - a circle
   // of five checking in is a single fact, not five headlines. Counted by
-  // distinct member so a second check-in the same day doesn't inflate it.
-  const checkedIn = new Set(events.filter((e) => e.type === 'mood_checkin').map((e) => e.user_id));
+  // distinct member (a Set, unioning both sources) so a second mood
+  // check-in or a second goal check-in the same day doesn't inflate it, and
+  // a member who did both isn't counted twice either.
+  const checkedIn = new Set([
+    ...events.filter((e) => e.type === 'mood_checkin').map((e) => e.user_id),
+    ...checkedInUserIds,
+  ]);
   const participation: string[] = [];
   if (checkedIn.size > 0) {
     participation.push(

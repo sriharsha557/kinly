@@ -2,8 +2,11 @@
 // celebration pushes notify-circle's tier gate now suppresses
 // (docs/superpowers/specs/2026-07-31-notifications-design.md).
 //
-// Reads the last 24h of `events` - no new table is needed to accumulate
-// digest content, because every event is already in there for the feed.
+// Reads the last 24h of `events` for streaks, completions and garden growth
+// - no new table is needed for those, because every event is already in
+// there for the feed. Participation also reads `goal_checkins` directly:
+// an Areas of Growth check-in never writes an events row, so events alone
+// would miss it.
 //
 // Deploy: Supabase Dashboard -> Edge Functions -> New function
 // "daily-digest" -> paste digest.ts and this file -> Deploy -> turn OFF
@@ -107,9 +110,28 @@ Deno.serve(async (_req) => {
         const memberIds = (members ?? []).map((m) => m.user_id as string);
         if (memberIds.length === 0) continue;
 
+        // Areas of Growth check-ins live in goal_checkins, not in events -
+        // nothing writes an events row for a cadence commitment. Read the
+        // same half-open [since, anchor) window as the events query above so
+        // a check-in counts in exactly one day's digest, never zero or two.
+        // goals!inner(circle_id) scopes the join to this circle - goal_checkins
+        // itself carries no circle_id, only goal_id.
+        const { data: checkinRows, error: checkinsError } = await supabase
+          .from('goal_checkins')
+          .select('user_id, goals!inner(circle_id)')
+          .eq('goals.circle_id', circle.id)
+          .gte('created_at', since)
+          .lt('created_at', anchor.toISOString());
+        if (checkinsError) {
+          console.log('daily-digest checkins query failed', circle.id, checkinsError.message);
+          failed++;
+          continue;
+        }
+        const checkedInUserIds = [...new Set((checkinRows ?? []).map((r) => r.user_id as string))];
+
         // composeDigest ignores immediate-tier types on its own by only
         // reading the four it summarises, so no pre-filter is needed here.
-        const lines = composeDigest(events, memberIds.length);
+        const lines = composeDigest(events, memberIds.length, checkedInUserIds);
         if (!lines) {
           skipped++;
           continue;
