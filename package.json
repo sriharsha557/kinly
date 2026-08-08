@@ -42,9 +42,13 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^14.0.1",
+    "@types/jest": "29.5.14",
     "@types/react": "~19.1.10",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0",
+    "jest": "~29.7.0",
+    "jest-expo": "~54.0.17",
     "react-native-svg-transformer": "^1.5.3",
     "typescript": "~5.9.2"
   },
@@ -54,6 +58,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "node --experimental-strip-types --test \"src/**/*.test.ts\" \"supabase/functions/**/*.test.ts\"",
+    "test:render": "jest",
+    "test:all": "npm test && npm run test:render",
     "test:functions": "node --env-file=.env scripts/test-edge-functions.mjs",
     "test:parity": "node scripts/check-showing-up-parity.mjs",
     "lint": "expo lint"
